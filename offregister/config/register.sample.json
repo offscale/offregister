@@ -1,0 +1,61 @@
+{
+    "name": "Default",
+    "description": "Default register strategy",
+    "version": "0.0.1",
+    "provider": {
+        "options": [
+            {
+                "EC2_AP_SOUTHEAST2": {
+                    "auth": {
+                        "username": "${env.AWS_KEY_ID}",
+                        "key": "${env.AWS_ACCESS_KEY}"
+                    },
+                    "ssh": {
+                        "public_key_path": "${env.PUBLIC_KEY_PATH}",
+                        "private_key_path": "${env.PRIVATE_KEY_PATH}",
+                        "key_name": "${env.PUBLIC_KEY_NAME}"
+                    },
+                    "security_group": [
+                        "all"
+                    ],
+                    "driver": "EC2APSESydneyNodeDriver",
+                    "key_name": "${env.PUBLIC_KEY_NAME}"
+                }
+            },
+            {
+                "SOFTLAYER": {
+                    "auth": {
+                        "username": "${env.SL_USER}",
+                        "key": "${env.SL_KEY}"
+                    },
+                    "ssh": {
+                        "public_key_path": "${env.PUBLIC_KEY_PATH}",
+                        "private_key_path": "${env.PRIVATE_KEY_PATH}",
+                        "key_name": "${env.PUBLIC_KEY_NAME}"
+                    },
+                    "driver": "SoftLayerNodeDriver"
+                }
+            }
+        ]
+    },
+    "register": {
+        "/unclustered/*": [
+            "coreos"
+        ],
+        "_comments": [
+            "etcd",
+            "bosh",
+            "mesos",
+            "consul",
+            "etcd",
+            "flynn",
+            "dokku",
+            "deis"
+        ]
+    },
+    "purpose": [
+        "any-cluster"
+    ],
+    "etcd_server": "http://localhost:2379",
+    "default_pick": "first"
+}
