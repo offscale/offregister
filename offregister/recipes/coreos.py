@@ -12,7 +12,7 @@ from offregister.recipes.etcd2 import (ubuntu_install_etcd, ubuntu_serve_etcd,
 from offutils_strategy_register import _get_client as get_client
 
 
-def ubuntu_install_coreos():
+def ubuntu_install_coreos(*args, **kwargs):
     # raise NotImplementedError("CoreOS on Ubuntu? - That'll be the day!")
 
     command = 'etcd'
@@ -28,7 +28,7 @@ def ubuntu_install_coreos():
     return '[ubuntu_install_coreos] etcd2 service stopped (so the conf can be updated)'
 
 
-def core_install_coreos():
+def core_install_coreos(*args, **kwargs):
     # raise NotImplementedError('CoreOS on CoreOS? - Now that makes sense.')
 
     if run('systemctl status etcd2.service', warn_only=True, quiet=True).succeeded:

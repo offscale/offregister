@@ -4,7 +4,7 @@ from fabric.contrib.files import append
 from offregister.utils import append_path
 
 
-def ubuntu_install_go(version='1.4.2', arch='amd64', GOROOT=None):
+def ubuntu_install_go(version='1.5.1', arch='amd64', GOROOT=None):
     if not GOROOT:
         HOME = run('echo $HOME')
         GOROOT = '{HOME}/go'.format(HOME=HOME)
@@ -20,3 +20,7 @@ def ubuntu_install_go(version='1.4.2', arch='amd64', GOROOT=None):
     run('rm {go_tar}'.format(go_tar=go_tar))
     # run('rm -rf go*')
     run('mkdir {GOROOT}'.format(GOROOT=GOROOT))
+
+
+def core_install_godep():
+    run('go get github.com/tools/godep')

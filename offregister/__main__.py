@@ -17,8 +17,8 @@ from process_node import ProcessNode
 def _build_parser():
     parser = ArgumentParser(
         description='Register node to cluster(s). Node is found by manual specification, or popped from a queue.',
-        epilog='''Example usage: {program} -q etcd -r mesos:location, etcd:location, consul:location
-        '''.format(program=argv[0])
+        epilog='Example usage: {program} -q etcd -r mesos:location, etcd:location, consul:location'.format(
+            program=argv[0])
     )
     parser.add_argument('-d', '--dns', help='DNS for node (if no queue)')
     parser.add_argument('-i', '--ip', help='Public IP for node (if no queue)')

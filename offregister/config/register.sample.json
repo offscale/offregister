@@ -40,17 +40,19 @@
     },
     "register": {
         "/unclustered/*": [
-            "coreos"
+            "etcd"
         ],
         "_comments": [
-            "etcd",
-            "bosh",
             "mesos",
-            "consul",
-            "etcd",
-            "flynn",
             "dokku",
-            "deis"
+            "tsuru",
+            "coreos",
+            "deis",
+            "flynn",
+            "coreos",
+
+            "bosh",
+            "consul"
         ]
     },
     "purpose": [

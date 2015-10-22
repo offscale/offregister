@@ -5,7 +5,7 @@ from offregister.utils import get_tempdir_fab, which_true
 from offregister.aux_recipes.go import ubuntu_install_go
 
 
-def ubuntu_install_bosh(master):
+def ubuntu_install_bosh(master, *args, **kwargs):
     # DEPS, TODO: @depends(['go', 'bosh', 'vagrant'])
     command = 'go'
     if which_true(command):
@@ -20,8 +20,8 @@ def ubuntu_install_bosh(master):
         ubuntu_actually_install_bosh(master)
 
 
-def ubuntu_actually_install_bosh(master):
-    sudo('apt-get update')
+def ubuntu_actually_install_bosh(master, *args, **kwargs):
+    sudo('apt-get update -qq')
     sudo('apt-get install -y build-essential ruby ruby-dev libxml2-dev libsqlite3-dev libxslt1-dev '
          'libpq-dev libmysqlclient-dev curl')
     sudo('gem install bosh_cli bosh_cli_plugin_micro --no-ri --no-rdoc')
@@ -31,16 +31,16 @@ def ubuntu_actually_install_bosh(master):
     )'''
 
 
-def core_install_bosh():
-    pass
+def core_install_bosh(*args, **kwargs):
+    raise NotImplementedError()
 
 
-def ubuntu_serve_bosh(domain, master):
+def ubuntu_serve_bosh(domain, master, *args, **kwargs):
     _serve_bosh(domain, master)
 
 
-def core_serve_bosh():
-    pass
+def core_serve_bosh(*args, **kwargs):
+    raise NotImplementedError()
 
 
 def _serve_bosh(domain, master):

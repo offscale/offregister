@@ -6,7 +6,7 @@ from offregister.aux_recipes.go import ubuntu_install_go
 from offregister.recipes.bosh import ubuntu_actually_install_bosh
 
 
-def ubuntu_install_cloudfoundry(master):
+def ubuntu_install_cloudfoundry(master, *args, **kwargs):
     # DEPS, TODO: @depends(['go', 'bosh', 'vagrant'])
     command = 'go'
     if which_true(command):
@@ -45,16 +45,16 @@ def tpl():
     export BOSH_VPC_SECONDARY_AZ=us-east-1b'''
 
 
-def core_install_cloudfoundry():
-    pass
+def core_install_cloudfoundry(*args, **kwargs):
+    raise NotImplementedError()
 
 
-def ubuntu_serve_cloudfoundry(domain, master):
+def ubuntu_serve_cloudfoundry(domain, master, *args, **kwargs):
     _serve_cloudfoundry(domain, master)
 
 
-def core_serve_cloudfoundry():
-    pass
+def core_serve_cloudfoundry(*args, **kwargs):
+    raise NotImplementedError()
 
 
 def _serve_cloudfoundry(domain, master):

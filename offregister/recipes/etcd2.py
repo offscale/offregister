@@ -6,27 +6,21 @@ from etcd import EtcdKeyNotFound
 from fabric.api import run, sudo, cd, local, settings
 from fabric.contrib.files import append, upload_template
 
-from offregister.utils import get_tempdir_fab, which_true
+from offutils import it_consumes
+from offregister.utils import get_tempdir_fab, which_true  # , App, require
 from offregister.aux_recipes.go import ubuntu_install_go
-from offregister.aux_recipes.base import ubuntu_install_curl
+from offregister.aux_recipes.base import ubuntu_install_curl, ubuntu_install_apt_update
 
 from offutils_strategy_register import _get_client as get_client
 
 
-def ubuntu_install_etcd():
-    sudo('apt-get update -qq')
-
-    command = 'curl'
-    if which_true(command):
-        local('echo {command} is already installed'.format(command=command))
-    else:
-        ubuntu_install_curl()
-
-    command = 'go'
-    if which_true(command):
-        local('echo {command} is already installed'.format(command=command))
-    else:
-        ubuntu_install_go()
+# @require(App('apt_update'), App('curl'), App('go'), os='ubuntu')
+def ubuntu_install_etcd(version='v2.2.0', *args, **kwargs):
+    it_consumes(
+        local('echo {command} is already installed'.format(command=command)) if which_true(command)
+        else globals()['_'.join(('ubuntu', 'install', command))]()
+        for command in ('apt_update', 'curl', 'go')
+    )
 
     command = 'etcd'
     if which_true(command):
@@ -34,7 +28,7 @@ def ubuntu_install_etcd():
         return
 
     tempdir = get_tempdir_fab(run_command=run)
-    version = 'v2.0.10'
+
     install_dir = path.join(tempdir, version, run('date +%s'))
     run('mkdir -p {install_dir}'.format(install_dir=install_dir))
 
@@ -53,10 +47,8 @@ def ubuntu_install_etcd():
 
 def ubuntu_serve_etcd(domain, node_name, public_ipv4, private_ipv4, etcd_discovery=None, size=3, *args, **kwargs):
     command = 'etcd --version'
-    if run(command, quiet=True, warn_only=True).succeeded:
-        local('echo {command} is already installed'.format(command=command))
-    else:
-        ubuntu_install_etcd()
+    if run(command, quiet=True, warn_only=True).failed:
+        raise EnvironmentError('Expected etcd to be installed')
 
     with settings(warn_only=True, quiet=True):
         service_install = sudo('initctl list | grep etcd2')
@@ -86,6 +78,10 @@ def ubuntu_serve_etcd(domain, node_name, public_ipv4, private_ipv4, etcd_discove
 def ubuntu_tail_etcd(method_args):
     sudo('initctl list | grep etcd')  # Chuck error if it's not installed
     sudo('tail {method_args} /var/log/upstart/etcd2.log'.format(method_args=method_args))
+
+
+def core_install_etcd(*args, **kwargs):
+    pass  # etcd is installed by default
 
 
 def core_serve_etcd(domain, node_name, public_ipv4, private_ipv4, etcd_discovery=None, size=3, *args, **kwargs):

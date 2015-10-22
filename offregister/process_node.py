@@ -1,30 +1,36 @@
 import json
 
+from os import name as os_name, environ
 from pkg_resources import resource_filename, resource_string
 from itertools import ifilter, imap
 from functools import partial
 from types import NoneType
 
+from libcloud import security
 from libcloud.compute.providers import get_driver, DRIVERS
 from fabric.api import execute, env
 
-from offutils import pp, percent_overlap, obj_to_d
+from offutils import pp, percent_overlap, update_d
 
 from offutils_strategy_register import list_nodes, get_node_info, node_to_dict, save_node_info, fetch_node
 
 from offconf import replace_variables
 
 from __init__ import logger
-from recipes import hostname
 
 from recipes.consul import ubuntu_install_consul, core_install_consul
-from recipes.etcd2 import ubuntu_install_etcd, core_serve_etcd, ubuntu_serve_etcd, ubuntu_tail_etcd
-from recipes.mesos import ubuntu_install_mesos, core_install_mesos
+from recipes.etcd2 import ubuntu_install_etcd, core_serve_etcd, ubuntu_serve_etcd, ubuntu_tail_etcd, core_install_etcd
+from recipes.mesos import ubuntu_install_mesos, core_install_mesos, ubuntu_serve_mesos, core_serve_mesos
 from recipes.deis import ubuntu_install_deis, core_install_deis, ubuntu_serve_deis, core_serve_deis
-from recipes.dokku import ubuntu_install_dokku, core_install_dokku
+from recipes.dokku import ubuntu_install_dokku, core_install_dokku, ubuntu_serve_dokku, core_serve_dokku
 from recipes.flynn import ubuntu_install_flynn, core_install_flynn, ubuntu_serve_flynn
 from recipes.bosh import ubuntu_install_bosh, core_install_bosh, ubuntu_serve_bosh
 from recipes.coreos import ubuntu_install_coreos, core_install_coreos, ubuntu_serve_coreos, core_serve_coreos
+from recipes.tsuru import ubuntu_install_tsuru, core_install_tsuru, ubuntu_serve_tsuru, core_serve_tsuru
+
+# AWS Certificates are acting up (on Windows), remove this in production:
+if os_name == 'nt' or environ.get('disable_ssl'):
+    security.VERIFY_SSL_CERT = False
 
 
 class ProcessNode(object):
@@ -99,7 +105,12 @@ class ProcessNode(object):
 
     def add_to_cluster(self, cluster_type, res):
         master = cluster_type.endswith(':master')
-        kwargs = dict(master=master) if master else {}
+        kwargs = update_d(
+            dict(master=master) if master else {},
+            domain=self.dns_name, node_name=self.node_name,
+            public_ipv4=self.node.public_ips[-1],
+            private_ipv4=self.node.private_ips[-1]
+        )
         cluster_type = cluster_type[:-len(':master')] if master else cluster_type
         res.update(
             execute(
@@ -115,8 +126,8 @@ class ProcessNode(object):
             ifilter(
                 None,
                 imap(lambda k: ((lambda r: r[1] if r and len(r) > 0 else None)(
-                    self.previous_clustering_results[k][cluster_type])
-                                if self.previous_clustering_results[k] else None),
+                    self.previous_clustering_results.get(k, {}).get(cluster_type))
+                                if self.previous_clustering_results.get(k) else None),
                      self.previous_clustering_results)
             ),
             tuple()
@@ -126,9 +137,7 @@ class ProcessNode(object):
             (lambda result: result[result.keys()[0]])(execute(
                 globals()[
                     '{os}_serve_{cluster_name}'.format(os=self.guess_os(), cluster_name=cluster_type)
-                ],
-                domain=self.dns_name, node_name=self.node_name, public_ipv4=self.node.public_ips[-1],
-                private_ipv4=self.node.private_ips[-1], **kwargs
+                ], **kwargs
             ))
         )}
 

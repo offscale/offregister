@@ -13,9 +13,7 @@ def ubuntu_install_vb(extensions=False, distribution='trusty'):
         ),
         use_sudo=True
     )
-    sudo('apt-get update')
-
-    sudo('apt-get update')
+    sudo('apt-get update -qq')
     sudo('apt-get install -y virtualbox-4.3 dkms')
 
     if extensions:
