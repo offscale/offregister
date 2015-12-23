@@ -40,9 +40,10 @@
     },
     "register": {
         "/unclustered/*": [
-            "etcd"
+            "taiga"
         ],
         "_comments": [
+            "etcd",
             "mesos",
             "dokku",
             "tsuru",
@@ -50,7 +51,6 @@
             "deis",
             "flynn",
             "coreos",
-
             "bosh",
             "consul"
         ]

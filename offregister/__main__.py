@@ -2,6 +2,7 @@
 
 import json
 
+from os import path
 from argparse import ArgumentParser
 from sys import argv
 from pkg_resources import resource_filename
@@ -16,9 +17,9 @@ from process_node import ProcessNode
 
 def _build_parser():
     parser = ArgumentParser(
-        description='Register node to cluster(s). Node is found by manual specification, or popped from a queue.',
-        epilog='Example usage: {program} -q etcd -r mesos:location, etcd:location, consul:location'.format(
-            program=argv[0])
+            description='Register node to cluster(s). Node is found by manual specification, or popped from a queue.',
+            epilog='Example usage: {program} -q etcd -r mesos:location, etcd:location, consul:location'.format(
+                    program=argv[0])
     )
     parser.add_argument('-d', '--dns', help='DNS for node (if no queue)')
     parser.add_argument('-i', '--ip', help='Public IP for node (if no queue)')
@@ -28,7 +29,8 @@ def _build_parser():
     parser.add_argument('-r', '--register', nargs='+',
                         help='Join node to which cluster(s). Example: mesos:location, etcd:location')
     parser.add_argument('-c', '--config', help='Schema file. Can use the same one across all off- CLIs.',
-                        default=resource_filename('offregister.config', 'register.sample.json'))
+                        default=path.join(path.dirname(resource_filename('offregister', '__main__.py')),
+                                          '_config', 'register.sample.json'))
     parser.add_argument('-w', '--within', help='Clusters to set nodes within [/unclustered/* (from .json conf)]')
     parser.add_argument('-m', '--method', help='Method to run. E.g.: `tail` or `set_clusters`. [set_clusters]',
                         default='set_clusters')
@@ -62,8 +64,8 @@ if __name__ == '__main__':
     process_node = ProcessNode(args.config)
 
     process_within(
-        args.within or {k: process_node.process_dict['register'][k]
-                        for k in ifilterfalse(lambda key: key.startswith('_'),
-                                              process_node.process_dict['register'])},
-        config=args.config, method=args.method, method_args=args.method_args
+            args.within or {k: process_node.process_dict['register'][k]
+                            for k in ifilterfalse(lambda key: key.startswith('_'),
+                                                  process_node.process_dict['register'])},
+            config=args.config, method=args.method, method_args=args.method_args
     )

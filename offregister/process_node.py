@@ -27,6 +27,7 @@ from recipes.flynn import ubuntu_install_flynn, core_install_flynn, ubuntu_serve
 from recipes.bosh import ubuntu_install_bosh, core_install_bosh, ubuntu_serve_bosh
 from recipes.coreos import ubuntu_install_coreos, core_install_coreos, ubuntu_serve_coreos, core_serve_coreos
 from recipes.tsuru import ubuntu_install_tsuru, core_install_tsuru, ubuntu_serve_tsuru, core_serve_tsuru
+from recipes.taiga import ubuntu_install_taiga, core_install_taiga, ubuntu_serve_taiga, core_serve_taiga
 
 # AWS Certificates are acting up (on Windows), remove this in production:
 if os_name == 'nt' or environ.get('disable_ssl'):
@@ -51,7 +52,7 @@ class ProcessNode(object):
                 self.config_provider = driver[_driver_name]
 
         driver = get_driver(driver_name)(
-            self.config_provider['auth']['username'], self.config_provider['auth']['key']
+                self.config_provider['auth']['username'], self.config_provider['auth']['key']
         )
 
         self.node_name = node.key[node.key.find('/', 1) + 1:].encode('utf8')
@@ -106,38 +107,38 @@ class ProcessNode(object):
     def add_to_cluster(self, cluster_type, res):
         master = cluster_type.endswith(':master')
         kwargs = update_d(
-            dict(master=master) if master else {},
-            domain=self.dns_name, node_name=self.node_name,
-            public_ipv4=self.node.public_ips[-1],
-            private_ipv4=self.node.private_ips[-1]
+                dict(master=master) if master else {},
+                domain=self.dns_name, node_name=self.node_name,
+                public_ipv4=self.node.public_ips[-1],
+                private_ipv4=self.node.private_ips[-1]
         )
         cluster_type = cluster_type[:-len(':master')] if master else cluster_type
         res.update(
-            execute(
-                globals()['{os}_install_{cluster_name}'.format(os=self.guess_os(), cluster_name=cluster_type)],
-                **kwargs
-            )
+                execute(
+                        globals()['{os}_install_{cluster_name}'.format(os=self.guess_os(), cluster_name=cluster_type)],
+                        **kwargs
+                )
         )
         save_node_info(self.node_name, node_to_dict(self.node), folder=cluster_type, marshall=json)
         if master:
             save_node_info('masters', [self.node_name], folder=cluster_type, marshall=json)
 
         kwargs.update({'{cluster_type}_discovery'.format(cluster_type=cluster_type): next(
-            ifilter(
-                None,
-                imap(lambda k: ((lambda r: r[1] if r and len(r) > 0 else None)(
-                    self.previous_clustering_results.get(k, {}).get(cluster_type))
-                                if self.previous_clustering_results.get(k) else None),
-                     self.previous_clustering_results)
-            ),
-            tuple()
+                ifilter(
+                        None,
+                        imap(lambda k: ((lambda r: r[1] if r and len(r) > 0 else None)(
+                                self.previous_clustering_results.get(k, {}).get(cluster_type))
+                                        if self.previous_clustering_results.get(k) else None),
+                             self.previous_clustering_results)
+                ),
+                tuple()
         )})
         res[res.keys()[0]] = {cluster_type: (
             res[res.keys()[0]],
             (lambda result: result[result.keys()[0]])(execute(
-                globals()[
-                    '{os}_serve_{cluster_name}'.format(os=self.guess_os(), cluster_name=cluster_type)
-                ], **kwargs
+                    globals()[
+                        '{os}_serve_{cluster_name}'.format(os=self.guess_os(), cluster_name=cluster_type)
+                    ], **kwargs
             ))
         )}
 
@@ -157,8 +158,8 @@ class ProcessNode(object):
         for cluster_type in self.process_dict['register'][directory]:
             cluster_type = cluster_type[:-len(':master')] if cluster_type.endswith(':master') else cluster_type
             execute(
-                globals()['{os}_tail_{cluster_name}'.format(os=self.guess_os(), cluster_name=cluster_type)],
-                method_args
+                    globals()['{os}_tail_{cluster_name}'.format(os=self.guess_os(), cluster_name=cluster_type)],
+                    method_args
             )
 
 
