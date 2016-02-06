@@ -2,7 +2,7 @@ from fabric.api import run, cd
 
 
 def ubuntu_install_consul(*args, **kwargs):
-    return
+    raise NotImplementedError()
 
 
 def core_install_consul(*args, **kwargs):

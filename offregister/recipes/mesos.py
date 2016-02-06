@@ -1,14 +1,11 @@
-from fabric.api import run, cd, sudo
+from fabric.api import run
 
-from offregister.utils import get_tempdir_fab
+from offregister_fab_utils.apt import apt_depends
 
 
-def ubuntu_install_mesos(version='0.25.0', apt_update=True, *args, **kwargs):
-    if apt_update:
-        sudo('apt-get update -qq')
-    sudo('apt-get install -y openjdk-7-jdk')
-    sudo('apt-get install -y build-essential python-dev python-boto libcurl4-nss-dev libsasl2-dev maven '
-         'libapr1-dev libsvn-dev')
+def ubuntu_install_mesos(version='0.27.0', apt_update=True, *args, **kwargs):
+    apt_depends('openjdk-7-jdk', 'build-essential', 'python-dev', 'python-boto', 'curl',
+                'libcurl4-nss-dev', 'libsasl2-dev', 'maven' 'libapr1-dev', 'libsvn-dev')
     run('curl -O http://www.apache.org/dist/mesos/{version}/mesos-{version}.tar.gz'.format(version=version))
     run('tar -zxf mesos-{version}.tar.gz'.format(version=version))
 

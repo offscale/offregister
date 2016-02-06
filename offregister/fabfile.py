@@ -1,5 +1,5 @@
-from fabric import api
+from fabric.api import run
 
 
 def hostname():
-    api.run('hostname')
+    run('hostname')

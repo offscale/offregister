@@ -45,9 +45,9 @@ def process_within(register_within, config, method, method_args):
 
     for cluster_location in register_within:
         if cluster_location.endswith('*'):
-            process_nodes(cluster_location[:-2], config, method, method_args)
-        else:
-            process_nodes(cluster_location, config, method, method_args)
+            cluster_location = cluster_location[:-2]
+        ProcessNode.validate_conf(config, cluster_location)
+        process_nodes(cluster_location, config, method, method_args)
 
 
 def process_nodes(cluster_location, config, method, method_args):

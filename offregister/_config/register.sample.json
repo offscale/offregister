@@ -40,9 +40,11 @@
     },
     "register": {
         "/unclustered/*": [
-            "taiga"
+            "offregister-etcd"
         ],
         "_comments": [
+            "offregister-taiga",
+            "taiga",
             "etcd",
             "mesos",
             "dokku",

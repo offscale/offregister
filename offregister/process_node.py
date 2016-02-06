@@ -1,7 +1,9 @@
 import json
+import recipes
 
-from os import name as os_name, environ
-from pkg_resources import resource_filename, resource_string
+from os import name as os_name, environ, path, listdir
+from sys import modules
+from pkg_resources import resource_filename
 from itertools import ifilter, imap
 from functools import partial
 from types import NoneType
@@ -17,17 +19,11 @@ from offutils_strategy_register import list_nodes, get_node_info, node_to_dict, 
 from offconf import replace_variables
 
 from __init__ import logger
+from utils import get_pip_packages, pip_install
 
-from recipes.consul import ubuntu_install_consul, core_install_consul
-from recipes.etcd2 import ubuntu_install_etcd, core_serve_etcd, ubuntu_serve_etcd, ubuntu_tail_etcd, core_install_etcd
-from recipes.mesos import ubuntu_install_mesos, core_install_mesos, ubuntu_serve_mesos, core_serve_mesos
-from recipes.deis import ubuntu_install_deis, core_install_deis, ubuntu_serve_deis, core_serve_deis
-from recipes.dokku import ubuntu_install_dokku, core_install_dokku, ubuntu_serve_dokku, core_serve_dokku
-from recipes.flynn import ubuntu_install_flynn, core_install_flynn, ubuntu_serve_flynn
-from recipes.bosh import ubuntu_install_bosh, core_install_bosh, ubuntu_serve_bosh
-from recipes.coreos import ubuntu_install_coreos, core_install_coreos, ubuntu_serve_coreos, core_serve_coreos
-from recipes.tsuru import ubuntu_install_tsuru, core_install_tsuru, ubuntu_serve_tsuru, core_serve_tsuru
-from recipes.taiga import ubuntu_install_taiga, core_install_taiga, ubuntu_serve_taiga, core_serve_taiga
+pip_packages = get_pip_packages()
+available_recipes = frozenset(ifilter(lambda s: not s.startswith('_'), dir(recipes)))
+loaded_modules = frozenset(imap(lambda name: modules[name], frozenset(modules) & frozenset(globals())))
 
 # AWS Certificates are acting up (on Windows), remove this in production:
 if os_name == 'nt' or environ.get('disable_ssl'):
@@ -52,13 +48,45 @@ class ProcessNode(object):
                 self.config_provider = driver[_driver_name]
 
         driver = get_driver(driver_name)(
-                self.config_provider['auth']['username'], self.config_provider['auth']['key']
+            self.config_provider['auth']['username'], self.config_provider['auth']['key']
         )
 
         self.node_name = node.key[node.key.find('/', 1) + 1:].encode('utf8')
         self.node = next(ifilter(lambda _node: _node.uuid == node.value['uuid'], driver.list_nodes()), None)
         # pp(node_to_dict(self.node))
         self.dns_name = self.node.extra.get('dns_name')
+
+    @classmethod
+    def validate_conf(cls, process_filename, within):
+        # Init
+        with open(process_filename) as f:
+            process_dict = replace_variables(f.read())
+        process_dict = json.loads(process_dict)
+
+        # Ensure package required to install cluster is available
+        directory = cls.get_directory(process_dict, within)
+        for cluster in process_dict['register'][directory]:
+            dash_un_cluster = cluster.replace('-', '_')
+            mods = available_recipes | loaded_modules
+            if cluster not in mods and dash_un_cluster not in mods:
+                if cluster in pip_packages:
+                    # import
+                    pass
+                elif dash_un_cluster in pip_packages:
+                    # import
+                    pass
+                else:
+                    # `folder` is one above `offregister` directory
+                    folder = environ.get('PKG_DIR', path.dirname(path.dirname(path.dirname(__file__))))
+
+                    ls_folder = listdir(folder)
+                    pip_install_d = partial(pip_install, options_attr={'src_dir': folder})
+                    if cluster in ls_folder:
+                        pip_install_d(path.join(folder, cluster))
+                    elif dash_un_cluster in ls_folder:
+                        pip_install_d(path.join(folder, dash_un_cluster))
+                    else:
+                        raise ImportError("Cannot find package for cluster: '{!s}'".format(cluster))
 
     def setup_connection_meta(self, within):
         if not self.node.public_ips:
@@ -69,9 +97,9 @@ class ProcessNode(object):
         env.key_filename = self.config_provider['ssh']['private_key_path']
         if 'password' in self.node.extra:
             env.password = self.node.extra['password']
-        env.user = self.guess_os(self.node.driver.__class__.__name__)
+        env.user = self.guess_os_username(self.node.driver.__class__.__name__)
 
-        directory = self.get_directory(within)
+        directory = self.get_directory(self.process_dict, within)
         if not self.dns_name and 'skydns2' not in self.process_dict['register'][directory] and \
                         'consul' not in self.process_dict['register'][directory]:
             self.dns_name = '{public_ip}.xip.io'.format(public_ip=self.node.public_ips[0])
@@ -79,7 +107,11 @@ class ProcessNode(object):
         env.hosts = [self.dns_name]
 
     def get_directory(self, within):
-        directory = next((directory for directory in self.process_dict['register']), None)
+        return self.get_directory(self.process_dict, within)
+
+    @staticmethod
+    def get_directory(process_dict, within):
+        directory = next((directory for directory in process_dict['register']), None)
         if type(directory) is NoneType or directory != within \
                 and len(directory) >= len(within) + 3 or directory[-1] != '*':
             # + 3 is for /, /* and *
@@ -91,11 +123,11 @@ class ProcessNode(object):
             logger.warn('No node, skipping')
             return
         self.setup_connection_meta(within)
-        directory = self.get_directory(within)
+        directory = self.get_directory(self.process_dict, within)
 
         res = {}
         for cluster in self.process_dict['register'][directory]:
-            self.add_to_cluster(cluster, res)
+            self.add_to_cluster(cluster.replace('-', '_'), res)
 
         if self.previous_clustering_results:
             self.previous_clustering_results.update(res)
@@ -105,61 +137,82 @@ class ProcessNode(object):
         return res
 
     def add_to_cluster(self, cluster_type, res):
+        """ Specification:
+          0. Search and handle `master` tag in `cluster_name`
+          1. Imports `cluster_name`, seeks and sets (`install` xor `setup`) and (serve` or `start`) callables
+          2. Installs `cluster_name`
+          3. Serves `cluster_name`
+        """
         master = cluster_type.endswith(':master')
         kwargs = update_d(
-                dict(master=master) if master else {},
-                domain=self.dns_name, node_name=self.node_name,
-                public_ipv4=self.node.public_ips[-1],
-                private_ipv4=self.node.private_ips[-1]
+            dict(master=master) if master else {},
+            domain=self.dns_name, node_name=self.node_name,
+            public_ipv4=self.node.public_ips[-1],
+            private_ipv4=self.node.private_ips[-1]
         )
         cluster_type = cluster_type[:-len(':master')] if master else cluster_type
-        res.update(
-                execute(
-                        globals()['{os}_install_{cluster_name}'.format(os=self.guess_os(), cluster_name=cluster_type)],
-                        **kwargs
-                )
-        )
+        guessed_os = self.guess_os()
+
+        # import `cluster_type`
+        setattr(self, 'fab', getattr(__import__(cluster_type, globals(), locals(), [guessed_os], -1), guessed_os))
+        fab_dir = set(dir(self.fab))
+
+        install = self.fab.install if 'install' in fab_dir else self.fab.setup
+        serve = self.fab.serve if 'serve' in fab_dir else self.fab.start
+
+        res.update(execute(install, **kwargs))
         save_node_info(self.node_name, node_to_dict(self.node), folder=cluster_type, marshall=json)
         if master:
             save_node_info('masters', [self.node_name], folder=cluster_type, marshall=json)
 
-        kwargs.update({'{cluster_type}_discovery'.format(cluster_type=cluster_type): next(
+        # etcd stuff, TODO: move
+        if cluster_type == 'etcd':
+            kwargs.update({'{cluster_type}_discovery'.format(cluster_type=cluster_type): next(
                 ifilter(
-                        None,
-                        imap(lambda k: ((lambda r: r[1] if r and len(r) > 0 else None)(
-                                self.previous_clustering_results.get(k, {}).get(cluster_type))
-                                        if self.previous_clustering_results.get(k) else None),
-                             self.previous_clustering_results)
+                    None,
+                    imap(lambda k: ((lambda r: r[1] if r and len(r) > 0 else None)(
+                        self.previous_clustering_results.get(k, {}).get(cluster_type))
+                                    if self.previous_clustering_results.get(k) else None),
+                         self.previous_clustering_results)
                 ),
                 tuple()
-        )})
-        res[res.keys()[0]] = {cluster_type: (
-            res[res.keys()[0]],
-            (lambda result: result[result.keys()[0]])(execute(
-                    globals()[
-                        '{os}_serve_{cluster_name}'.format(os=self.guess_os(), cluster_name=cluster_type)
-                    ], **kwargs
-            ))
-        )}
+            )})
+        # etcd stuff, TODO: move
 
-    def guess_os(self, hint=None):
+        res[res.keys()[0]] = {
+            cluster_type: (res[res.keys()[0]], (lambda result: result[result.keys()[0]])(
+                execute(serve, **kwargs)
+            ))
+        }
+
+    def guess_os_username(self, hint=None):
         if hint and 'softlayer' in hint.lower():
             return 'root'
-        if 'ubuntu' in self.node.name.lower():
+        node_name = self.node.name.lower()
+        if 'ubuntu' in node_name:
             return 'ubuntu'
-        elif 'core' in self.node.name.lower():
+        elif 'core' in node_name:
             return 'core'
         return 'user'
+
+    def guess_os(self, hint=None):
+        node_name = self.node.name.lower()
+        if 'ubuntu' in node_name:
+            return 'ubuntu'
+        elif 'core' in node_name:
+            return 'core'
+        return hint or 'ubuntu'
 
     def tail(self, within, *method_args):
         method_args = ''.join(method_args)
         self.setup_connection_meta(within)
-        directory = self.get_directory(within)
+        directory = self.get_directory(self.process_dict, within)
         for cluster_type in self.process_dict['register'][directory]:
             cluster_type = cluster_type[:-len(':master')] if cluster_type.endswith(':master') else cluster_type
             execute(
-                    globals()['{os}_tail_{cluster_name}'.format(os=self.guess_os(), cluster_name=cluster_type)],
-                    method_args
+                globals()[
+                    '{os}_tail_{cluster_name}'.format(os=self.guess_os_username(), cluster_name=cluster_type)],
+                method_args
             )
 
 

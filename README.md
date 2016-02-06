@@ -51,3 +51,11 @@ New entry in `register.sample.json`:
     
     Example usage: /usr/local/lib/python2.7/dist-packages/offregister/__main__.py
     -q etcd -r mesos:location, etcd:location, consul:location
+
+## External recipes
+
+Install external recipes and they'll be imported automatically.
+If you want them to be installed automatically:
+
+  - set `PKG_DIR` environment variable to one level above your project, or
+  - put your project one dir above offregister's

@@ -1,21 +1,20 @@
-from fabric.api import run, sudo, cd, settings, local
-from fabric.contrib.files import exists
+from fabric.api import run, sudo, cd, local
 
-from offregister.utils import get_tempdir_fab, which_true
-from offregister.aux_recipes.go import ubuntu_install_go
+from offregister_fab_utils.fs import cmd_avail
+from offregister_fab_utils.go import install as install_go
 from offregister.recipes.bosh import ubuntu_actually_install_bosh
 
 
 def ubuntu_install_cloudfoundry(master, *args, **kwargs):
     # DEPS, TODO: @depends(['go', 'bosh', 'vagrant'])
     command = 'go'
-    if which_true(command):
+    if cmd_avail(command):
         local('echo {command} is already installed'.format(command=command))
     else:
-        ubuntu_install_go()
+        install_go()
 
     command = 'bosh'
-    if which_true(command):
+    if cmd_avail(command):
         local('echo {command} is already installed'.format(command=command))
     else:
         ubuntu_actually_install_bosh(master)

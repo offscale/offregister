@@ -2,6 +2,7 @@ apache-libcloud
 python-etcd
 fabric
 
-https://github.com/offscale/offutils/archive/master.zip#egg=offutils
-https://github.com/offscale/offutils-strategy-register/archive/master.zip#egg=offutils-strategy-register
-https://github.com/offscale/offconf/archive/master.zip#egg=offconf
+https://api.github.com/repos/offscale/offutils/zipball#egg=offutils
+https://api.github.com/repos/offscale/offutils-strategy-register/zipball#egg=offutils-strategy-register
+https://api.github.com/repos/offscale/offconf/zipball#egg=offconf
+https://api.github.com/repos/offscale/offregister_fab_utils/zipball#egg=offregister_fab_utils

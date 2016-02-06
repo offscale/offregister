@@ -1,12 +1,5 @@
-from fabric.api import sudo, run, local
-
-from offregister.utils import which_true
+from offregister_fab_utils.apt import apt_depends
 
 
 def install_bosh_lite():
-    command = 'git'
-    if which_true(command):
-        local('echo {command} is already installed'.format(command=command))
-    else:
-        sudo('apt-get update -qq')
-        sudo('apt-get install git')
+    apt_depends('git')

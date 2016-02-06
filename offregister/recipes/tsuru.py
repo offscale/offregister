@@ -1,9 +1,10 @@
-from fabric.api import run, cd
+from fabric.api import run
 
-from offregister.utils import get_tempdir_fab
+from offregister_fab_utils.apt import apt_depends
 
 
 def ubuntu_install_tsuru(*args, **kwargs):
+    apt_depends('curl')
     run('curl -sL https://raw.githubusercontent.com/tsuru/now/master/run.bash | bash')
 
 

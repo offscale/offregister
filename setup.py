@@ -33,11 +33,11 @@ if __name__ == '__main__':
             test_suite=package_name + '.tests',
             packages=find_packages(),
             package_dir={package_name: package_name},
-            install_requires=['apache-libcloud', 'python-etcd', 'fabric'],
+            install_requires=['pyyaml', 'apache-libcloud', 'python-etcd', 'fabric'],
             data_files=[
-                (_data_install_dir(), [_data_join(f) for f in listdir(_data_join())]),
-                (_config_install_dir(), [_config_join(f) for f in listdir(_config_join())]),
-                (templates_install_dir(), [templates_join(f) for f in listdir(templates_join())]),
-                (taiga_install_dir(), [taiga_join(f) for f in listdir(taiga_join())])
+                (_data_install_dir(), map(_data_join, listdir(_data_join()))),
+                (_config_install_dir(), map(_config_join, listdir(_config_join()))),
+                (templates_install_dir(), map(templates_join, listdir(templates_join()))),
+                (taiga_install_dir(), map(taiga_join, listdir(taiga_join())))
             ]
     )

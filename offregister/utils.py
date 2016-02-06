@@ -1,6 +1,8 @@
 import importlib
 import pkgutil
 
+from pip import get_installed_distributions
+from pip.commands import install
 from sys import stderr
 from collections import namedtuple
 from types import FunctionType
@@ -26,18 +28,18 @@ def get_tempdir_fab(run_command=run, **kwargs):
     return run("python -c 'from tempfile import gettempdir; print gettempdir()'", **kwargs)
 
 
-def which_true(command, run_command=run, **kwargs):
+def cmd_avail(command, run_command=run, **kwargs):
     with settings(warn_only=True):
-        installed = run_command('which {command} >/dev/null'.format(command=command), **kwargs)
+        installed = run_command('command -v {command} >/dev/null'.format(command=command), **kwargs)
     return installed.succeeded
 
 
 def append_path(new_path):
     with settings(warn_only=True):
-        installed = run('grep {new_path} /etc/environment'.format(new_path=new_path))
+        installed = run('grep -q {new_path} /etc/environment'.format(new_path=new_path))
 
     if installed.failed:
-        run('''sudo sed -e '/^PATH/s/"$/:{new_path}"/g' -i /etc/environment'''.format(
+        sudo('''sed -e '/^PATH/s/"$/:{new_path}"/g' -i /etc/environment'''.format(
             new_path=new_path.replace('/', '\/')
         ))
 
@@ -98,7 +100,7 @@ def require(*apps, **kwargs):
             raise ValueError('App must have name')
         command = 'curl'
 
-        if which_true(app.name):
+        if cmd_avail(app.name):
             local('echo {command} is already installed'.format(command=app.name))
         else:
             try:
@@ -113,3 +115,16 @@ def require(*apps, **kwargs):
         return inner
 
     return dec
+
+
+def get_pip_packages():
+    return map(lambda s: s.project_name, get_installed_distributions())
+
+
+def pip_install(package, options_attr=None):
+    install_cmd = install.InstallCommand()
+    options, args = install_cmd.parse_args([package])
+    if options_attr:
+        for opt_name, opt_val in options_attr.iteritems():
+            setattr(options, opt_name, opt_val)
+    return install_cmd.run(options, args)

@@ -1,17 +1,18 @@
-from itertools import ifilter, imap
-from operator import methodcaller
+from fabric.api import run, local
 
-from fabric.api import run, cd
-
-from offutils import it_consumes
-from offregister.utils import get_tempdir_fab
-from offregister.aux_recipes import base
+from offregister_fab_utils.fs import cmd_avail
+from offregister_fab_utils.apt import apt_depends
 
 
 def ubuntu_install_flynn(*args, **kwargs):
+    apt_depends('curl')
+    command = 'flynn'
+    if cmd_avail(command):
+        local('echo {command} is already installed'.format(command=command))
+        return
+
     # run('L=/usr/local/bin/flynn && curl -sSL -A "`uname -sp`" https://dl.flynn.io/cli | zcat >$L && chmod +x $L')
     run('sudo bash < <(curl -fsSL https://dl.flynn.io/install-flynn)')
-    it_consumes(imap(lambda e: methodcaller(e)(base), ifilter(lambda a: a.startswith('ubuntu_'), dir(base))))
 
 
 def core_install_flynn(*args, **kwargs):
