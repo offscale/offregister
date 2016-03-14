@@ -40,13 +40,12 @@
     },
     "register": {
         "/unclustered/*": [
-            "offregister-etcd"
+            "offregister-zookeeper"
         ],
         "_comments": [
+            "offregister-mesos",
+            "offregister-etcd",
             "offregister-taiga",
-            "taiga",
-            "etcd",
-            "mesos",
             "dokku",
             "tsuru",
             "coreos",

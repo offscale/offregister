@@ -154,7 +154,13 @@ class ProcessNode(object):
         guessed_os = self.guess_os()
 
         # import `cluster_type`
-        setattr(self, 'fab', getattr(__import__(cluster_type, globals(), locals(), [guessed_os], -1), guessed_os))
+        try:
+            setattr(self, 'fab', getattr(__import__(cluster_type, globals(), locals(), [guessed_os], -1), guessed_os))
+        except AttributeError as e:
+            if e.message != "'module' object has no attribute '{os}'".format(os=guessed_os):
+                raise
+            raise ImportError('Cannot `import {os} from {cluster_type}`'.format(os=guessed_os,
+                                                                              cluster_type=cluster_type))
         fab_dir = set(dir(self.fab))
 
         install = self.fab.install if 'install' in fab_dir else self.fab.setup
