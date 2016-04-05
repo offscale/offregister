@@ -39,20 +39,35 @@ class ProcessNode(object):
         with open(process_filename) as f:
             strategy = replace_variables(f.read())
         self.process_dict = json.loads(strategy)
-        driver_name = next(driver_name for driver_name, driver_tuple in DRIVERS.iteritems()
-                           if driver_tuple == tuple(node.value['driver'].rsplit('.', 1)))
+        self.driver_name = next(self.driver_name for self.driver_name, driver_tuple in DRIVERS.iteritems()
+                                if driver_tuple == tuple(node.value['driver'].rsplit('.', 1)))
         self.config_provider = None
         for driver in self.process_dict['provider']['options']:
-            _driver_name = driver.keys()[0]
-            if percent_overlap(driver_name.upper(), _driver_name) > 94:
-                self.config_provider = driver[_driver_name]
+            self.driver_name = driver.keys()[0]
+            if percent_overlap(self.driver_name.upper(), self.driver_name) > 94:
+                self.config_provider = driver[self.driver_name]
 
-        driver = get_driver(driver_name)(
-            self.config_provider['auth']['username'], self.config_provider['auth']['key']
+        self.driver_name = self.driver_name.lower()
+        driver = get_driver(self.driver_name)
+        driver = driver(
+            subscription_id=self.config_provider['auth']['subscription_id'],
+            key_file=self.config_provider['auth']['key_file']
+        ) if self.driver_name == 'azure' else driver(
+            self.config_provider['auth']['username'],
+            self.config_provider['auth']['key']
         )
 
         self.node_name = node.key[node.key.find('/', 1) + 1:].encode('utf8')
-        self.node = next(ifilter(lambda _node: _node.uuid == node.value['uuid'], driver.list_nodes()), None)
+        if self.driver_name == 'azure':
+            if 'AZURE_CLOUD_NAME' not in environ:
+                raise KeyError('$AZURE_CLOUD_NAME needs to be defined. '
+                               'See: http://libcloud.readthedocs.org/en/latest/compute/drivers/azure.html'
+                               '#libcloud.compute.drivers.azure.AzureNodeDriver.create_node')
+            nodes = driver.list_nodes(environ['AZURE_CLOUD_NAME'])
+        else:
+            nodes = driver.list_nodes()
+        self.node = next(ifilter(lambda _node: _node.uuid == node.value['uuid'],
+                                 nodes), None)
         # pp(node_to_dict(self.node))
         self.dns_name = self.node.extra.get('dns_name')
 
@@ -94,9 +109,13 @@ class ProcessNode(object):
         if self.node.state == 2:
             # state = 2 is terminated on AWS, need to lookup MAP/enum from lib for general solution. TODO
             raise Exception('Node is terminated, so cannot SSH')
-        env.key_filename = self.config_provider['ssh']['private_key_path']
-        if 'password' in self.node.extra:
-            env.password = self.node.extra['password']
+
+        if self.driver_name == 'azure':
+            env.password = self.config_provider['ssh']['node_password']
+        else:
+            env.key_filename = self.config_provider['ssh']['private_key_path']
+            if 'password' in self.node.extra:
+                env.password = self.node.extra['password']
         env.user = self.guess_os_username(self.node.driver.__class__.__name__)
 
         directory = self.get_directory(self.process_dict, within)
@@ -160,13 +179,14 @@ class ProcessNode(object):
             if e.message != "'module' object has no attribute '{os}'".format(os=guessed_os):
                 raise
             raise ImportError('Cannot `import {os} from {cluster_type}`'.format(os=guessed_os,
-                                                                              cluster_type=cluster_type))
+                                                                                cluster_type=cluster_type))
         fab_dir = set(dir(self.fab))
 
         install = self.fab.install if 'install' in fab_dir else self.fab.setup
         serve = self.fab.serve if 'serve' in fab_dir else self.fab.start
 
         res.update(execute(install, **kwargs))
+        pp(node_to_dict(self.node))
         save_node_info(self.node_name, node_to_dict(self.node), folder=cluster_type, marshall=json)
         if master:
             save_node_info('masters', [self.node_name], folder=cluster_type, marshall=json)
@@ -194,6 +214,10 @@ class ProcessNode(object):
     def guess_os_username(self, hint=None):
         if hint and 'softlayer' in hint.lower():
             return 'root'
+
+        if self.driver_name == 'azure':
+            return 'azureuser'
+
         node_name = self.node.name.lower()
         if 'ubuntu' in node_name:
             return 'ubuntu'

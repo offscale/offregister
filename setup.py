@@ -37,7 +37,6 @@ if __name__ == '__main__':
             data_files=[
                 (_data_install_dir(), map(_data_join, listdir(_data_join()))),
                 (_config_install_dir(), map(_config_join, listdir(_config_join()))),
-                (templates_install_dir(), map(templates_join, listdir(templates_join()))),
-                (taiga_install_dir(), map(taiga_join, listdir(taiga_join())))
+                (templates_install_dir(), map(templates_join, listdir(templates_join())))
             ]
     )
