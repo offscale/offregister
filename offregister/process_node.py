@@ -39,13 +39,10 @@ class ProcessNode(object):
         with open(process_filename) as f:
             strategy = replace_variables(f.read())
         self.process_dict = json.loads(strategy)
-        self.driver_name = next(self.driver_name for self.driver_name, driver_tuple in DRIVERS.iteritems()
-                                if driver_tuple == tuple(node.value['driver'].rsplit('.', 1)))
-        self.config_provider = None
-        for driver in self.process_dict['provider']['options']:
-            self.driver_name = driver.keys()[0]
-            if percent_overlap(self.driver_name.upper(), self.driver_name) > 94:
-                self.config_provider = driver[self.driver_name]
+        self.driver_name = next(driver_name for driver_name, driver_tuple in DRIVERS.iteritems()
+                                if driver_tuple[1] == node.value['driver'])
+        self.config_provider = next(provider for provider in self.process_dict['provider']['options']
+                                    if provider['provider']['name'] == self.driver_name.upper())
 
         self.driver_name = self.driver_name.lower()
         driver = get_driver(self.driver_name)
@@ -68,6 +65,8 @@ class ProcessNode(object):
             nodes = driver.list_nodes()
         self.node = next(ifilter(lambda _node: _node.uuid == node.value['uuid'],
                                  nodes), None)
+        if not self.node:
+            raise EnvironmentError('node not found. Maybe the cloud provider is still provisioning?')
         # pp(node_to_dict(self.node))
         self.dns_name = self.node.extra.get('dns_name')
 
