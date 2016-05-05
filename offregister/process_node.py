@@ -45,14 +45,14 @@ class ProcessNode(object):
                                     if provider['provider']['name'] == self.driver_name.upper())
 
         self.driver_name = self.driver_name.lower()
-        driver = get_driver(self.driver_name)
-        driver = driver(
+        driver = (lambda driver: driver(
             subscription_id=self.config_provider['auth']['subscription_id'],
             key_file=self.config_provider['auth']['key_file']
         ) if self.driver_name == 'azure' else driver(
             self.config_provider['auth']['username'],
-            self.config_provider['auth']['key']
-        )
+            self.config_provider['auth']['key'],
+            region=self.config_provider['provider']['region']
+        ))(get_driver(self.driver_name))
 
         self.node_name = node.key[node.key.find('/', 1) + 1:].encode('utf8')
         if self.driver_name == 'azure':
@@ -63,10 +63,15 @@ class ProcessNode(object):
             nodes = driver.list_nodes(environ['AZURE_CLOUD_NAME'])
         else:
             nodes = driver.list_nodes()
+
         self.node = next(ifilter(lambda _node: _node.uuid == node.value['uuid'],
                                  nodes), None)
         if not self.node:
             raise EnvironmentError('node not found. Maybe the cloud provider is still provisioning?')
+
+        if 'password' in self.node.extra:
+            print 'password =', self.node.extra['password']
+
         # pp(node_to_dict(self.node))
         self.dns_name = self.node.extra.get('dns_name')
 

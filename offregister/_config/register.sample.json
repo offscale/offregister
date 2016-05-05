@@ -58,9 +58,10 @@
   },
   "register": {
     "/unclustered/*": [
-      "offregister-ceph"
+      "offregister-dokku"
     ],
     "_comments": [
+      "offregister-ceph",
       "offregister-zookeeper",
       "offregister-mesos",
       "offregister-etcd",
