@@ -39,19 +39,22 @@ class ProcessNode(object):
         with open(process_filename) as f:
             strategy = replace_variables(f.read())
         self.process_dict = json.loads(strategy)
+
+        driver_cls = node.value['driver'] if '_' not in node.value['driver'] \
+            else node.value['driver'][:node.value['driver'].find('_')
+                 ] + node.value['driver'][node.value['driver'].rfind('_') + 1:]
+
         self.driver_name = next(driver_name for driver_name, driver_tuple in DRIVERS.iteritems()
-                                if driver_tuple[1] == node.value['driver'])
+                                if driver_tuple[1] == driver_cls)
+
         self.config_provider = next(provider for provider in self.process_dict['provider']['options']
                                     if provider['provider']['name'] == self.driver_name.upper())
 
         self.driver_name = self.driver_name.lower()
+
         driver = (lambda driver: driver(
-            subscription_id=self.config_provider['auth']['subscription_id'],
-            key_file=self.config_provider['auth']['key_file']
-        ) if self.driver_name == 'azure' else driver(
-            self.config_provider['auth']['username'],
-            self.config_provider['auth']['key'],
-            region=self.config_provider['provider']['region']
+            region=self.config_provider['provider']['region'],
+            **self.config_provider['auth']
         ))(get_driver(self.driver_name))
 
         self.node_name = node.key[node.key.find('/', 1) + 1:].encode('utf8')
@@ -166,14 +169,17 @@ class ProcessNode(object):
           2. Installs `cluster_name`
           3. Serves `cluster_name`
         """
-        master = cluster_type.endswith(':master')
-        kwargs = update_d(
-            dict(master=master) if master else {},
-            domain=self.dns_name, node_name=self.node_name,
-            public_ipv4=self.node.public_ips[-1],
-            private_ipv4=self.node.private_ips[-1]
-        )
-        cluster_type = cluster_type[:-len(':master')] if master else cluster_type
+        kwargs = {
+            'domain': self.dns_name,
+            'node_name': self.node_name,
+            'public_ipv4': self.node.public_ips[-1]
+        }
+        if cluster_type.endswith(':master'):
+            kwargs.update(master=True)
+        if hasattr(self.node, 'private_ips') and len(self.node.private_ips):
+            kwargs.update(private_ipv4=self.node.private_ips[-1])
+
+        cluster_type = cluster_type[:-len(':master')] if kwargs.get('master') else cluster_type
         guessed_os = self.guess_os()
 
         # import `cluster_type`
@@ -192,7 +198,7 @@ class ProcessNode(object):
         res.update(execute(install, **kwargs))
         pp(node_to_dict(self.node))
         save_node_info(self.node_name, node_to_dict(self.node), folder=cluster_type, marshall=json)
-        if master:
+        if kwargs.get('master'):
             save_node_info('masters', [self.node_name], folder=cluster_type, marshall=json)
 
         # etcd stuff, TODO: move
