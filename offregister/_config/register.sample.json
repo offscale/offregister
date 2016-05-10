@@ -39,6 +39,25 @@
         }
       },
       {
+        "auth": {
+          "subscription_id": "${env.AZURE_SUBSCRIPTION}",
+          "key_file": "${env.AZURE_KEY_FILE}"
+        },
+        "ssh": {
+          "public_key_path": "${env.PUBLIC_KEY_PATH}",
+          "private_key_path": "${env.PRIVATE_KEY_PATH}",
+          "key_name": "${env.PUBLIC_KEY_NAME}",
+          "node_password": "${env.AZURE_NODE_PASSWORD}"
+        },
+        "create_with": {
+          "ex_cloud_service_name": "${env.AZURE_CLOUD_NAME}"
+        },
+        "provider": {
+          "name": "AZURE",
+          "region": "Australia East"
+        }
+      },
+      {
         "provider": {
           "name": "DIGITAL_OCEAN",
           "region": "sgp1"

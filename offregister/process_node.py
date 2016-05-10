@@ -10,6 +10,7 @@ from types import NoneType
 
 from libcloud import security
 from libcloud.compute.providers import get_driver, DRIVERS
+from libcloud.compute.types import Provider
 from fabric.api import execute, env
 
 from offutils import pp, percent_overlap, update_d
@@ -48,7 +49,12 @@ class ProcessNode(object):
                                 if driver_tuple[1] == driver_cls)
 
         self.config_provider = next(provider for provider in self.process_dict['provider']['options']
-                                    if provider['provider']['name'] == self.driver_name.upper())
+                                    if provider['provider']['name'] == (
+                                        self.driver_name.upper() if hasattr(Provider, self.driver_name.upper())
+                                        else next(
+                                            ifilter(lambda prov_name: getattr(Provider, prov_name) == self.driver_name,
+                                                    dir(Provider)))
+                                    ))
 
         self.driver_name = self.driver_name.lower()
 
@@ -59,11 +65,12 @@ class ProcessNode(object):
 
         self.node_name = node.key[node.key.find('/', 1) + 1:].encode('utf8')
         if self.driver_name == 'azure':
-            if 'AZURE_CLOUD_NAME' not in environ:
-                raise KeyError('$AZURE_CLOUD_NAME needs to be defined. '
+            if 'create_with' not in self.config_provider or \
+                            'ex_cloud_service_name' not in self.config_provider['create_with']:
+                raise KeyError('`ex_cloud_service_name` must be defined. '
                                'See: http://libcloud.readthedocs.org/en/latest/compute/drivers/azure.html'
                                '#libcloud.compute.drivers.azure.AzureNodeDriver.create_node')
-            nodes = driver.list_nodes(environ['AZURE_CLOUD_NAME'])
+            nodes = driver.list_nodes(self.config_provider['create_with']['ex_cloud_service_name'])
         else:
             nodes = driver.list_nodes()
 
@@ -222,10 +229,9 @@ class ProcessNode(object):
         }
 
     def guess_os_username(self, hint=None):
-        if hint and 'softlayer' in hint.lower():
+        if hint and 'softlayer' in hint.lower() or self.driver_name == 'digitalocean':
             return 'root'
-
-        if self.driver_name == 'azure':
+        elif self.driver_name == 'azure':
             return 'azureuser'
 
         node_name = self.node.name.lower()
