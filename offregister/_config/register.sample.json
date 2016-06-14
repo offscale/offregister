@@ -75,22 +75,53 @@
   },
   "register": {
     "/unclustered/*": [
-      "offregister-dokku"
+      {
+        "module": "offregister-etcd",
+        "cluster_name": "etcd0",
+        "args": [],
+        "kwargs": {}
+      }
     ],
     "_comments": [
-      "offregister-ceph",
-      "offregister-zookeeper",
-      "offregister-mesos",
-      "offregister-etcd",
-      "offregister-taiga",
-      "dokku",
-      "tsuru",
-      "coreos",
-      "deis",
-      "flynn",
-      "coreos",
-      "bosh",
-      "consul"
+      {
+        "module": "offregister-dokku"
+      },
+      {
+        "module": "offregister-ceph"
+      },
+      {
+        "module": "offregister-zookeeper"
+      },
+      {
+        "module": "offregister-mesos"
+      },
+      {
+        "module": "offregister-taiga"
+      },
+      {
+        "module": "dokku"
+      },
+      {
+        "module": "tsuru"
+      },
+      {
+        "module": "coreos"
+      },
+      {
+        "module": "deis"
+      },
+      {
+        "module": "flynn"
+      },
+      {
+        "module": "coreos"
+      },
+      {
+        "module": "bosh"
+      },
+      {
+        "module": "consul"
+      }
     ]
   },
   "purpose": [

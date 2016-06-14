@@ -4,7 +4,7 @@ import recipes
 from os import name as os_name, environ, path, listdir
 from sys import modules
 from pkg_resources import resource_filename
-from itertools import ifilter, imap
+from itertools import ifilter, imap, takewhile
 from functools import partial
 from types import NoneType
 
@@ -13,7 +13,7 @@ from libcloud.compute.providers import get_driver, DRIVERS
 from libcloud.compute.types import Provider
 from fabric.api import execute, env
 
-from offutils import pp, percent_overlap, update_d
+from offutils import pp, binary_search, raise_f, update_d
 
 from offutils_strategy_register import list_nodes, get_node_info, node_to_dict, save_node_info, fetch_node
 
@@ -95,10 +95,10 @@ class ProcessNode(object):
         # Ensure package required to install cluster is available
         directory = cls.get_directory(process_dict, within)
         for cluster in process_dict['register'][directory]:
-            dash_un_cluster = cluster.replace('-', '_')
+            dash_un_cluster = cluster['module'].replace('-', '_')
             mods = available_recipes | loaded_modules
-            if cluster not in mods and dash_un_cluster not in mods:
-                if cluster in pip_packages:
+            if cluster['module'] not in mods and dash_un_cluster not in mods:
+                if cluster['module'] in pip_packages:
                     # import
                     pass
                 elif dash_un_cluster in pip_packages:
@@ -124,7 +124,7 @@ class ProcessNode(object):
             # state = 2 is terminated on AWS, need to lookup MAP/enum from lib for general solution. TODO
             raise Exception('Node is terminated, so cannot SSH')
 
-        if self.driver_name == 'azure':
+        if 'node_password' in self.config_provider['ssh']:
             env.password = self.config_provider['ssh']['node_password']
         else:
             env.key_filename = self.config_provider['ssh']['private_key_path']
@@ -160,7 +160,7 @@ class ProcessNode(object):
 
         res = {}
         for cluster in self.process_dict['register'][directory]:
-            self.add_to_cluster(cluster.replace('-', '_'), res)
+            self.add_to_cluster(cluster, res)
 
         if self.previous_clustering_results:
             self.previous_clustering_results.update(res)
@@ -169,24 +169,40 @@ class ProcessNode(object):
 
         return res
 
-    def add_to_cluster(self, cluster_type, res):
+    def add_to_cluster(self, cluster, res):
         """ Specification:
           0. Search and handle `master` tag in `cluster_name`
           1. Imports `cluster_name`, seeks and sets (`install` xor `setup`) and (serve` or `start`) callables
           2. Installs `cluster_name`
           3. Serves `cluster_name`
         """
-        kwargs = {
+        print 'add_to_cluster:cluster =', cluster
+        args = cluster['args'] if 'args' in cluster else tuple()
+
+        kwargs = update_d({
             'domain': self.dns_name,
             'node_name': self.node_name,
-            'public_ipv4': self.node.public_ips[-1]
-        }
-        if cluster_type.endswith(':master'):
+            'public_ipv4': self.node.public_ips[-1],
+            'cache': {},
+            'cluster_name': cluster.get('cluster_name')
+        }, cluster['kwargs'] if 'kwargs' in cluster else {})
+        cluster_type = cluster['module'].replace('-', '_')
+        cluster_path = '/'.join(ifilter(None, (cluster_type, kwargs['cluster_name'])))
+        kwargs.update(cluster_path=cluster_path)
+
+        if ':' in cluster_type:
+            cluster_type, _, tag = cluster_type.rpartition(':')
+            del _
+        else:
+            tag = None
+
+        kwargs.update(tag=tag)
+
+        if tag == 'master':
             kwargs.update(master=True)
         if hasattr(self.node, 'private_ips') and len(self.node.private_ips):
             kwargs.update(private_ipv4=self.node.private_ips[-1])
 
-        cluster_type = cluster_type[:-len(':master')] if kwargs.get('master') else cluster_type
         guessed_os = self.guess_os()
 
         # import `cluster_type`
@@ -197,39 +213,66 @@ class ProcessNode(object):
                 raise
             raise ImportError('Cannot `import {os} from {cluster_type}`'.format(os=guessed_os,
                                                                                 cluster_type=cluster_type))
-        fab_dir = set(dir(self.fab))
+        fab_dir = dir(self.fab)
+        # Sort functions like so: `step0`, `step1`
+        func_names = sorted(
+            (j for j in fab_dir if not j.startswith('_') and str.isdigit(j[-1])),
+            key=lambda s: int(''.join(takewhile(str.isdigit, s[::-1]))[::-1] or -1)
+        )
 
-        install = self.fab.install if 'install' in fab_dir else self.fab.setup
-        serve = self.fab.serve if 'serve' in fab_dir else self.fab.start
+        if not func_names:
+            try:
+                get_attr = lambda a, b: a if hasattr(self.fab, a) else b if hasattr(self.fab, b) else raise_f(
+                    AttributeError, '`{a}` nor `{b}`'.format(a=a, b=b))
+                func_names = (
+                    get_attr('install', 'setup'),
+                    get_attr('serve', 'start')
+                )
+            except AttributeError as e:
+                logger.error('{e} found in {cluster_type}'.format(e=e, cluster_type=cluster_type))
+                raise AttributeError(
+                    'Function names in {cluster_type} must end in a number'.format(cluster_type=cluster_type)
+                )  # 'must'!
 
-        res.update(execute(install, **kwargs))
-        pp(node_to_dict(self.node))
-        save_node_info(self.node_name, node_to_dict(self.node), folder=cluster_type, marshall=json)
-        if kwargs.get('master'):
-            save_node_info('masters', [self.node_name], folder=cluster_type, marshall=json)
+            logger.warn('Deprecation: Function names in {cluster_type} should end in a number'.format(
+                cluster_type=cluster_type)
+            )
 
-        # etcd stuff, TODO: move
-        if cluster_type == 'etcd':
-            kwargs.update({'{cluster_type}_discovery'.format(cluster_type=cluster_type): next(
-                ifilter(
-                    None,
-                    imap(lambda k: ((lambda r: r[1] if r and len(r) > 0 else None)(
-                        self.previous_clustering_results.get(k, {}).get(cluster_type))
-                                    if self.previous_clustering_results.get(k) else None),
-                         self.previous_clustering_results)
-                ),
-                tuple()
-            )})
-        # etcd stuff, TODO: move
+        self.handle_deprecations(func_names)
 
-        res[res.keys()[0]] = {
-            cluster_type: (res[res.keys()[0]], (lambda result: result[result.keys()[0]])(
-                execute(serve, **kwargs)
-            ))
-        }
+        for idx, step in enumerate(func_names):
+            # TODO: remove all these special cases and handle in a simple functional way
+            if idx == 0:
+                res.update(execute(getattr(self.fab, step), *args, **kwargs))
+                if tag == 'master':
+                    save_node_info('master', [self.node_name], folder=cluster_type, marshall=json)
+            elif idx == 1:
+                res[res.keys()[0]] = {
+                    cluster_path: (lambda r: r[r.keys()[0]])(execute(getattr(self.fab, step), *args, **kwargs))
+                }
+            elif idx == 2:
+                res[res.keys()[0]][cluster_path] = [
+                    res[res.keys()[0]][cluster_path],
+                    (lambda r: r[r.keys()[0]])(execute(getattr(self.fab, step), *args, **kwargs))
+                ]
+            else:
+                res[res.keys()[0]][cluster_path].extend(
+                    (lambda r: r[r.keys()[0]])(execute(getattr(self.fab, step), *args, **kwargs))
+                )
+
+        save_node_info(self.node_name, node_to_dict(self.node), folder=cluster_path, marshall=json)
+
+    def handle_deprecations(self, func_names):
+        deprecated = lambda: logger.warn('Depreciation: use function names ending in numerals instead')
+        deprecated_func_names = ('install', 'setup', 'serve', 'start')
+        found = tuple(func_name for func_name in deprecated_func_names
+                      if binary_search(func_names, func_name) and deprecated())
+        if found and next((func_name for func_name in func_names
+                           if str.isdigit(func_name[1])), False):
+            deprecated()
 
     def guess_os_username(self, hint=None):
-        if hint and 'softlayer' in hint.lower() or self.driver_name == 'digitalocean':
+        if hint and 'softlayer' in hint.lower() or self.driver_name in ('digitalocean', 'softlayer'):
             return 'root'
         elif self.driver_name == 'azure':
             return 'azureuser'
