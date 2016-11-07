@@ -79,10 +79,27 @@
         "module": "offregister-etcd",
         "cluster_name": "etcd0",
         "args": [],
-        "kwargs": {}
+        "kwargs": {
+          "exclusive_cluster": false
+        }
+      },
+      {
+        "module": "offregister-mesosphere-dcos",
+        "cluster_name": "",
+        "args": [],
+        "kwargs": {
+          "nodes_from": "%etcd0%"
+        }
       }
     ],
     "_comments": [
+      {
+        "module": "offregister-dokku",
+        "kwargs": {
+          "domain": "scientific.sydney",
+          "static_git": "https://github.com/offscale/scientific.sydney-dist"
+        }
+      },
       {
         "module": "offregister-dokku"
       },
