@@ -76,6 +76,18 @@
   "register": {
     "/unclustered/*": [
       {
+        "module": "offregister-openedx",
+        "cluster_name": "openedx0",
+        "args": [],
+        "kwargs": {},
+        "run_cmds": {
+          "op": ">=",
+          "val": 3
+        }
+      }
+    ],
+    "_comments": [
+      {
         "module": "offregister-etcd",
         "cluster_name": "etcd0",
         "args": [],
@@ -90,9 +102,7 @@
         "kwargs": {
           "nodes_from": "%etcd0%"
         }
-      }
-    ],
-    "_comments": [
+      },
       {
         "module": "offregister-dokku",
         "kwargs": {

@@ -1,4 +1,6 @@
 import json
+from operator import add
+
 import recipes
 
 from os import name as os_name, environ, path, listdir
@@ -6,7 +8,7 @@ from sys import modules
 from pkg_resources import resource_filename
 from itertools import ifilter, imap, takewhile
 from functools import partial
-from types import NoneType
+from types import NoneType, DictType
 
 from libcloud import security
 from libcloud.compute.providers import get_driver, DRIVERS
@@ -219,7 +221,24 @@ class ProcessNode(object):
             (j for j in fab_dir if not j.startswith('_') and str.isdigit(j[-1])),
             key=lambda s: int(''.join(takewhile(str.isdigit, s[::-1]))[::-1] or -1)
         )
+        if 'run_cmds' in cluster:
+            import operator
+            mapping = {'>=': operator.ge}  # TODO: There must be a full list somewhere!
 
+            def dict_type(run_cmds, func_names):
+                op = mapping[run_cmds['op']]
+                return [func_name for func_name in func_names
+                        if op(int(''.join(takewhile(str.isdigit, func_name[::-1]))[::-1]),
+                              int(run_cmds['val']))]
+
+            run_cmds_type = type(cluster['run_cmds'])
+            func_names = dict_type(cluster['run_cmds'], func_names)
+
+            '''{
+                DictType: dict_type(cluster['run_cmds'], func_names)
+            }.get(run_cmds_type, raise_f(NotImplementedError, '{!s} unexpected for run_cmds'.format(run_cmds_type)))'''
+
+        print 'not func_names =', not func_names
         if not func_names:
             try:
                 get_attr = lambda a, b: a if hasattr(self.fab, a) else b if hasattr(self.fab, b) else raise_f(
@@ -241,35 +260,28 @@ class ProcessNode(object):
         self.handle_deprecations(func_names)
 
         for idx, step in enumerate(func_names):
-            # TODO: remove all these special cases and handle in a simple functional way
+            exec_output = execute(getattr(self.fab, step), *args, **kwargs)[self.dns_name]
+
             if idx == 0:
-                res.update(execute(getattr(self.fab, step), *args, **kwargs))
+                res[self.dns_name] = {cluster_path: {step: exec_output}}
                 if tag == 'master':
                     save_node_info('master', [self.node_name], folder=cluster_type, marshall=json)
-            elif idx == 1:
-                res[res.keys()[0]] = {
-                    cluster_path: (lambda r: r[r.keys()[0]])(execute(getattr(self.fab, step), *args, **kwargs))
-                }
-            elif idx == 2:
-                res[res.keys()[0]][cluster_path] = [
-                    res[res.keys()[0]][cluster_path],
-                    (lambda r: r[r.keys()[0]])(execute(getattr(self.fab, step), *args, **kwargs))
-                ]
             else:
-                res[res.keys()[0]][cluster_path].extend(
-                    (lambda r: r[r.keys()[0]])(execute(getattr(self.fab, step), *args, **kwargs))
-                )
+                res[self.dns_name][cluster_path][step] = exec_output
 
         save_node_info(self.node_name, node_to_dict(self.node), folder=cluster_path, marshall=json)
 
-    def handle_deprecations(self, func_names):
-        deprecated = lambda: logger.warn('Depreciation: use function names ending in numerals instead')
-        deprecated_func_names = ('install', 'setup', 'serve', 'start')
-        found = tuple(func_name for func_name in deprecated_func_names
-                      if binary_search(func_names, func_name) and deprecated())
-        if found and next((func_name for func_name in func_names
-                           if str.isdigit(func_name[1])), False):
-            deprecated()
+    @staticmethod
+    def handle_deprecations(func_names):
+        called = 0
+        deprecated = lambda: add(called, 1) and called == 0 and logger.warn(
+            'Depreciation: use function names ending in numerals instead')
+        deprecated_func_names = 'install', 'setup', 'serve', 'start'
+
+        frozenset(func_name for func_name in deprecated_func_names
+                  if binary_search(func_names, func_name) > -1 and deprecated()
+                  ) and next((func_name for func_name in func_names
+                              if str.isdigit(func_name[1])), False) and deprecated()
 
     def guess_os_username(self, hint=None):
         if hint and 'softlayer' in hint.lower() or self.driver_name in ('digitalocean', 'softlayer'):
