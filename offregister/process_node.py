@@ -1,4 +1,5 @@
 import json
+import operator
 from operator import add
 
 import recipes
@@ -8,7 +9,7 @@ from sys import modules
 from pkg_resources import resource_filename
 from itertools import ifilter, imap, takewhile
 from functools import partial
-from types import NoneType, DictType
+from types import NoneType
 
 from libcloud import security
 from libcloud.compute.providers import get_driver, DRIVERS
@@ -17,7 +18,7 @@ from fabric.api import execute, env
 
 from offutils import pp, binary_search, raise_f, update_d
 
-from offutils_strategy_register import list_nodes, get_node_info, node_to_dict, save_node_info, fetch_node
+from offutils_strategy_register import list_nodes, node_to_dict, save_node_info, fetch_node
 
 from offconf import replace_variables
 
@@ -178,7 +179,6 @@ class ProcessNode(object):
           2. Installs `cluster_name`
           3. Serves `cluster_name`
         """
-        print 'add_to_cluster:cluster =', cluster
         args = cluster['args'] if 'args' in cluster else tuple()
 
         kwargs = update_d({
@@ -222,8 +222,8 @@ class ProcessNode(object):
             key=lambda s: int(''.join(takewhile(str.isdigit, s[::-1]))[::-1] or -1)
         )
         if 'run_cmds' in cluster:
-            import operator
-            mapping = {'>=': operator.ge}  # TODO: There must be a full list somewhere!
+            mapping = {'>=': operator.ge, '<': operator.lt,
+                       '>': operator.gt, '<=': operator.le}  # TODO: There must be a full list somewhere!
 
             def dict_type(run_cmds, func_names):
                 op = mapping[run_cmds['op']]
@@ -232,13 +232,14 @@ class ProcessNode(object):
                               int(run_cmds['val']))]
 
             run_cmds_type = type(cluster['run_cmds'])
+            if 'exclude' in cluster['run_cmds']:
+                func_names = tuple(ifilter(lambda func: func not in cluster['run_cmds']['exclude'], func_names))
             func_names = dict_type(cluster['run_cmds'], func_names)
 
             '''{
                 DictType: dict_type(cluster['run_cmds'], func_names)
             }.get(run_cmds_type, raise_f(NotImplementedError, '{!s} unexpected for run_cmds'.format(run_cmds_type)))'''
 
-        print 'not func_names =', not func_names
         if not func_names:
             try:
                 get_attr = lambda a, b: a if hasattr(self.fab, a) else b if hasattr(self.fab, b) else raise_f(

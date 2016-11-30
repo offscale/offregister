@@ -11,15 +11,15 @@ from itertools import ifilterfalse, imap
 from offutils import pp
 from offutils_strategy_register import list_nodes
 
-from __init__ import logger
+from __init__ import logger, __version__
 from process_node import ProcessNode
 
 
 def _build_parser():
     parser = ArgumentParser(
+            prog='python -m offregister',
             description='Register node to cluster(s). Node is found by manual specification, or popped from a queue.',
-            epilog='Example usage: {program} -q etcd -r mesos:location, etcd:location, consul:location'.format(
-                    program=argv[0])
+            epilog='Example usage: %(prog)s -q etcd -r mesos:location -r etcd:location -r consul:location'
     )
     parser.add_argument('-d', '--dns', help='DNS for node (if no queue)')
     parser.add_argument('-i', '--ip', help='Public IP for node (if no queue)')
@@ -36,6 +36,7 @@ def _build_parser():
                         default='set_clusters')
     parser.add_argument('-a', '--method-args', help='Method args. Use with --method. Example: "-f -n 20"',
                         default=tuple())
+    parser.add_argument('--version', action='version', version='%(prog)s {}'.format(__version__))
     return parser
 
 
