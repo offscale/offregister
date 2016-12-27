@@ -70,87 +70,249 @@
           "private_key_path": "${env.PRIVATE_KEY_PATH}",
           "key_name": "${env.PUBLIC_KEY_NAME}"
         }
+      },
+      {
+        "provider": {
+          "name": "VAGRANT",
+          "ex_vagrantfile": "/mnt/large_linux/vagrant/edx-fullstack/Vagrantfile",
+          "key": "/mnt/large_linux/vagrant/edx-fullstack/Vagrantfile"
+        }
       }
     ]
   },
   "register": {
-    "/unclustered/*": [
+    "/local_unclustered/*": [
       {
-        "module": "offregister-openedx",
-        "cluster_name": "openedx0",
-        "args": [],
-        "kwargs": {},
-        "run_cmds": {
-          "op": ">=",
-          "val": 3
-        }
-      }
-    ],
-    "_comments": [
-      {
-        "module": "offregister-etcd",
-        "cluster_name": "etcd0",
+        "module": "offregister-githook",
+        "cluster_name": "grc-githook",
         "args": [],
         "kwargs": {
-          "exclusive_cluster": false
+          "hookserve-init-name": "hookserve_nome.conf",
+          "git_pull-init-context": {
+            "GIT_REPO": "https://github.com/SamuelMarks/nome-dist.git",
+            "GIT_DIR": "/var/www/static/nome-dist"
+          },
+          "git_pull-init-name": "git_pull_nome.conf"
         }
-      },
-      {
-        "module": "offregister-mesosphere-dcos",
-        "cluster_name": "",
-        "args": [],
-        "kwargs": {
-          "nodes_from": "%etcd0%"
-        }
-      },
-      {
-        "module": "offregister-dokku",
-        "kwargs": {
-          "domain": "scientific.sydney",
-          "static_git": "https://github.com/offscale/scientific.sydney-dist"
-        }
-      },
-      {
-        "module": "offregister-dokku"
-      },
-      {
-        "module": "offregister-ceph"
-      },
-      {
-        "module": "offregister-zookeeper"
-      },
-      {
-        "module": "offregister-mesos"
-      },
-      {
-        "module": "offregister-taiga"
-      },
-      {
-        "module": "dokku"
-      },
-      {
-        "module": "tsuru"
-      },
-      {
-        "module": "coreos"
-      },
-      {
-        "module": "deis"
-      },
-      {
-        "module": "flynn"
-      },
-      {
-        "module": "coreos"
-      },
-      {
-        "module": "bosh"
-      },
-      {
-        "module": "consul"
       }
     ]
   },
+  "_comment_ideas": [
+    {
+      "purpose": "STRING",
+      "env": {
+        "args": [],
+        "kwargs": {},
+        "_comment": "top-level env takes precedence by default"
+      },
+      "modules": [
+        {
+          "module": "offregister-nginx",
+          "cluster_name": "static0",
+          "stateful": false,
+          "run_cmds": {
+            "op": ">=",
+            "val": 2
+          },
+          "env_precedence": "local_first",
+          "dependencies": [
+            {
+              "type": "system",
+              "uses": "apt"
+            },
+            "_comment: limits concurrency because of system-wide lock"
+          ]
+        },
+        {
+          "module": "offregister-odoo",
+          "cluster_name": "odoo0",
+          "args": [],
+          "kwargs": {},
+          "inherit_env": false,
+          "dependencies": [
+            {
+              "type": "module",
+              "name": "offregister-nginx"
+            },
+            "_comment: Run independent modules concurrently"
+          ]
+        }
+      ]
+    }
+  ],
+  "_comments": [
+    {
+      "/unclustered/*": [
+        {
+          "module": "offregister-githook",
+          "cluster_name": "grc-githook",
+          "args": [],
+          "kwargs": {
+            "hookserve-init-name": "hookserve_nome.conf",
+            "git_pull-init-context": {
+              "GIT_REPO": "https://github.com/SamuelMarks/nome-dist.git",
+              "GIT_DIR": "/var/www/static/nome-dist"
+            },
+            "git_pull-init-name": "git_pull_nome.conf"
+          }
+        },
+        {
+          "module": "offregister-angular2",
+          "cluster_name": "fome-frontend",
+          "args": [],
+          "kwargs": {
+            "GIT_REPO": "https://github.com/fome/web-frontend-dist",
+            "SERVER_LOCATION": "/var/www/static/fome-frontend-dist",
+            "SERVER_NAME": "fome.*",
+            "nginx-conf-filename": "fome-frontend-dist"
+          }
+        },
+        {
+          "module": "offregister-githook",
+          "cluster_name": "fome-frontend",
+          "args": [],
+          "kwargs": {
+            "hookserve-init-name": "hookserve_fome-frontend.conf",
+            "hookserve-init-context": {
+              "PID": "/var/run/hookserve_fome-frontend.pid",
+              "DAEMON_PORT": 9889
+            },
+            "git_pull-init-context": {
+              "GIT_DIR": "/var/www/static/fome-frontend-dist",
+              "GIT_REPO": "https://github.com/fome/web-frontend-dist"
+            },
+            "git_pull-init-name": "git_pull_fome.conf"
+          }
+        }
+      ]
+    },
+    {
+      "module": "offregister-angular2",
+      "cluster_name": "nome",
+      "args": [],
+      "kwargs": {
+        "GIT_REPO": "https://github.com/SamuelMarks/nome-dist.git",
+        "SERVER_LOCATION": "/var/www/nome",
+        "SERVER_NAME": "nome.*",
+        "nginx-conf-filename": "nome-dist"
+      }
+    },
+    {
+      "module": "offregister-nginx",
+      "cluster_name": "nome",
+      "args": [],
+      "kwargs": {
+        "nginx-init-context": {
+          "SERVER_NAME": "nome.*",
+          "NAME_OF_BLOCK": "static0",
+          "SERVER_LOCATION": "unix:/run/nome.sock"
+        }
+      },
+      "run_cmds": {
+        "op": "<=",
+        "val": 2,
+        "exclude": [
+          "setup_nginx_conf2"
+        ]
+      }
+    },
+    {
+      "module": "offregister-odoo",
+      "cluster_name": "odoo0",
+      "args": [],
+      "kwargs": {}
+    },
+    {
+      "_local_tmp": [
+        {
+          "module": "offregister-openedx",
+          "cluster_name": "openedx0_local",
+          "args": [],
+          "kwargs": {},
+          "run_cmds": {
+            "op": ">=",
+            "val": 2
+          }
+        }
+      ]
+    },
+    {
+      "/unclustered/*": [
+        {
+          "module": "offregister-openedx",
+          "cluster_name": "openedx0",
+          "args": [],
+          "kwargs": {},
+          "run_cmds": {
+            "op": ">=",
+            "val": 2
+          }
+        }
+      ]
+    },
+    {
+      "module": "offregister-etcd",
+      "cluster_name": "etcd0",
+      "args": [],
+      "kwargs": {
+        "exclusive_cluster": false
+      }
+    },
+    {
+      "module": "offregister-mesosphere-dcos",
+      "cluster_name": "",
+      "args": [],
+      "kwargs": {
+        "nodes_from": "%etcd0%"
+      }
+    },
+    {
+      "module": "offregister-dokku",
+      "kwargs": {
+        "domain": "scientific.sydney",
+        "static_git": "https://github.com/offscale/scientific.sydney-dist"
+      }
+    },
+    {
+      "module": "offregister-dokku"
+    },
+    {
+      "module": "offregister-ceph"
+    },
+    {
+      "module": "offregister-zookeeper"
+    },
+    {
+      "module": "offregister-mesos"
+    },
+    {
+      "module": "offregister-taiga"
+    },
+    {
+      "module": "dokku"
+    },
+    {
+      "module": "tsuru"
+    },
+    {
+      "module": "coreos"
+    },
+    {
+      "module": "deis"
+    },
+    {
+      "module": "flynn"
+    },
+    {
+      "module": "coreos"
+    },
+    {
+      "module": "bosh"
+    },
+    {
+      "module": "consul"
+    }
+  ],
   "purpose": [
     "any-cluster"
   ],

@@ -2,6 +2,8 @@ import json
 import operator
 from operator import add
 
+from libcloud.common.vagrant import isIpPrivate
+
 import recipes
 
 from os import name as os_name, environ, path, listdir
@@ -49,7 +51,8 @@ class ProcessNode(object):
                  ] + node.value['driver'][node.value['driver'].rfind('_') + 1:]
 
         self.driver_name = next(driver_name for driver_name, driver_tuple in DRIVERS.iteritems()
-                                if driver_tuple[1] == driver_cls)
+                                if driver_tuple[1].lower() in (
+                                    driver_cls.lower(), "{}NodeDriver".format(driver_cls).lower()))
 
         self.config_provider = next(provider for provider in self.process_dict['provider']['options']
                                     if provider['provider']['name'] == (
@@ -62,8 +65,8 @@ class ProcessNode(object):
         self.driver_name = self.driver_name.lower()
 
         driver = (lambda driver: driver(
-            region=self.config_provider['provider']['region'],
-            **self.config_provider['auth']
+            **update_d(self.config_provider['provider'],
+                       **self.config_provider.get('auth', {}))
         ))(get_driver(self.driver_name))
 
         self.node_name = node.key[node.key.find('/', 1) + 1:].encode('utf8')
@@ -79,6 +82,13 @@ class ProcessNode(object):
 
         self.node = next(ifilter(lambda _node: _node.uuid == node.value['uuid'],
                                  nodes), None)
+
+        if self.node.extra is not None and 'ssh_config' in self.node.extra:
+            if 'IdentityFile' in self.node.extra['ssh_config']:
+                self.config_provider['ssh'] = dict(private_key_path=self.node.extra['ssh_config']['IdentityFile'],
+                                                   **self.config_provider.get('ssh', {}))
+            pp(self.node.extra)
+
         if not self.node:
             raise EnvironmentError('node not found. Maybe the cloud provider is still provisioning?')
 
@@ -127,16 +137,31 @@ class ProcessNode(object):
             # state = 2 is terminated on AWS, need to lookup MAP/enum from lib for general solution. TODO
             raise Exception('Node is terminated, so cannot SSH')
 
+        if self.node.extra is not None and 'ssh_config' in self.node.extra:
+            # TODO: Get value for `env.ssh_config_path` and set that
+            for k in ('HostName', 'IdentityFile', 'Port', 'User'):
+                if k in self.node.extra['ssh_config']:
+                    setattr(env, {'IdentityFile': 'key_filename',
+                                  'HostName': 'host',
+                                  'Port': 'port',
+                                  'User': 'user'}[k], self.node.extra['ssh_config'][k])
+        if env.key_filename:
+            env.key = env.key_filename
+        if env.host:
+            env.host_name = env.host
         if 'node_password' in self.config_provider['ssh']:
             env.password = self.config_provider['ssh']['node_password']
         else:
             env.key_filename = self.config_provider['ssh']['private_key_path']
             if 'password' in self.node.extra:
                 env.password = self.node.extra['password']
+
         env.user = self.guess_os_username(self.node.driver.__class__.__name__)
 
         directory = self.get_directory(self.process_dict, within)
-        if not self.dns_name and 'skydns2' not in self.process_dict['register'][directory] and \
+        if isIpPrivate(self.node.public_ips[0]):
+            self.dns_name = self.node.public_ips[0]  # LOL
+        elif not self.dns_name and 'skydns2' not in self.process_dict['register'][directory] and \
                         'consul' not in self.process_dict['register'][directory]:
             self.dns_name = '{public_ip}.xip.io'.format(public_ip=self.node.public_ips[0])
             # raise Exception('No DNS name and no way of acquiring one')
@@ -289,6 +314,8 @@ class ProcessNode(object):
             return 'root'
         elif self.driver_name == 'azure':
             return 'azureuser'
+        elif self.driver_name == 'vagrant':
+            return self.node.extra['user']
 
         node_name = self.node.name.lower()
         if 'ubuntu' in node_name:
