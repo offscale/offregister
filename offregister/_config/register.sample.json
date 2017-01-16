@@ -81,23 +81,38 @@
     ]
   },
   "register": {
-    "/local_unclustered/*": [
+    "/unclustered/*": [
       {
-        "module": "offregister-githook",
-        "cluster_name": "grc-githook",
-        "args": [],
-        "kwargs": {
-          "hookserve-init-name": "hookserve_nome.conf",
-          "git_pull-init-context": {
-            "GIT_REPO": "https://github.com/SamuelMarks/nome-dist.git",
-            "GIT_DIR": "/var/www/static/nome-dist"
-          },
-          "git_pull-init-name": "git_pull_nome.conf"
-        }
+        "module": "offregister-bootstrap"
       }
     ]
   },
   "_comment_ideas": [
+    {
+        "module": "offregister-inline",
+        "kwargs": {
+          "sudo": [
+            "echo hello"
+          ]
+        }
+      },
+    {
+      "module": "offregister-users",
+      "kwargs": {
+        "add_users": [
+          {
+            "name": "ubuntu",
+            "groups": null
+          }
+        ]
+      }
+    },
+    {
+      "module": "offregister-openedx",
+      "cluster_name": "openedx_ficus0",
+      "args": [],
+      "kwargs": {}
+    },
     {
       "purpose": "STRING",
       "env": {
@@ -142,70 +157,87 @@
   ],
   "_comments": [
     {
+      "/local_unclustered/*": [
+        {
+          "module": "offregister-githook",
+          "cluster_name": "grc-githook",
+          "args": [],
+          "kwargs": {
+            "hookserve-init-name": "hookserve_foo.conf",
+            "git_pull-init-context": {
+              "GIT_REPO": "https://github.com/SamuelMarks/foo-dist.git",
+              "GIT_DIR": "/var/www/static/foo-dist"
+            },
+            "git_pull-init-name": "git_pull_foo.conf"
+          }
+        }
+      ]
+    },
+    {
       "/unclustered/*": [
         {
           "module": "offregister-githook",
           "cluster_name": "grc-githook",
           "args": [],
           "kwargs": {
-            "hookserve-init-name": "hookserve_nome.conf",
+            "hookserve-init-name": "hookserve_foo.conf",
             "git_pull-init-context": {
-              "GIT_REPO": "https://github.com/SamuelMarks/nome-dist.git",
-              "GIT_DIR": "/var/www/static/nome-dist"
+              "GIT_REPO": "https://github.com/SamuelMarks/foo-dist.git",
+              "GIT_DIR": "/var/www/static/foo-dist"
             },
-            "git_pull-init-name": "git_pull_nome.conf"
+            "git_pull-init-name": "git_pull_foo.conf"
           }
         },
         {
           "module": "offregister-angular2",
-          "cluster_name": "fome-frontend",
+          "cluster_name": "bar-frontend",
           "args": [],
           "kwargs": {
-            "GIT_REPO": "https://github.com/fome/web-frontend-dist",
-            "SERVER_LOCATION": "/var/www/static/fome-frontend-dist",
-            "SERVER_NAME": "fome.*",
-            "nginx-conf-filename": "fome-frontend-dist"
+            "GIT_REPO": "https://github.com/bar/web-frontend-dist",
+            "SERVER_LOCATION": "/var/www/static/bar-frontend-dist",
+            "SERVER_NAME": "bar.*",
+            "nginx-conf-filename": "bar-frontend-dist"
           }
         },
         {
           "module": "offregister-githook",
-          "cluster_name": "fome-frontend",
+          "cluster_name": "bar-frontend",
           "args": [],
           "kwargs": {
-            "hookserve-init-name": "hookserve_fome-frontend.conf",
+            "hookserve-init-name": "hookserve_bar-frontend.conf",
             "hookserve-init-context": {
-              "PID": "/var/run/hookserve_fome-frontend.pid",
-              "DAEMON_PORT": 9889
+              "PID": "/var/run/hookserve_bar-frontend.pid",
+              "DAEMON_PORT": 8889
             },
             "git_pull-init-context": {
-              "GIT_DIR": "/var/www/static/fome-frontend-dist",
-              "GIT_REPO": "https://github.com/fome/web-frontend-dist"
+              "GIT_DIR": "/var/www/static/bar-frontend-dist",
+              "GIT_REPO": "https://github.com/bar/web-frontend-dist"
             },
-            "git_pull-init-name": "git_pull_fome.conf"
+            "git_pull-init-name": "git_pull_bar.conf"
           }
         }
       ]
     },
     {
       "module": "offregister-angular2",
-      "cluster_name": "nome",
+      "cluster_name": "foo",
       "args": [],
       "kwargs": {
-        "GIT_REPO": "https://github.com/SamuelMarks/nome-dist.git",
-        "SERVER_LOCATION": "/var/www/nome",
-        "SERVER_NAME": "nome.*",
-        "nginx-conf-filename": "nome-dist"
+        "GIT_REPO": "https://github.com/SamuelMarks/foo-dist.git",
+        "SERVER_LOCATION": "/var/www/foo",
+        "SERVER_NAME": "foo.*",
+        "nginx-conf-filename": "foo-dist"
       }
     },
     {
       "module": "offregister-nginx",
-      "cluster_name": "nome",
+      "cluster_name": "foo",
       "args": [],
       "kwargs": {
         "nginx-init-context": {
-          "SERVER_NAME": "nome.*",
+          "SERVER_NAME": "foo.*",
           "NAME_OF_BLOCK": "static0",
-          "SERVER_LOCATION": "unix:/run/nome.sock"
+          "SERVER_LOCATION": "unix:/run/foo.sock"
         }
       },
       "run_cmds": {

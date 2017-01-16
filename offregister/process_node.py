@@ -1,7 +1,9 @@
 import json
 import operator
+from collections import namedtuple, OrderedDict
 from operator import add
 
+from etcd import Client
 from libcloud.common.vagrant import isIpPrivate
 
 import recipes
@@ -18,9 +20,9 @@ from libcloud.compute.providers import get_driver, DRIVERS
 from libcloud.compute.types import Provider
 from fabric.api import execute, env
 
-from offutils import pp, binary_search, raise_f, update_d
+from offutils import pp, binary_search, raise_f, update_d, get_sorted_strnum, filter_strnums
 
-from offutils_strategy_register import list_nodes, node_to_dict, save_node_info, fetch_node
+from offutils_strategy_register import list_nodes, node_to_dict, save_node_info, fetch_node, _get_client as get_redis
 
 from offconf import replace_variables
 
@@ -35,9 +37,12 @@ loaded_modules = frozenset(imap(lambda name: modules[name], frozenset(modules) &
 if os_name == 'nt' or environ.get('disable_ssl'):
     security.VERIFY_SSL_CERT = False
 
+DirectoryFile = namedtuple('DirectoryFile', ('directory', 'file'))
+
 
 class ProcessNode(object):
-    def __init__(self, process_filename, node=None, previous_clustering_results=None):
+    def __init__(self, process_filename, node=None, previous_clustering_results=None,
+                 redis_client_kwargs=None):
         self.previous_clustering_results = previous_clustering_results
         if not node:
             node = fetch_node(marshall=json)
@@ -61,6 +66,7 @@ class ProcessNode(object):
                                             ifilter(lambda prov_name: getattr(Provider, prov_name) == self.driver_name,
                                                     dir(Provider)))
                                     ))
+        self.redis_client_kwargs = redis_client_kwargs
 
         self.driver_name = self.driver_name.lower()
 
@@ -105,11 +111,10 @@ class ProcessNode(object):
             process_dict = replace_variables(f.read())
         process_dict = json.loads(process_dict)
 
-        # Ensure package required to install cluster is available
-        directory = cls.get_directory(process_dict, within)
-        for cluster in process_dict['register'][directory]:
+        def handle_cluster(cluster):
             dash_un_cluster = cluster['module'].replace('-', '_')
             mods = available_recipes | loaded_modules
+            # Ensure package required to install cluster is available
             if cluster['module'] not in mods and dash_un_cluster not in mods:
                 if cluster['module'] in pip_packages:
                     # import
@@ -123,12 +128,17 @@ class ProcessNode(object):
 
                     ls_folder = listdir(folder)
                     pip_install_d = partial(pip_install, options_attr={'src_dir': folder})
-                    if cluster in ls_folder:
-                        pip_install_d(path.join(folder, cluster))
+                    if cluster['module'] in ls_folder:
+                        pip_install_d(path.join(folder, cluster['module']))
                     elif dash_un_cluster in ls_folder:
                         pip_install_d(path.join(folder, dash_un_cluster))
                     else:
-                        raise ImportError("Cannot find package for cluster: '{!s}'".format(cluster))
+                        raise ImportError("Cannot find package for cluster: '{!s}'".format(cluster['module']))
+
+        dir_or_file = ProcessNode.get_directory_or_key(process_dict, within)
+        return tuple(imap(handle_cluster, process_dict['register'][
+            dir_or_file.directory if dir_or_file.directory is not None else dir_or_file.file
+        ]))
 
     def setup_connection_meta(self, within):
         if not self.node.public_ips:
@@ -158,36 +168,44 @@ class ProcessNode(object):
 
         env.user = self.guess_os_username(self.node.driver.__class__.__name__)
 
-        directory = self.get_directory(self.process_dict, within)
+        dir_or_key = ProcessNode.get_directory_or_key(self.process_dict, within)
+        dir_or_key = dir_or_key.directory or dir_or_key.file
+
         if isIpPrivate(self.node.public_ips[0]):
             self.dns_name = self.node.public_ips[0]  # LOL
-        elif not self.dns_name and 'skydns2' not in self.process_dict['register'][directory] and \
-                        'consul' not in self.process_dict['register'][directory]:
+        elif not self.dns_name and 'skydns2' not in self.process_dict['register'][dir_or_key] and \
+                        'consul' not in self.process_dict['register'][dir_or_key]:
             self.dns_name = '{public_ip}.xip.io'.format(public_ip=self.node.public_ips[0])
             # raise Exception('No DNS name and no way of acquiring one')
         env.hosts = [self.dns_name]
 
-    def get_directory(self, within):
-        return self.get_directory(self.process_dict, within)
+    def get_directory_or_key(self, within):
+        return ProcessNode.get_directory_or_key(self.process_dict, within)
 
     @staticmethod
-    def get_directory(process_dict, within):
+    def get_directory_or_key(process_dict, within):
         directory = next((directory for directory in process_dict['register']), None)
         if type(directory) is NoneType or directory != within \
                 and len(directory) >= len(within) + 3 or directory[-1] != '*':
+
+            v = Client().read(directory).value  # Maybe pass this along?
+            if v is not None:
+                return DirectoryFile(directory=None, file=directory)
+
             # + 3 is for /, /* and *
             raise Exception('No clusters found to join this node to')
-        return directory
+
+        return DirectoryFile(directory=directory, file=None)
 
     def set_clusters(self, within):
         if not self.node:
             logger.warn('No node, skipping')
             return
         self.setup_connection_meta(within)
-        directory = self.get_directory(self.process_dict, within)
+        dir_or_key = ProcessNode.get_directory_or_key(self.process_dict, within)
 
         res = {}
-        for cluster in self.process_dict['register'][directory]:
+        for cluster in self.process_dict['register'][dir_or_key.directory or dir_or_key.file]:
             self.add_to_cluster(cluster, res)
 
         if self.previous_clustering_results:
@@ -216,6 +234,8 @@ class ProcessNode(object):
         cluster_type = cluster['module'].replace('-', '_')
         cluster_path = '/'.join(ifilter(None, (cluster_type, kwargs['cluster_name'])))
         kwargs.update(cluster_path=cluster_path)
+        if 'cache' not in kwargs:
+            kwargs['cache'] = {}
 
         if ':' in cluster_type:
             cluster_type, _, tag = cluster_type.rpartition(':')
@@ -241,29 +261,10 @@ class ProcessNode(object):
             raise ImportError('Cannot `import {os} from {cluster_type}`'.format(os=guessed_os,
                                                                                 cluster_type=cluster_type))
         fab_dir = dir(self.fab)
+
         # Sort functions like so: `step0`, `step1`
-        func_names = sorted(
-            (j for j in fab_dir if not j.startswith('_') and str.isdigit(j[-1])),
-            key=lambda s: int(''.join(takewhile(str.isdigit, s[::-1]))[::-1] or -1)
-        )
-        if 'run_cmds' in cluster:
-            mapping = {'>=': operator.ge, '<': operator.lt,
-                       '>': operator.gt, '<=': operator.le}  # TODO: There must be a full list somewhere!
-
-            def dict_type(run_cmds, func_names):
-                op = mapping[run_cmds['op']]
-                return [func_name for func_name in func_names
-                        if op(int(''.join(takewhile(str.isdigit, func_name[::-1]))[::-1]),
-                              int(run_cmds['val']))]
-
-            run_cmds_type = type(cluster['run_cmds'])
-            if 'exclude' in cluster['run_cmds']:
-                func_names = tuple(ifilter(lambda func: func not in cluster['run_cmds']['exclude'], func_names))
-            func_names = dict_type(cluster['run_cmds'], func_names)
-
-            '''{
-                DictType: dict_type(cluster['run_cmds'], func_names)
-            }.get(run_cmds_type, raise_f(NotImplementedError, '{!s} unexpected for run_cmds'.format(run_cmds_type)))'''
+        func_names = get_sorted_strnum(fab_dir)
+        func_names = self.filter_funcs(cluster, func_names)
 
         if not func_names:
             try:
@@ -285,17 +286,57 @@ class ProcessNode(object):
 
         self.handle_deprecations(func_names)
 
+        self.run_tasks(args, cluster_path, cluster_type, func_names, kwargs, res, tag)
+
+        save_node_info(self.node_name, node_to_dict(self.node), folder=cluster_path, marshall=json)
+
+    def run_tasks(self, args, cluster_path, cluster_type, func_names, kwargs, res, tag):
         for idx, step in enumerate(func_names):
-            exec_output = execute(getattr(self.fab, step), *args, **kwargs)[self.dns_name]
+            kw_args = kwargs.copy()  # Only allow mutations on kwargs.cache [between task runs]
+            kw_args['cache'] = kwargs['cache']  # ref
+            exec_output = execute(getattr(self.fab, step), *args, **kw_args)[self.dns_name]
 
             if idx == 0:
-                res[self.dns_name] = {cluster_path: {step: exec_output}}
+                res[self.dns_name] = OrderedDict(**{cluster_path: OrderedDict(**{step: exec_output})})
                 if tag == 'master':
                     save_node_info('master', [self.node_name], folder=cluster_type, marshall=json)
             else:
                 res[self.dns_name][cluster_path][step] = exec_output
 
-        save_node_info(self.node_name, node_to_dict(self.node), folder=cluster_path, marshall=json)
+            if '_merge' in res[self.dns_name][cluster_path][step]:
+                merge = res[self.dns_name][cluster_path][step].pop('_merge')
+                self.merge_steps(merge, res)
+
+            if '_merge' in kwargs['cache']:
+                merge = kwargs['cache'].pop('_merge')
+                self.merge_steps(merge, res)
+
+            if 'offregister_fab_utils' in res[self.dns_name]:
+                del res[self.dns_name]['offregister_fab_utils']
+
+    def merge_steps(self, merge, res):
+        for (mod, step_name), out in merge.iteritems():
+            mod = mod.partition('.')[0]
+            if mod not in res[self.dns_name]:
+                res[self.dns_name][mod] = {}
+            if step_name not in res[self.dns_name][mod]:
+                res[self.dns_name][mod][step_name] = out
+            else:
+                res[self.dns_name][mod][step_name].update(out)
+
+    @staticmethod
+    def filter_funcs(cluster, func_names):
+        if 'run_cmds' not in cluster:
+            return func_names
+
+        if 'exclude' in cluster['run_cmds']:
+            func_names = tuple(ifilter(lambda func: func not in cluster['run_cmds']['exclude'], func_names))
+
+        '''run_cmds_type = type(cluster['run_cmds'])
+                {DictType: filter_by(cluster['run_cmds'], func_names)
+           }.get(run_cmds_type, raise_f(NotImplementedError, '{!s} unexpected for run_cmds'.format(run_cmds_type)))'''
+
+        return tuple(filter_strnums(cluster['run_cmds'].get('op'), cluster['run_cmds']['val'], func_names))
 
     @staticmethod
     def handle_deprecations(func_names):
@@ -351,4 +392,4 @@ handle_unprocessed = lambda: tuple(ProcessNode(resource_filename('config', 'regi
 if __name__ == '__main__':
     unprocessed_handler = handle_unprocessed()
     for handler in unprocessed_handler:
-        pp(handler.set_clusters())
+        pp(handler.set_clusters('/unclustered'))

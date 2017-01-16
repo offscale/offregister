@@ -1,12 +1,13 @@
 #!/usr/bin/env python
-
+import contextlib
 import json
+import pprint
+from collections import OrderedDict
 
 from os import path
 from argparse import ArgumentParser
-from sys import argv
 from pkg_resources import resource_filename
-from itertools import ifilterfalse, imap
+from itertools import ifilterfalse
 
 from offutils import pp
 from offutils_strategy_register import list_nodes
@@ -17,9 +18,9 @@ from process_node import ProcessNode
 
 def _build_parser():
     parser = ArgumentParser(
-            prog='python -m offregister',
-            description='Register node to cluster(s). Node is found by manual specification, or popped from a queue.',
-            epilog='Example usage: %(prog)s -q etcd -r mesos:location -r etcd:location -r consul:location'
+        prog='python -m offregister',
+        description='Register node to cluster(s). Node is found by manual specification, or popped from a queue.',
+        epilog='Example usage: %(prog)s -q etcd -r mesos:location -r etcd:location -r consul:location'
     )
     parser.add_argument('-d', '--dns', help='DNS for node (if no queue)')
     parser.add_argument('-i', '--ip', help='Public IP for node (if no queue)')
@@ -51,13 +52,28 @@ def process_within(register_within, config, method, method_args):
         process_nodes(cluster_location, config, method, method_args)
 
 
+@contextlib.contextmanager
+def pprint_OrderedDict():
+    pp_orig = pprint._sorted
+    od_orig = OrderedDict.__repr__
+    try:
+        pprint._sorted = lambda x: x
+        OrderedDict.__repr__ = dict.__repr__
+        yield
+    finally:
+        pprint._sorted = pp_orig
+        OrderedDict.__repr__ = od_orig
+
+
 def process_nodes(cluster_location, config, method, method_args):
     clustering_results = []
     for node_res in list_nodes(cluster_location, marshall=json):
         process_node_obj = ProcessNode(config, node_res, clustering_results)
         getattr(process_node_obj, method)(cluster_location, *method_args)
         clustering_results = process_node_obj.previous_clustering_results
-    pp(clustering_results)
+
+    with pprint_OrderedDict():
+        pp(clustering_results)
 
 
 if __name__ == '__main__':
@@ -65,8 +81,8 @@ if __name__ == '__main__':
     process_node = ProcessNode(args.config)
 
     process_within(
-            args.within or {k: process_node.process_dict['register'][k]
-                            for k in ifilterfalse(lambda key: key.startswith('_'),
-                                                  process_node.process_dict['register'])},
-            config=args.config, method=args.method, method_args=args.method_args
+        args.within or {k: process_node.process_dict['register'][k]
+                        for k in ifilterfalse(lambda key: key.startswith('_'),
+                                              process_node.process_dict['register'])},
+        config=args.config, method=args.method, method_args=args.method_args
     )
