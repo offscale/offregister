@@ -12,7 +12,7 @@ from itertools import ifilterfalse
 from offutils import pp
 from offutils_strategy_register import list_nodes
 
-from __init__ import logger, __version__
+from __init__ import root_logger, __version__
 from process_node import ProcessNode
 
 

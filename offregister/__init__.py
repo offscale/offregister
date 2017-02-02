@@ -5,14 +5,14 @@ from os import path
 from logging.config import dictConfig as _dictConfig
 
 __author__ = 'Samuel Marks'
-__version__ = '0.0.12'
+__version__ = '0.1.0-alpha'
 
 
-def _get_logger():
+def get_logger(name=None):
     with open(path.join(path.dirname(__file__), '_data', 'logging.yml'), 'rt') as f:
         data = yaml.load(f)
     _dictConfig(data)
-    return logging.getLogger()
+    return logging.getLogger(name=name)
 
 
-logger = _get_logger()
+root_logger = get_logger()

@@ -81,21 +81,63 @@
     ]
   },
   "register": {
-    "/unclustered/*": [
+    "/unclustered/any-cluster-ubuntu1604-bighd-0c79ca28239a44dfba7ef382e382ab70": [
       {
-        "module": "offregister-bootstrap"
+        "module": "inline0",
+        "type": "ansible",
+        "source": {
+          "name": "inline0",
+          "gather_facts": "no",
+          "tasks": [
+            {
+              "action": {
+                "args": "lsb_release -a",
+                "module": "shell"
+              },
+              "register": "shell_out"
+            },
+            {
+              "action": {
+                "args": {
+                  "msg": "{{shell_out.stdout}}"
+                },
+                "module": "debug"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "_comments": [
+          {
+            "module": "offregister-bootstrap",
+            "type": "fabric"
+          },
+          {
+            "module": "offregister-inline",
+            "kwargs": {
+              "run": [
+                "echo hello"
+              ]
+            },
+            "type": "fabric"
+          },
+          {
+            "module": "offregister-bootstrap",
+            "type": "fabric"
+          },
+          {
+            "module": "offregister-openedx",
+            "cluster_name": "local__openedx-ficus.1rc1",
+            "args": [],
+            "kwargs": {},
+            "type": "fabric"
+          }
+        ]
       }
     ]
   },
   "_comment_ideas": [
-    {
-        "module": "offregister-inline",
-        "kwargs": {
-          "sudo": [
-            "echo hello"
-          ]
-        }
-      },
     {
       "module": "offregister-users",
       "kwargs": {
@@ -105,13 +147,8 @@
             "groups": null
           }
         ]
-      }
-    },
-    {
-      "module": "offregister-openedx",
-      "cluster_name": "openedx_ficus0",
-      "args": [],
-      "kwargs": {}
+      },
+      "type": "fabric"
     },
     {
       "purpose": "STRING",
@@ -136,7 +173,8 @@
               "uses": "apt"
             },
             "_comment: limits concurrency because of system-wide lock"
-          ]
+          ],
+          "type": "fabric"
         },
         {
           "module": "offregister-odoo",
@@ -150,7 +188,8 @@
               "name": "offregister-nginx"
             },
             "_comment: Run independent modules concurrently"
-          ]
+          ],
+          "type": "fabric"
         }
       ]
     }
@@ -159,190 +198,213 @@
     {
       "/local_unclustered/*": [
         {
-          "module": "offregister-githook",
-          "cluster_name": "grc-githook",
           "args": [],
+          "cluster_name": "grc-githook",
           "kwargs": {
-            "hookserve-init-name": "hookserve_foo.conf",
             "git_pull-init-context": {
-              "GIT_REPO": "https://github.com/SamuelMarks/foo-dist.git",
-              "GIT_DIR": "/var/www/static/foo-dist"
+              "GIT_DIR": "/var/www/static/foo-dist",
+              "GIT_REPO": "https://github.com/SamuelMarks/foo-dist.git"
             },
-            "git_pull-init-name": "git_pull_foo.conf"
-          }
+            "git_pull-init-name": "git_pull_foo.conf",
+            "hookserve-init-name": "hookserve_foo.conf"
+          },
+          "module": "offregister-githook"
         }
-      ]
+      ],
+      "type": "fabric"
     },
     {
       "/unclustered/*": [
         {
-          "module": "offregister-githook",
-          "cluster_name": "grc-githook",
           "args": [],
+          "cluster_name": "grc-githook",
           "kwargs": {
-            "hookserve-init-name": "hookserve_foo.conf",
             "git_pull-init-context": {
-              "GIT_REPO": "https://github.com/SamuelMarks/foo-dist.git",
-              "GIT_DIR": "/var/www/static/foo-dist"
+              "GIT_DIR": "/var/www/static/foo-dist",
+              "GIT_REPO": "https://github.com/SamuelMarks/foo-dist.git"
             },
-            "git_pull-init-name": "git_pull_foo.conf"
-          }
+            "git_pull-init-name": "git_pull_foo.conf",
+            "hookserve-init-name": "hookserve_foo.conf"
+          },
+          "module": "offregister-githook"
         },
         {
-          "module": "offregister-angular2",
-          "cluster_name": "bar-frontend",
           "args": [],
+          "cluster_name": "bar-frontend",
           "kwargs": {
             "GIT_REPO": "https://github.com/bar/web-frontend-dist",
             "SERVER_LOCATION": "/var/www/static/bar-frontend-dist",
             "SERVER_NAME": "bar.*",
             "nginx-conf-filename": "bar-frontend-dist"
-          }
+          },
+          "module": "offregister-angular2"
         },
         {
-          "module": "offregister-githook",
-          "cluster_name": "bar-frontend",
           "args": [],
+          "cluster_name": "bar-frontend",
           "kwargs": {
-            "hookserve-init-name": "hookserve_bar-frontend.conf",
-            "hookserve-init-context": {
-              "PID": "/var/run/hookserve_bar-frontend.pid",
-              "DAEMON_PORT": 8889
-            },
             "git_pull-init-context": {
               "GIT_DIR": "/var/www/static/bar-frontend-dist",
               "GIT_REPO": "https://github.com/bar/web-frontend-dist"
             },
-            "git_pull-init-name": "git_pull_bar.conf"
-          }
+            "git_pull-init-name": "git_pull_bar.conf",
+            "hookserve-init-context": {
+              "DAEMON_PORT": 8889,
+              "PID": "/var/run/hookserve_bar-frontend.pid"
+            },
+            "hookserve-init-name": "hookserve_bar-frontend.conf"
+          },
+          "module": "offregister-githook"
         }
-      ]
+      ],
+      "type": "fabric"
     },
     {
-      "module": "offregister-angular2",
-      "cluster_name": "foo",
       "args": [],
+      "cluster_name": "foo",
       "kwargs": {
         "GIT_REPO": "https://github.com/SamuelMarks/foo-dist.git",
         "SERVER_LOCATION": "/var/www/foo",
         "SERVER_NAME": "foo.*",
         "nginx-conf-filename": "foo-dist"
-      }
+      },
+      "module": "offregister-angular2",
+      "type": "fabric"
     },
     {
-      "module": "offregister-nginx",
-      "cluster_name": "foo",
       "args": [],
+      "cluster_name": "foo",
       "kwargs": {
         "nginx-init-context": {
-          "SERVER_NAME": "foo.*",
           "NAME_OF_BLOCK": "static0",
-          "SERVER_LOCATION": "unix:/run/foo.sock"
+          "SERVER_LOCATION": "unix:/run/foo.sock",
+          "SERVER_NAME": "foo.*"
         }
       },
+      "module": "offregister-nginx",
       "run_cmds": {
-        "op": "<=",
-        "val": 2,
         "exclude": [
           "setup_nginx_conf2"
-        ]
-      }
+        ],
+        "op": "<=",
+        "val": 2
+      },
+      "type": "fabric"
     },
     {
-      "module": "offregister-odoo",
-      "cluster_name": "odoo0",
       "args": [],
-      "kwargs": {}
+      "cluster_name": "odoo0",
+      "kwargs": {},
+      "module": "offregister-odoo",
+      "type": "fabric"
     },
     {
       "_local_tmp": [
         {
-          "module": "offregister-openedx",
-          "cluster_name": "openedx0_local",
           "args": [],
+          "cluster_name": "openedx0_local",
           "kwargs": {},
+          "module": "offregister-openedx",
           "run_cmds": {
             "op": ">=",
             "val": 2
           }
         }
-      ]
+      ],
+      "type": "fabric"
     },
     {
       "/unclustered/*": [
         {
-          "module": "offregister-openedx",
-          "cluster_name": "openedx0",
           "args": [],
+          "cluster_name": "openedx0",
           "kwargs": {},
+          "module": "offregister-openedx",
           "run_cmds": {
             "op": ">=",
             "val": 2
           }
         }
-      ]
+      ],
+      "type": "fabric"
     },
     {
-      "module": "offregister-etcd",
-      "cluster_name": "etcd0",
       "args": [],
+      "cluster_name": "etcd0",
       "kwargs": {
         "exclusive_cluster": false
-      }
+      },
+      "module": "offregister-etcd",
+      "type": "fabric"
     },
     {
-      "module": "offregister-mesosphere-dcos",
-      "cluster_name": "",
       "args": [],
+      "cluster_name": "",
       "kwargs": {
         "nodes_from": "%etcd0%"
-      }
+      },
+      "module": "offregister-mesosphere-dcos",
+      "type": "fabric"
     },
     {
-      "module": "offregister-dokku",
       "kwargs": {
         "domain": "scientific.sydney",
         "static_git": "https://github.com/offscale/scientific.sydney-dist"
-      }
+      },
+      "module": "offregister-dokku",
+      "type": "fabric"
     },
     {
-      "module": "offregister-dokku"
+      "module": "offregister-dokku",
+      "type": "fabric"
     },
     {
-      "module": "offregister-ceph"
+      "module": "offregister-ceph",
+      "type": "fabric"
     },
     {
-      "module": "offregister-zookeeper"
+      "module": "offregister-zookeeper",
+      "type": "fabric"
     },
     {
-      "module": "offregister-mesos"
+      "module": "offregister-mesos",
+      "type": "fabric"
     },
     {
-      "module": "offregister-taiga"
+      "module": "offregister-taiga",
+      "type": "fabric"
     },
     {
-      "module": "dokku"
+      "module": "dokku",
+      "type": "fabric"
     },
     {
-      "module": "tsuru"
+      "module": "tsuru",
+      "type": "fabric"
     },
     {
-      "module": "coreos"
+      "module": "coreos",
+      "type": "fabric"
     },
     {
-      "module": "deis"
+      "module": "deis",
+      "type": "fabric"
     },
     {
-      "module": "flynn"
+      "module": "flynn",
+      "type": "fabric"
     },
     {
-      "module": "coreos"
+      "module": "coreos",
+      "type": "fabric"
     },
     {
-      "module": "bosh"
+      "module": "bosh",
+      "type": "fabric"
     },
     {
-      "module": "consul"
+      "module": "consul",
+      "type": "fabric"
     }
   ],
   "purpose": [
