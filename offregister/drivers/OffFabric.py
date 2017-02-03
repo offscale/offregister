@@ -6,6 +6,7 @@ from operator import add
 from os import environ, path
 from os import listdir
 from sys import modules
+from time import time
 
 from fabric.api import env
 from fabric.tasks import execute
@@ -100,15 +101,21 @@ class OffFabric(OffregisterBaseDriver):
         for idx, step in enumerate(self.func_names):
             kw_args = cluster_kwargs.copy()  # Only allow mutations on cluster_kwargs.cache [between task runs]
             kw_args['cache'] = cluster_kwargs['cache']  # ref
+            t = time()
             exec_output = execute(getattr(self.fab, step), *cluster_args, **kw_args)[self.dns_name]
 
             if idx == 0:
                 if self.dns_name not in res:
-                    res[self.dns_name] = OrderedDict(**{cluster_path: OrderedDict(**{step: exec_output})})
+                    res[self.dns_name] = {cluster_path: OrderedDict({step: {t: exec_output}})}
                 if tag == 'master':
                     save_node_info('master', [self.node_name], folder=cluster_type, marshall=json)
 
-            self.add_to_res(cluster_path=cluster_path, exec_output=exec_output, res=res, step=step)
+            if cluster_path not in res[self.dns_name]:
+                res[self.dns_name][cluster_path] = OrderedDict({step: OrderedDict({t: exec_output})})
+            elif step not in res[self.dns_name][cluster_path]:
+                res[self.dns_name][cluster_path][step] = OrderedDict({t: exec_output})
+            else:
+                res[self.dns_name][cluster_path][step][t] = exec_output
 
             if res[self.dns_name][cluster_path][step] and '_merge' in res[self.dns_name][cluster_path][step]:
                 print '**' * 20

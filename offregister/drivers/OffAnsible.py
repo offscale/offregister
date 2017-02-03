@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from itertools import ifilter, imap
 from collections import namedtuple
+from time import time
 
 from ansible.parsing.dataloader import DataLoader
 from ansible.vars import VariableManager
@@ -124,20 +125,17 @@ class OffAnsible(OffregisterBaseDriver):
                 stdout_callback=self.results_callback
             )
             tqm.run(cluster_kwargs['play'])  # returns numerical return code
+            t = time()
             result = self.results_callback.last_result
             if 'stdout' in result:
                 result = result['stdout']
 
             if self.dns_name not in res:
-                res[self.dns_name] = OrderedDict({cluster_path: result})
-            elif cluster_path in res[self.dns_name]:
-                if not is_sequence(res[self.dns_name][cluster_path]):
-                    res[self.dns_name][cluster_path] = [res[self.dns_name][cluster_path]]
-                if not isinstance(res[self.dns_name][cluster_path], list):
-                    res[self.dns_name][cluster_path] = list(res[self.dns_name][cluster_path])
-                res[self.dns_name][cluster_path].append(result)
+                res[self.dns_name] = OrderedDict({cluster_path: OrderedDict({t: result})})
+            elif cluster_path not in res[self.dns_name]:
+                res[self.dns_name][cluster_path] = OrderedDict({t: result})
             else:
-                res[self.dns_name] = OrderedDict({cluster_path: result})
+                res[self.dns_name][cluster_path][t] = result
         finally:
             if tqm is not None:
                 tqm.cleanup()
