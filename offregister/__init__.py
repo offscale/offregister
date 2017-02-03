@@ -5,7 +5,7 @@ from os import path
 from logging.config import dictConfig as _dictConfig
 
 __author__ = 'Samuel Marks'
-__version__ = '0.1.0-alpha'
+__version__ = '0.1.0'
 
 
 def get_logger(name=None):

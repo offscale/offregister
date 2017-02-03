@@ -1,7 +1,8 @@
 from abc import ABCMeta, abstractmethod
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 
 from libcloud.compute.base import Node
+from offutils import is_sequence
 
 from offregister.process_node import Env
 
@@ -81,3 +82,16 @@ class OffregisterBaseDriver(object):
         :type cluster: ``{}``
 
         """
+
+    def add_to_res(self, res, cluster_path, step, exec_output):
+        # TODO: generalise
+        if cluster_path not in res[self.dns_name]:
+            res[self.dns_name][cluster_path] = OrderedDict(**{step: exec_output})
+        elif step not in res[self.dns_name][cluster_path]:
+            res[self.dns_name][cluster_path][step] = exec_output
+        else:
+            if not is_sequence(res[self.dns_name][cluster_path][step]):
+                res[self.dns_name][cluster_path][step] = [res[self.dns_name][cluster_path][step]]
+            if not isinstance(res[self.dns_name][cluster_path][step], list):
+                res[self.dns_name][cluster_path][step] = list(res[self.dns_name][cluster_path][step])
+            res[self.dns_name][cluster_path][step].append(exec_output)

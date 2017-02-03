@@ -10,7 +10,7 @@ from sys import modules
 from fabric.api import env
 from fabric.tasks import execute
 
-from offutils import update_d, get_sorted_strnum, filter_strnums, binary_search, raise_f, pp
+from offutils import update_d, get_sorted_strnum, filter_strnums, binary_search, raise_f, pp, is_sequence
 from offutils_strategy_register import save_node_info
 
 from offregister import root_logger
@@ -107,17 +107,8 @@ class OffFabric(OffregisterBaseDriver):
                     res[self.dns_name] = OrderedDict(**{cluster_path: OrderedDict(**{step: exec_output})})
                 if tag == 'master':
                     save_node_info('master', [self.node_name], folder=cluster_type, marshall=json)
-            else:
-                if step not in res[self.dns_name][cluster_path]:
-                    res[self.dns_name][cluster_path][step] = exec_output
-                else:
-                    if isinstance(res[self.dns_name][cluster_path][step], tuple):
-                        res[self.dns_name][cluster_path][step] = list(res[self.dns_name][cluster_path][step])
-                    elif res[self.dns_name][cluster_path][step] is None:
-                        res[self.dns_name][cluster_path][step] = [res[self.dns_name][cluster_path][step]]
-                    if not isinstance(res[self.dns_name][cluster_path][step], list):
-                        res[self.dns_name][cluster_path][step] = list(res[self.dns_name][cluster_path][step])
-                    res[self.dns_name][cluster_path][step].append(exec_output)
+
+            self.add_to_res(cluster_path=cluster_path, exec_output=exec_output, res=res, step=step)
 
             if res[self.dns_name][cluster_path][step] and '_merge' in res[self.dns_name][cluster_path][step]:
                 print '**' * 20
@@ -213,5 +204,3 @@ class OffFabric(OffregisterBaseDriver):
                     pip_install_d(path.join(folder, dash_un_cluster))
                 else:
                     raise ImportError("Cannot find package for cluster: '{!s}'".format(cluster['module']))
-
-

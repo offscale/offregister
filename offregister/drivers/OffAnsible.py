@@ -1,7 +1,6 @@
 from collections import OrderedDict
 from itertools import ifilter, imap
 from collections import namedtuple
-from copy import deepcopy
 
 from ansible.parsing.dataloader import DataLoader
 from ansible.vars import VariableManager
@@ -10,12 +9,10 @@ from ansible.playbook.play import Play
 from ansible.executor.task_queue_manager import TaskQueueManager
 from ansible.plugins.callback.default import CallbackModule as CallbackModule_default
 
-from offutils import update_d, pp, it_consumes
-from offutils_strategy_register import save_node_info
+from offutils import update_d, it_consumes, is_sequence
 
 from offregister import get_logger
 from offregister.drivers import OffregisterBaseDriver, PreparedClusterObj
-from offregister.utils import guess_os
 
 Options = namedtuple('Options',
                      ['connection', 'module_path', 'forks', 'become', 'become_method', 'become_user', 'check'])
@@ -103,11 +100,9 @@ class OffAnsible(OffregisterBaseDriver):
                                                               for k, v in
                                                               self.env_namedtuple.use_ssh_config.iteritems()
                                                               if k not in frozenset(('Port', 'User', 'Host'))),
-                'ansible_host_key_checking': host_key_checking,
-                'host_key_checking': host_key_checking
+                'ansible_host_key_checking': host_key_checking
             })
 
-            # TODO: Consider looping over whole ssh_config. Not sure if I want to...
         self.variable_manager.extra_vars = extra_vars
         cluster_kwargs['play'] = Play().load(cluster_kwargs['play_source'],
                                              variable_manager=self.variable_manager,
@@ -126,15 +121,19 @@ class OffAnsible(OffregisterBaseDriver):
                 loader=self.loader,
                 options=self.options,
                 passwords=self.passwords,
-                stdout_callback=self.results_callback,
-                # Use our custom callback ^ instead of the ``default`` callback plugin
+                stdout_callback=self.results_callback
             )
-            result = tqm.run(cluster_kwargs['play'])
+            tqm.run(cluster_kwargs['play'])  # returns numerical return code
+            result = self.results_callback.last_result
+            if 'stdout' in result:
+                result = result['stdout']
+
             if self.dns_name not in res:
                 res[self.dns_name] = OrderedDict({cluster_path: result})
             elif cluster_path in res[self.dns_name]:
-                if not hasattr(res[self.dns_name][cluster_path], 'append') or isinstance(
-                        res[self.dns_name][cluster_path], basestring):
+                if not is_sequence(res[self.dns_name][cluster_path]):
+                    res[self.dns_name][cluster_path] = [res[self.dns_name][cluster_path]]
+                if not isinstance(res[self.dns_name][cluster_path], list):
                     res[self.dns_name][cluster_path] = list(res[self.dns_name][cluster_path])
                 res[self.dns_name][cluster_path].append(result)
             else:
@@ -151,6 +150,7 @@ class ResultCallback(CallbackModule_default):
     the end of the execution, look into utilizing the ``json`` callback plugin
     or writing your own custom callback plugin
     """
+    last_result = None
 
     @staticmethod
     def pp_lines(log, result, key, op=None, op_args=None):
@@ -193,7 +193,8 @@ class ResultCallback(CallbackModule_default):
 
         if 'stdout_lines' in result._result and result._result['stdout_lines']:
             ResultCallback.pp_lines(log, result, 'stdout_lines')
-        super(ResultCallback, self).v2_runner_on_ok(result)
+            self.last_result = result._result
+            # super(ResultCallback, self).v2_runner_on_ok(result)
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
         """
