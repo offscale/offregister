@@ -82,18 +82,18 @@ class ProcessNode(object):
         self.node = next(ifilter(lambda _node: _node.uuid == node.value['uuid'],
                                  nodes), None)
 
-        if self.node.extra is not None and 'ssh_config' in self.node.extra:
-            if 'IdentityFile' in self.node.extra['ssh_config']:
-                self.config_provider['ssh'] = dict(private_key_path=self.node.extra['ssh_config']['IdentityFile'],
-                                                   **self.config_provider.get('ssh', {}))
-            Env.use_ssh_config = self.node.extra['ssh_config']
-            pp(self.node.extra)
-
         if not self.node:
             raise EnvironmentError('node not found. Maybe the cloud provider is still provisioning?')
 
-        if 'password' in self.node.extra:
-            print 'password =', self.node.extra['password']
+        if self.node.extra is not None:
+            if 'ssh_config' in self.node.extra:
+                if 'IdentityFile' in self.node.extra['ssh_config']:
+                    self.config_provider['ssh'] = dict(private_key_path=self.node.extra['ssh_config']['IdentityFile'],
+                                                       **self.config_provider.get('ssh', {}))
+                Env.use_ssh_config = self.node.extra['ssh_config']
+            if 'password' in self.node.extra:
+                print 'password =', self.node.extra['password']
+            pp(self.node.extra)
 
         # pp(node_to_dict(self.node))
         self.dns_name = self.node.extra.get('dns_name')
