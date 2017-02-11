@@ -83,8 +83,8 @@ def pip_install(package, options_attr=None):
 
 
 def guess_os_username(node, hint=None):
-    driver_name = node.driver.__class__.__name__
-    if hint and 'softlayer' in hint.lower() or driver_name in ('digitalocean', 'softlayer'):
+    driver_name = node.driver.__class__.__name__.lower()
+    if hint and 'softlayer' in hint.lower() or driver_name in ('digitalocean', 'softlayernodedriver'):
         return 'root'
     elif driver_name == 'azure':
         return 'azureuser'
