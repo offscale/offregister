@@ -13,12 +13,12 @@ PreparedClusterObj = namedtuple('PreparedClusterObj', ('cluster_path', 'cluster_
 class OffregisterBaseDriver(object):
     __metaclass__ = ABCMeta
 
-    def __init__(self, env_namedtuple, node, node_name, dns_name):
+    def __init__(self, env, node, node_name, dns_name):
         """
         OffregisterBaseDriver: base driver for implementing support for configuration managers
 
-        :keyword env_namedtuple: Env (same as fabric.api.env)
-        :type env_namedtuple: ``Env``
+        :keyword env: Env
+        :type env: ``Env``
 
         :keyword node: Node
         :type node: ``Node``
@@ -29,7 +29,7 @@ class OffregisterBaseDriver(object):
         :keyword dns_name: DNS name associated with node
         :type dns_name: ``str``
         """
-        self.env_namedtuple = env_namedtuple
+        self.env_namedtuple = env
         self.node = node
         self.node_name = node_name
         self.dns_name = dns_name

@@ -21,7 +21,8 @@ from offutils_strategy_register import list_nodes, node_to_dict, save_node_info,
 from offconf import replace_variables
 
 from __init__ import get_logger
-from utils import guess_os_username, guess_os, Env
+from offregister.common.env import Env
+from utils import guess_os_username, guess_os
 
 # AWS Certificates are acting up (on Windows), remove this in production:
 if os_name == 'nt' or environ.get('disable_ssl'):
@@ -35,6 +36,7 @@ logger = get_logger(modules[__name__].__name__)
 class ProcessNode(object):
     def __init__(self, process_filename, node=None, previous_clustering_results=None,
                  redis_client_kwargs=None):
+        self.env = Env()
         self.previous_clustering_results = previous_clustering_results
 
         if not node:
@@ -90,7 +92,7 @@ class ProcessNode(object):
                 if 'IdentityFile' in self.node.extra['ssh_config']:
                     self.config_provider['ssh'] = dict(private_key_path=self.node.extra['ssh_config']['IdentityFile'],
                                                        **self.config_provider.get('ssh', {}))
-                Env.use_ssh_config = self.node.extra['ssh_config']
+                self.env.ssh_config = self.node.extra['ssh_config']
             if 'password' in self.node.extra:
                 print 'password =', self.node.extra['password']
             pp(self.node.extra)
@@ -141,26 +143,26 @@ class ProcessNode(object):
             raise Exception('Node is terminated, so cannot SSH')
 
         if self.node.extra is not None and 'ssh_config' in self.node.extra:
-            # TODO: Get value for `Env.ssh_config_path` and set that
-            for k in ('HostName', 'IdentityFile', 'Port', 'User'):
-                if k in self.node.extra['ssh_config']:
-                    setattr(Env, {'IdentityFile': 'key_filename',
-                                  'HostName': 'host',
-                                  'Port': 'port',
-                                  'User': 'user'}[k], self.node.extra['ssh_config'][k])
-        if Env.key_filename:
-            Env.key = Env.key_filename
-        if Env.host:
-            Env.host_name = Env.host
-        if 'node_password' in self.config_provider['ssh']:
-            Env.password = self.config_provider['ssh']['node_password']
-        else:
-            Env.key_filename = self.config_provider['ssh']['private_key_path']
-            if 'password' in self.node.extra:
-                Env.password = self.node.extra['password']
+            # TODO: Get value for `self.env_kwargs['ssh_config_path']` and set that
+            ssh_config_to_fab = {'IdentityFile': 'key_filename',
+                                 'HostName': 'host',
+                                 'Port': 'port',
+                                 'User': 'user'}
+            for ssh_name, fab_name in ssh_config_to_fab.iteritems():
+                if ssh_name in self.node.extra['ssh_config']:
+                    setattr(self.env, fab_name, self.node.extra['ssh_config'][ssh_name])
 
-        if isinstance(Env.user, property) or not Env.user:
-            Env.user = self.guess_os_username()
+        if 'ssh' in self.config_provider:
+            if 'private_key_path' in self.config_provider['ssh']:
+                self.env.key_filename = self.env.key_filename or self.config_provider['ssh']['private_key_path']
+            if 'node_password' in self.config_provider['ssh']:
+                self.env.password = self.config_provider['ssh']['node_password']
+
+        if self.env.user is None:
+            self.env.user = self.guess_os_username()
+
+        if self.env.password is None and 'password' in self.node.extra:
+            self.env.password = self.node.extra['password']
 
         dir_or_key = (lambda d_or_k: d_or_k.directory or d_or_k.file)(
             ProcessNode.get_directory_or_key(self.process_dict, within)
@@ -172,7 +174,7 @@ class ProcessNode(object):
                         'consul' not in self.process_dict['register'][dir_or_key]:
             self.dns_name = '{public_ip}.xip.io'.format(public_ip=self.node.public_ips[0])
             # raise Exception('No DNS name and no way of acquiring one')
-        Env.hosts = [self.dns_name]
+        self.env.hosts = [self.dns_name]
 
     def get_directory_or_key(self, within):
         return ProcessNode.get_directory_or_key(self.process_dict, within)
@@ -223,14 +225,15 @@ class ProcessNode(object):
         if cluster['type'] == 'fabric':
             from drivers.OffFabric import OffFabric
 
-            offregister = OffFabric(Env, self.node, self.node_name, self.dns_name)
+            offregisterC = OffFabric
         elif cluster['type'] == 'ansible':
             from drivers.OffAnsible import OffAnsible
 
-            offregister = OffAnsible(Env, self.node, self.node_name, self.dns_name)
+            offregisterC = OffAnsible
         else:
             raise NotImplementedError('{}'.format(cluster['type']))
 
+        offregister = offregisterC(self.env, self.node, self.node_name, self.dns_name)
         add_cluster_ret = offregister.prepare_cluster_obj(cluster, res)
         offregister.run_tasks(**add_cluster_ret._asdict())
         # offregister.run_tasks(cluster_path, cluster_type, res, tag, args, kwargs)

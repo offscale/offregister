@@ -113,10 +113,10 @@ Env = namedtuple('Env', ('disable_known_hosts', 'effective_roles', 'tasks', 'lin
                          'skip_bad_hosts', 'use_ssh_config', 'roledefs', 'gateway', 'gss_auth', 'keepalive',
                          'eagerly_disconnect', 'rcfile', 'path_behavior', 'hide', 'sudo_prefix', 'lcwd', 'no_agent',
                          'forward_agent', 'remote_interrupt', 'port', 'shell', 'version', 'use_exceptions_for',
-                         'connection_attempts', 'hosts', 'gss_deleg', 'cwd', 'abort_exception', 'real_fabfile',
-                         'passwords', 'sudo_password', 'host_string', 'shell_env', 'always_use_pty', 'colorize_errors',
-                         'exclude_hosts', 'all_hosts', 'sudo_prompt', 'again_prompt', 'echo_stdin', 'user', 'gss_kex',
-                         'command_timeout', 'path', 'local_user', 'combine_stderr', 'command_prefixes', 'dedupe_hosts',
-                         'warn_only', 'no_keys', 'sudo_passwords', 'roles', 'fabfile', 'use_shell', 'host', 'pool_size',
-                         'system_known_hosts', 'prompts', 'output_prefix', 'command', 'timeout', 'default_port',
-                         'ssh_config_path', 'parallel', 'sudo_user', 'ok_ret_codes'))
+                            'connection_attempts', 'hosts', 'gss_deleg', 'cwd', 'abort_exception', 'real_fabfile',
+                            'passwords', 'sudo_password', 'host_string', 'shell_env', 'always_use_pty', 'colorize_errors',
+                            'exclude_hosts', 'all_hosts', 'sudo_prompt', 'again_prompt', 'echo_stdin', 'user', 'gss_kex',
+                            'command_timeout', 'path', 'local_user', 'combine_stderr', 'command_prefixes', 'dedupe_hosts',
+                            'warn_only', 'no_keys', 'sudo_passwords', 'roles', 'fabfile', 'use_shell', 'host', 'pool_size',
+                            'system_known_hosts', 'prompts', 'output_prefix', 'command', 'timeout', 'default_port',
+                            'ssh_config_path', 'parallel', 'sudo_user', 'ok_ret_codes'))

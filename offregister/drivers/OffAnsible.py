@@ -24,11 +24,12 @@ logger = get_logger('ansible')
 class OffAnsible(OffregisterBaseDriver):
     func_names = None
 
-    def __init__(self, env_namedtuple, node, node_name, dns_name, **kwargs):
-        super(OffAnsible, self).__init__(env_namedtuple, node, node_name, dns_name)
+    def __init__(self, env, node, node_name, dns_name, **kwargs):
+        super(OffAnsible, self).__init__(env, node, node_name, dns_name)
+        self.env = env
         self.driver_node_env = {
-            k: getattr(env_namedtuple, k) for k in dir(env_namedtuple)
-            if not k.startswith('_') and k not in ('count', 'index') and not isinstance(getattr(env_namedtuple, k),
+            k: getattr(env, k) for k in dir(env)
+            if not k.startswith('_') and k not in ('count', 'index') and not isinstance(getattr(env, k),
                                                                                         property)
             }
         ansible_settings = kwargs.get('ansible_settings', {})
@@ -49,7 +50,7 @@ class OffAnsible(OffregisterBaseDriver):
 
         # create inventory and pass to var manager
         self.inventory = Inventory(loader=self.loader, variable_manager=self.variable_manager,
-                                   host_list=env_namedtuple.hosts)
+                                   host_list=env.hosts)
         self.variable_manager.set_inventory(self.inventory)
 
     def prepare_cluster_obj(self, cluster, res):
@@ -90,16 +91,16 @@ class OffAnsible(OffregisterBaseDriver):
             'ansible_ssh_port': self.env_namedtuple.port
         }
 
-        if 'password' in self.driver_node_env:
+        if self.env.password is not None:
             extra_vars.update({'ansible_ssh_pass': self.env_namedtuple.password})
-        if 'key_filename' in self.driver_node_env:
+        if self.env.key_filename is None:
             extra_vars.update({'ansible_ssh_private_key_file': self.env_namedtuple.key_filename})
-        if 'use_ssh_config' in self.driver_node_env and 'StrictHostKeyChecking' in self.env_namedtuple.use_ssh_config:
-            host_key_checking = self.env_namedtuple.use_ssh_config['StrictHostKeyChecking'] == 'yes'
+        if self.env.ssh_config is not None and 'StrictHostKeyChecking' in self.env.ssh_config:
+            host_key_checking = self.env_namedtuple.ssh_config['StrictHostKeyChecking'] == 'yes'
             extra_vars.update({
                 'ansible_ssh_extra_args': '-o ' + ' -o '.join('{k}="{v}"'.format(k=k, v=v)
                                                               for k, v in
-                                                              self.env_namedtuple.use_ssh_config.iteritems()
+                                                              self.env.ssh_config.iteritems()
                                                               if k not in frozenset(('Port', 'User', 'Host'))),
                 'ansible_host_key_checking': host_key_checking
             })

@@ -6,6 +6,8 @@ from collections import OrderedDict
 
 from os import path
 from argparse import ArgumentParser
+
+from offregister.common.env import Env
 from pkg_resources import resource_filename
 from itertools import ifilterfalse
 

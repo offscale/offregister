@@ -22,11 +22,9 @@ from offregister.utils import guess_os, get_pip_packages, pip_install
 class OffFabric(OffregisterBaseDriver):
     func_names = None
 
-    def __init__(self, env_namedtuple, node, node_name, dns_name):
-        super(OffFabric, self).__init__(env_namedtuple, node, node_name, dns_name)
-        env.update({k: getattr(env_namedtuple, k) for k in dir(env_namedtuple)
-                    if not k.startswith('_') and k not in ('count', 'index') and not isinstance(getattr(env_namedtuple,
-                                                                                                        k), property)})
+    def __init__(self, env_obj, node, node_name, dns_name):
+        super(OffFabric, self).__init__(env_obj, node, node_name, dns_name)
+        env.update({k: getattr(env_obj, k) for k in dir(env_obj) if getattr(env_obj, k) is not None})
 
     def prepare_cluster_obj(self, cluster, res):
         cluster_args = cluster['args'] if 'args' in cluster else tuple()
