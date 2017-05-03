@@ -5,6 +5,30 @@
   "provider": {
     "options": [
       {
+        "auth": {
+          "key_file": "${env.AZURE_KEY_FILE}",
+          "tenant_id": "${env.AZURE_TENANT_ID}",
+          "subscription_id": "${env.AZURE_SUBSCRIPTION}",
+          "key": "${env.AZURE_KEY}",
+          "secret": "${env.AZURE_SECRET}",
+          "region": "australiaeast"
+        },
+        "ssh": {
+          "public_key_path": "${env.PUBLIC_KEY_PATH}",
+          "private_key_path": "${env.PRIVATE_KEY_PATH}",
+          "key_name": "${env.PUBLIC_KEY_NAME}",
+          "node_password": "${env.AZURE_NODE_PASSWORD}"
+        },
+        "create_with": {
+          "ex_resource_group": "${env.AZURE_CLOUD_NAME}",
+          "ex_storage_account": null
+        },
+        "provider": {
+          "name": "AZURE_ARM",
+          "region": "Australia East"
+        }
+      },
+      {
         "provider": {
           "name": "EC2",
           "region": "ap-southeast-2"
@@ -81,36 +105,388 @@
     ]
   },
   "register": {
-    "/unclustered/any-cluster-ubuntu1604-bighd-0c79ca28239a44dfba7ef382e382ab70": [
+    "/unclustered/any-cluster-ubuntu1604-2-Glaucoma0": [
       {
-        "module": "inline0",
-        "type": "ansible",
-        "source": {
-          "name": "inline0",
-          "gather_facts": "no",
-          "tasks": [
-            {
-              "action": {
-                "args": "lsb_release -a",
-                "module": "shell"
-              },
-              "register": "shell_out"
-            },
-            {
-              "action": {
-                "args": {
-                  "msg": "{{shell_out.stdout}}"
-                },
-                "module": "debug"
-              }
-            }
-          ]
-        }
+        "module": "offregister-certbot",
+        "kwargs": {
+          "webroots": [
+          ],
+          "domains": [
+            "SamuelMarks.complicated.io"
+          ],
+          "email": "samuel@offscale.io"
+        },
+        "type": "fabric"
+      }
+    ]
+  },
+  "_comments": [
+    {
+      "module": "offregister-app-push",
+      "kwargs": {
+        "use_sudo": true
       },
-      {
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-app-push",
+      "kwargs": {
+        "skip_reset": true,
+        "destroy_node_modules": false,
+        "use_sudo": true,
+        "ExecStart": "/bin/bash -c 'PATH={home_dir}/n/bin:$PATH {home_dir}/n/bin/node main.js'"
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-postgres",
+      "kwargs": {
+        "users": [
+          {
+            "name": "org0_user",
+            "password": "newPassword"
+          }
+        ],
+        "dbs": [
+          "org0_db"
+        ],
+        "cluster": false
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-redis",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-bootstrap",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-node",
+      "kwargs": {
+        "npm_global_packages": [
+          "typings",
+          "mocha",
+          "typescript",
+          "bunyan"
+        ]
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-nginx-static",
+      "kwargs": {
+        "nginx-conf-filename": "default.conf"
+      },
+      "type": "fabric"
+    },
+    "any-cluster-ubuntulinux16-04l-dcd92a6507ab4c7f822199f0c1f93f03",
+    "any-cluster-ubuntu1604-bighd-003ff105846c4ac3ab29a6eaf1441ffd",
+    {
+      "module": "offregister-nginx",
+      "run_cmds": {
+        "exclude": [
+          "setup_nginx_conf2"
+        ],
+        "op": "<=",
+        "val": 2
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-inline",
+      "kwargs": {
+        "sudo": [
+        ]
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-backup",
+      "cluster_name": "backup",
+      "args": [],
+      "kwargs": {
+        "sudo": {
+          "before": [
+            "mongodump -o /edx/backup/mongo-backup",
+            "mysqldump -p --all-databases -r /edx/backup/mysql-backup.sql --password=''",
+            "echo -n '' > /edx/backup/backup.tar.xz",
+            "XZ_OPT=-9e tar -C /edx/backup -cJpf /edx/backup/backup.tar.xz . --exclude=backup.tar.xz"
+          ]
+        },
+        "REMOTE_PATHS": [
+          "/edx/app/edxapp/lms.env.json",
+          "/edx/app/edxapp/cms.env.json",
+          "/edx/backup/backup.tar.xz"
+        ],
+        "LOCAL_PATH": "$TMPDIR",
+        "LOCAL_PATH.append": [
+          "$DNS_NAME",
+          "backups"
+        ],
+        "use_sudo": true,
+        "flatten": true
+      },
+      "type": "fabric",
+      "run_cmds": {
+        "op": "==",
+        "val": 0
+      }
+    },
+    {
+      "module": "offregister-openedx",
+      "cluster_name": "openedx-ficus.1",
+      "args": [],
+      "kwargs": {
+        "lms.env": {
+          "SITE_NAME": "edu.complicated.io",
+          "STUDIO_NAME": "edu.complicated.io",
+          "STUDIO_SHORT_NAME": "edu.complicated.io",
+          "LMS_ROOT_URL": "http://edu.complicated.io",
+          "LMS_BASE": "edu.complicated.io",
+          "CMS_BASE": "studio.complicated.io",
+          "TIME_ZONE": "Australia/Sydney",
+          "REGISTRATION_EXTRA_FIELDS": {
+            "city": "hidden",
+            "country": "hidden",
+            "gender": "hidden",
+            "goals": "hidden",
+            "honor_code": "required",
+            "level_of_education": "hidden",
+            "mailing_address": "hidden",
+            "year_of_birth": "hidden"
+          },
+          "EMAIL_HOST": "smtp.gmail.com",
+          "EMAIL_PORT": 587,
+          "EMAIL_USE_TLS": true,
+          "EMAIL_HOST_USER": "samuelmarks@gmail.com",
+          "EMAIL_HOST_PASSWORD": "newpassword",
+          "DEFAULT_FROM_EMAIL": "samuel@offscale.io",
+          "USE_CUSTOM_THEME": false,
+          "THEME_NAME": "edx-stanford-theme"
+        },
+        "cms.env": {
+          "ANALYTICS_DASHBOARD_URL": "https://studio.complicated.io",
+          "SITE_NAME": "edu.complicated.io",
+          "STUDIO_NAME": "edu.complicated.io",
+          "STUDIO_SHORT_NAME": "edu.complicated.io",
+          "LMS_ROOT_URL": "http://edu.complicated.io",
+          "LMS_BASE": "edu.complicated.io",
+          "CMS_BASE": "studio.complicated.io",
+          "TIME_ZONE": "Australia/Sydney",
+          "REGISTRATION_EXTRA_FIELDS": {
+            "city": "optional",
+            "country": "optional",
+            "gender": "optional",
+            "goals": "optional",
+            "honor_code": "optional",
+            "level_of_education": "optional",
+            "mailing_address": "optional",
+            "year_of_birth": "optional"
+          },
+          "EMAIL_HOST": "smtp.gmail.com",
+          "EMAIL_PORT": 587,
+          "EMAIL_USE_TLS": true,
+          "EMAIL_HOST_USER": "samuelmarks@gmail.com",
+          "EMAIL_HOST_PASSWORD": "newpassword",
+          "DEFAULT_FROM_EMAIL": "samuel@offscale.io",
+          "USE_CUSTOM_THEME": true,
+          "THEME_NAME": "edx-stanford-theme"
+        },
+        "ALL_EMAILS_TO": "samuel@offscale.io"
+      },
+      "type": "fabric",
+      "run_cmds": {
+        "op": "==",
+        "val": 2
+      }
+    },
+    {
+      "/unclustered/": [
+        {
+          "module": "offregister-openedx",
+          "cluster_name": "openedx-ficus.1",
+          "args": [],
+          "kwargs": {
+            "lms.env": {
+              "SITE_NAME": "edu.complicated.io",
+              "STUDIO_NAME": "edu.complicated.io",
+              "STUDIO_SHORT_NAME": "edu.complicated.io",
+              "LMS_ROOT_URL": "http://edu.complicated.io",
+              "LMS_BASE": "edu.complicated.io",
+              "CMS_BASE": "studio.complicated.io",
+              "TIME_ZONE": "Australia/Sydney",
+              "REGISTRATION_EXTRA_FIELDS": {
+                "city": "hidden",
+                "country": "hidden",
+                "gender": "hidden",
+                "goals": "optional",
+                "honor_code": "hidden",
+                "level_of_education": "hidden",
+                "mailing_address": "hidden",
+                "year_of_birth": "hidden"
+              },
+              "EMAIL_HOST": "smtp.gmail.com",
+              "EMAIL_PORT": 587,
+              "EMAIL_USE_TLS": true,
+              "EMAIL_HOST_USER": "samuelmarks@gmail.com",
+              "EMAIL_HOST_PASSWORD": "newpassword",
+              "DEFAULT_FROM_EMAIL": "samuel@offscale.io",
+              "USE_CUSTOM_THEME": true,
+              "THEME_NAME": "edx-stanford-theme"
+            },
+            "cms.env": {
+              "SITE_NAME": "edu.complicated.io",
+              "STUDIO_NAME": "edu.complicated.io",
+              "STUDIO_SHORT_NAME": "edu.complicated.io",
+              "LMS_ROOT_URL": "http://edu.complicated.io",
+              "LMS_BASE": "edu.complicated.io",
+              "CMS_BASE": "studio.complicated.io",
+              "TIME_ZONE": "Australia/Sydney",
+              "REGISTRATION_EXTRA_FIELDS": {
+                "city": "hidden",
+                "country": "hidden",
+                "gender": "hidden",
+                "goals": "optional",
+                "honor_code": "hidden",
+                "level_of_education": "hidden",
+                "mailing_address": "hidden",
+                "year_of_birth": "hidden"
+              },
+              "EMAIL_HOST": "smtp.gmail.com",
+              "EMAIL_PORT": 587,
+              "EMAIL_USE_TLS": true,
+              "EMAIL_HOST_USER": "samuelmarks@gmail.com",
+              "EMAIL_HOST_PASSWORD": "newpassword",
+              "DEFAULT_FROM_EMAIL": "samuel@offscale.io",
+              "USE_CUSTOM_THEME": true,
+              "THEME_NAME": "edx-stanford-theme"
+            },
+            "ALL_EMAILS_TO": "samuel@offscale.io"
+          },
+          "type": "fabric",
+          "run_cmds": {
+            "op": ">=",
+            "val": 2
+          }
+        }
+      ]
+    },
+    {
+      "module": "offregister-backup",
+      "cluster_name": "backup",
+      "args": [],
+      "kwargs": {
+        "sudo": {
+          "before": [
+            "mongodump -o /edx/backup/mongo-backup",
+            "mysqldump -p --all-databases -r /edx/backup/mysql-backup.sql --password=''",
+            "echo -n '' > /edx/backup/backup.tar.xz",
+            "XZ_OPT=-9e tar -C /edx/backup -cJpf /edx/backup/backup.tar.xz . --exclude=backup.tar.xz"
+          ]
+        },
+        "REMOTE_PATHS": [
+          "/edx/app/edxapp/lms.env.json",
+          "/edx/app/edxapp/cms.env.json",
+          "/edx/backup/backup.tar.xz"
+        ],
+        "LOCAL_PATH": "$TMPDIR",
+        "LOCAL_PATH.append": [
+          "$DNS_NAME",
+          "backups"
+        ],
+        "use_sudo": true,
+        "flatten": true
+      },
+      "type": "fabric",
+      "run_cmds": {
+        "op": "==",
+        "val": 0
+      }
+    },
+    {
+      "": {
         "_comments": [
           {
             "module": "offregister-bootstrap",
+            "type": "fabric"
+          },
+          {
+            "module": "ansible_inline0",
+            "type": "ansible",
+            "source": {
+              "name": "inline0",
+              "gather_facts": "no",
+              "tasks": [
+                {
+                  "action": {
+                    "args": "lsb_release -a",
+                    "module": "shell"
+                  },
+                  "register": "shell_out"
+                },
+                {
+                  "action": {
+                    "args": {
+                      "msg": "{{shell_out.stdout}}"
+                    },
+                    "module": "debug"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "module": "ansible_inline0",
+            "type": "ansible",
+            "source": {
+              "name": "inline0",
+              "gather_facts": "no",
+              "tasks": [
+                {
+                  "action": {
+                    "args": "lsb_release -a",
+                    "module": "shell"
+                  },
+                  "register": "shell_out"
+                },
+                {
+                  "action": {
+                    "args": {
+                      "msg": "{{shell_out.stdout}}"
+                    },
+                    "module": "debug"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "module": "offregister-inline",
+            "kwargs": {
+              "run": [
+                "echo hello"
+              ]
+            },
+            "type": "fabric"
+          },
+          {
+            "module": "offregister-inline",
+            "kwargs": {
+              "run": [
+                "echo hello"
+              ]
+            },
+            "type": "fabric"
+          },
+          {
+            "module": "offregister-inline",
+            "kwargs": {
+              "sudo": [
+                "echo hello"
+              ]
+            },
             "type": "fabric"
           },
           {
@@ -130,71 +506,13 @@
             "module": "offregister-openedx",
             "cluster_name": "local__openedx-ficus.1rc1",
             "args": [],
-            "kwargs": {},
+            "kwargs": {
+            },
             "type": "fabric"
           }
         ]
       }
-    ]
-  },
-  "_comment_ideas": [
-    {
-      "module": "offregister-users",
-      "kwargs": {
-        "add_users": [
-          {
-            "name": "ubuntu",
-            "groups": null
-          }
-        ]
-      },
-      "type": "fabric"
     },
-    {
-      "purpose": "STRING",
-      "env": {
-        "args": [],
-        "kwargs": {},
-        "_comment": "top-level env takes precedence by default"
-      },
-      "modules": [
-        {
-          "module": "offregister-nginx",
-          "cluster_name": "static0",
-          "stateful": false,
-          "run_cmds": {
-            "op": ">=",
-            "val": 2
-          },
-          "env_precedence": "local_first",
-          "dependencies": [
-            {
-              "type": "system",
-              "uses": "apt"
-            },
-            "_comment: limits concurrency because of system-wide lock"
-          ],
-          "type": "fabric"
-        },
-        {
-          "module": "offregister-odoo",
-          "cluster_name": "odoo0",
-          "args": [],
-          "kwargs": {},
-          "inherit_env": false,
-          "dependencies": [
-            {
-              "type": "module",
-              "name": "offregister-nginx"
-            },
-            "_comment: Run independent modules concurrently"
-          ],
-          "type": "fabric"
-        }
-      ]
-    }
-  ],
-  "_comments": [
     {
       "/local_unclustered/*": [
         {
@@ -202,11 +520,7 @@
           "cluster_name": "grc-githook",
           "kwargs": {
             "git_pull-init-context": {
-              "GIT_DIR": "/var/www/static/foo-dist",
-              "GIT_REPO": "https://github.com/SamuelMarks/foo-dist.git"
             },
-            "git_pull-init-name": "git_pull_foo.conf",
-            "hookserve-init-name": "hookserve_foo.conf"
           },
           "module": "offregister-githook"
         }
@@ -220,39 +534,35 @@
           "cluster_name": "grc-githook",
           "kwargs": {
             "git_pull-init-context": {
-              "GIT_DIR": "/var/www/static/foo-dist",
-              "GIT_REPO": "https://github.com/SamuelMarks/foo-dist.git"
             },
-            "git_pull-init-name": "git_pull_foo.conf",
-            "hookserve-init-name": "hookserve_foo.conf"
           },
           "module": "offregister-githook"
         },
         {
           "args": [],
-          "cluster_name": "bar-frontend",
+          "cluster_name": "org1frontend",
           "kwargs": {
-            "GIT_REPO": "https://github.com/bar/web-frontend-dist",
-            "SERVER_LOCATION": "/var/www/static/bar-frontend-dist",
-            "SERVER_NAME": "bar.*",
-            "nginx-conf-filename": "bar-frontend-dist"
+            "GIT_REPO": "https://github.com/org1/web-frontend-dist",
+            "SERVER_LOCATION": "/var/www/static/org1frontend-dist",
+            "SERVER_NAME": "org1.*",
+            "nginx-conf-filename": "org1frontend-dist"
           },
           "module": "offregister-angular2"
         },
         {
           "args": [],
-          "cluster_name": "bar-frontend",
+          "cluster_name": "org1frontend",
           "kwargs": {
             "git_pull-init-context": {
-              "GIT_DIR": "/var/www/static/bar-frontend-dist",
-              "GIT_REPO": "https://github.com/bar/web-frontend-dist"
+              "GIT_DIR": "/var/www/static/org1frontend-dist",
+              "GIT_REPO": "https://github.com/org1/web-frontend-dist"
             },
-            "git_pull-init-name": "git_pull_bar.conf",
+            "git_pull-init-name": "git_pull_org1.conf",
             "hookserve-init-context": {
               "DAEMON_PORT": 8889,
-              "PID": "/var/run/hookserve_bar-frontend.pid"
+              "PID": "/var/run/hookserve_org1frontend.pid"
             },
-            "hookserve-init-name": "hookserve_bar-frontend.conf"
+            "hookserve-init-name": "hookserve_org1frontend.conf"
           },
           "module": "offregister-githook"
         }
@@ -261,24 +571,16 @@
     },
     {
       "args": [],
-      "cluster_name": "foo",
       "kwargs": {
-        "GIT_REPO": "https://github.com/SamuelMarks/foo-dist.git",
-        "SERVER_LOCATION": "/var/www/foo",
-        "SERVER_NAME": "foo.*",
-        "nginx-conf-filename": "foo-dist"
       },
       "module": "offregister-angular2",
       "type": "fabric"
     },
     {
       "args": [],
-      "cluster_name": "foo",
       "kwargs": {
         "nginx-init-context": {
           "NAME_OF_BLOCK": "static0",
-          "SERVER_LOCATION": "unix:/run/foo.sock",
-          "SERVER_NAME": "foo.*"
         }
       },
       "module": "offregister-nginx",
@@ -294,7 +596,8 @@
     {
       "args": [],
       "cluster_name": "odoo0",
-      "kwargs": {},
+      "kwargs": {
+      },
       "module": "offregister-odoo",
       "type": "fabric"
     },
@@ -303,7 +606,8 @@
         {
           "args": [],
           "cluster_name": "openedx0_local",
-          "kwargs": {},
+          "kwargs": {
+          },
           "module": "offregister-openedx",
           "run_cmds": {
             "op": ">=",
@@ -318,7 +622,8 @@
         {
           "args": [],
           "cluster_name": "openedx0",
-          "kwargs": {},
+          "kwargs": {
+          },
           "module": "offregister-openedx",
           "run_cmds": {
             "op": ">=",
@@ -405,6 +710,93 @@
     {
       "module": "consul",
       "type": "fabric"
+    }
+  ],
+  "_comment_ideas": [
+    {
+      "/unclustered/any-cluster-ubuntu1604-bighd-003ff105846c4ac3ab29a6eaf1441ffd": [
+        {
+          "cluster_name": "grc-githook",
+          "args": [],
+          "kwargs": {
+            "git_pull-init-context": {
+            },
+          },
+          "type": "fabric",
+          "module": "offregister-githook"
+        }
+      ]
+    },
+    {
+      "/unclustered/any-cluster-ubuntulinux16-04l-e81df2331b6d4aaca929ff8feb916ad6": [
+        {
+          "cluster_name": "grc-githook",
+          "args": [],
+          "kwargs": {
+            "git_pull-init-context": {
+            },
+          },
+          "type": "fabric",
+          "module": "offregister-githook"
+        }
+      ]
+    },
+    {
+      "module": "offregister-users",
+      "kwargs": {
+        "add_users": [
+          {
+            "name": "ubuntu",
+            "groups": null
+          }
+        ]
+      },
+      "type": "fabric"
+    },
+    {
+      "purpose": "STRING",
+      "env": {
+        "args": [],
+        "kwargs": {
+        },
+        "_comment": "top-level env takes precedence by default"
+      },
+      "modules": [
+        {
+          "module": "offregister-nginx",
+          "cluster_name": "static0",
+          "stateful": false,
+          "run_cmds": {
+            "op": ">=",
+            "val": 2
+          },
+          "env_precedence": "local_first",
+          "dependencies": [
+            {
+              "type": "system",
+              "uses": "apt"
+            },
+            "_comment: limits concurrency because of system-wide lock"
+          ],
+          "type": "fabric"
+        },
+        {
+          "module": "offregister-odoo",
+          "cluster_name": "odoo0",
+          "args": [],
+          "kwargs": {
+          },
+          "inherit_env": false,
+          "dependencies": [
+            {
+              "type": "module",
+              "name": "offregister-nginx"
+            },
+            "_comment: Run independent modules concurrently"
+          ],
+          "type": "fabric"
+        }
+      ]
     }
   ],
   "purpose": [

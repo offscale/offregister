@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import contextlib
 import json
 import pprint
@@ -6,8 +7,8 @@ from collections import OrderedDict
 
 from os import path
 from argparse import ArgumentParser
+from subprocess import CalledProcessError
 
-from offregister.common.env import Env
 from pkg_resources import resource_filename
 from itertools import ifilterfalse
 
@@ -70,9 +71,12 @@ def pprint_OrderedDict():
 def process_nodes(cluster_location, config, method, method_args):
     clustering_results = []
     for node_res in list_nodes(cluster_location, marshall=json):
-        process_node_obj = ProcessNode(config, node_res, clustering_results)
-        getattr(process_node_obj, method)(cluster_location, *method_args)
-        clustering_results = process_node_obj.previous_clustering_results
+        try:
+            process_node_obj = ProcessNode(config, node_res, clustering_results)
+            getattr(process_node_obj, method)(cluster_location, *method_args)
+            clustering_results = process_node_obj.previous_clustering_results
+        except CalledProcessError as e:
+            root_logger.exception(e)
 
     with pprint_OrderedDict():
         pp(clustering_results)

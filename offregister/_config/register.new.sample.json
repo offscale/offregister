@@ -1,0 +1,25 @@
+{
+  "name": "register sample",
+  "description": "Default register strategy",
+  "version": "0.0.1",
+  "kv_server": {
+    "url": "http://localhost:2379",
+    "type": "etcd",
+    "version": "2"
+  },
+  "default_pick": "first",
+  "register": [
+    {
+      "module": "offregister-openedx",
+      "cluster_name": "openedx-ficus.master",
+      "args": [],
+      "kwargs": {
+      },
+      "provisioner": "fabric",
+      "exec_filter": {
+        "op": ">=",
+        "val": 2
+      }
+    }
+  ]
+}

@@ -6,6 +6,8 @@ from etcd import Client
 from libcloud.common.vagrant import isIpPrivate
 
 from os import name as os_name, environ
+
+from libcloud.compute.base import Node
 from pkg_resources import resource_filename
 from itertools import ifilter, imap
 from types import NoneType
@@ -16,7 +18,7 @@ from libcloud.compute.types import Provider
 
 from offutils import pp, update_d
 
-from offutils_strategy_register import list_nodes, node_to_dict, save_node_info, fetch_node
+from offutils_strategy_register import list_nodes, node_to_dict, save_node_info
 
 from offconf import replace_variables
 
@@ -40,7 +42,8 @@ class ProcessNode(object):
         self.previous_clustering_results = previous_clustering_results
 
         if not node:
-            node = fetch_node(marshall=json)
+            nodes = list_nodes(marshall=json)
+            node = nodes[1] if len(nodes) > 1 else nodes[0]
 
         with open(process_filename) as f:
             strategy = replace_variables(f.read())
@@ -71,18 +74,29 @@ class ProcessNode(object):
         ))(get_driver(self.driver_name))
 
         self.node_name = node.key[node.key.find('/', 1) + 1:].encode('utf8')
-        if self.driver_name == 'azure':
+        if self.driver_name in ('azure',):  # ('azure', 'azure_arm'):
             if 'create_with' not in self.config_provider or \
                             'ex_cloud_service_name' not in self.config_provider['create_with']:
                 raise KeyError('`ex_cloud_service_name` must be defined. '
                                'See: http://libcloud.readthedocs.org/en/latest/compute/drivers/azure.html'
                                '#libcloud.compute.drivers.azure.AzureNodeDriver.create_node')
-            nodes = driver.list_nodes(self.config_provider['create_with']['ex_cloud_service_name'])
+            nodes = driver.list_nodes()  # (self.config_provider['create_with']['ex_cloud_service_name'])
+        elif self.driver_name == 'azure_arm':
+            from libcloud.compute.drivers.azure_arm import AzureNodeDriver
+
+            self.node = Node(node.value['uuid'],
+                             node.value['name'],
+                             node.value['state'],
+                             node.value['public_ips'],
+                             node.value['private_ips'],
+                             driver=AzureNodeDriver,
+                             extra=node.value['extra'])
+            nodes = None
         else:
             nodes = driver.list_nodes()
 
-        self.node = next(ifilter(lambda _node: _node.uuid == node.value['uuid'],
-                                 nodes), None)
+        self.node = self.node or next(ifilter(lambda _node: _node.uuid == node.value['uuid'],
+                                              nodes), None)
 
         if not self.node:
             raise EnvironmentError('node not found. Maybe the cloud provider is still provisioning?')
@@ -90,8 +104,8 @@ class ProcessNode(object):
         if self.node.extra is not None:
             if 'ssh_config' in self.node.extra:
                 if 'IdentityFile' in self.node.extra['ssh_config']:
-                    self.config_provider['ssh'] = dict(private_key_path=self.node.extra['ssh_config']['IdentityFile'],
-                                                       **self.config_provider.get('ssh', {}))
+                    self.config_provider['ssh'] = {'private_key_path': self.node.extra['ssh_config']['IdentityFile']}
+                    self.config_provider['ssh'].update(self.config_provider.get('ssh', {}))
                 self.env.ssh_config = self.node.extra['ssh_config']
             if 'password' in self.node.extra:
                 print 'password =', self.node.extra['password']

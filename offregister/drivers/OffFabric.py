@@ -116,9 +116,7 @@ class OffFabric(OffregisterBaseDriver):
                 res[self.dns_name][cluster_path][step][t] = exec_output
 
             if res[self.dns_name][cluster_path][step] and '_merge' in res[self.dns_name][cluster_path][step]:
-                print '**' * 20
                 merge = res[self.dns_name][cluster_path][step].pop('_merge')
-                print '/\\' * 20
                 self.merge_steps(merge, res)
 
             if '_merge' in cluster_kwargs['cache']:
