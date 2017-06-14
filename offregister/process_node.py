@@ -36,6 +36,8 @@ logger = get_logger(modules[__name__].__name__)
 
 
 class ProcessNode(object):
+    node = None
+
     def __init__(self, process_filename, node=None, previous_clustering_results=None,
                  redis_client_kwargs=None):
         self.env = Env()
@@ -138,8 +140,8 @@ class ProcessNode(object):
                 from drivers.OffFabric import OffFabric
 
                 return OffFabric.install_packages(cluster)
-            elif cluster['type'] == 'ansible':
-                logger.warn('NotImplementedError: Package installation for Ansible')
+            elif cluster['type'] in ('ansible', 'pyinvoke'):
+                logger.warn('NotImplementedError: Package installation for {}'.format(cluster['type']))
                 return
             else:
                 raise NotImplementedError('{}'.format(cluster['type']))
@@ -186,7 +188,7 @@ class ProcessNode(object):
             self.dns_name = self.node.public_ips[0]  # LOL
         elif not self.dns_name and 'skydns2' not in self.process_dict['register'][dir_or_key] and \
                         'consul' not in self.process_dict['register'][dir_or_key]:
-            self.dns_name = '{public_ip}.xip.io'.format(public_ip=self.node.public_ips[0])
+            self.dns_name = self.node.public_ips[0] # '{public_ip}.xip.io'.format(public_ip=self.node.public_ips[0])
             # raise Exception('No DNS name and no way of acquiring one')
         self.env.hosts = [self.dns_name]
 
@@ -237,17 +239,15 @@ class ProcessNode(object):
             return
 
         if cluster['type'] == 'fabric':
-            from drivers.OffFabric import OffFabric
-
-            offregisterC = OffFabric
+            from drivers.OffFabric import OffFabric as offregisterX
+        elif cluster['type'] == 'pyinvoke':
+            from drivers.OffInvoke import OffInvoke as offregisterX
         elif cluster['type'] == 'ansible':
-            from drivers.OffAnsible import OffAnsible
-
-            offregisterC = OffAnsible
+            from drivers.OffAnsible import OffAnsible as offregisterX
         else:
             raise NotImplementedError('{}'.format(cluster['type']))
 
-        offregister = offregisterC(self.env, self.node, self.node_name, self.dns_name)
+        offregister = offregisterX(self.env, self.node, self.node_name, self.dns_name)
         add_cluster_ret = offregister.prepare_cluster_obj(cluster, res)
         offregister.run_tasks(**add_cluster_ret._asdict())
         # offregister.run_tasks(cluster_path, cluster_type, res, tag, args, kwargs)

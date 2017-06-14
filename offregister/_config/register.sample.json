@@ -110,9 +110,10 @@
         "module": "offregister-certbot",
         "kwargs": {
           "webroots": [
+            "/var/www/static/glaucoma-risk-calculator-rest-api"
           ],
           "domains": [
-            "SamuelMarks.complicated.io"
+            "glaucoma-australia.complicated.io"
           ],
           "email": "samuel@offscale.io"
         },
@@ -124,6 +125,8 @@
     {
       "module": "offregister-app-push",
       "kwargs": {
+        "GIT_DIR": "/var/www/static/glaucoma-risk-calculator-web-frontend-dist",
+        "GIT_REPO": "https://github.com/glaucoma-australia/glaucoma-risk-calculator-web-frontend-dist",
         "use_sudo": true
       },
       "type": "fabric"
@@ -131,6 +134,8 @@
     {
       "module": "offregister-app-push",
       "kwargs": {
+        "GIT_DIR": "/var/www/static/glaucoma-risk-calculator-rest-api",
+        "GIT_REPO": "https://github.com/glaucoma-australia/glaucoma-risk-calculator-rest-api",
         "skip_reset": true,
         "destroy_node_modules": false,
         "use_sudo": true,
@@ -143,12 +148,12 @@
       "kwargs": {
         "users": [
           {
-            "name": "org0_user",
+            "name": "glaucoma_user",
             "password": "newPassword"
           }
         ],
         "dbs": [
-          "org0_db"
+          "glaucoma_db"
         ],
         "cluster": false
       },
@@ -198,6 +203,7 @@
       "module": "offregister-inline",
       "kwargs": {
         "sudo": [
+          "[ -d /var/www/static/glaucoma-risk-calculator-web-frontend-dist ] || git clone https://github.com/glaucoma-australia/glaucoma-risk-calculator-web-frontend-dist /var/www/static/glaucoma-risk-calculator-web-frontend-dist"
         ]
       },
       "type": "fabric"
@@ -261,7 +267,7 @@
           "EMAIL_PORT": 587,
           "EMAIL_USE_TLS": true,
           "EMAIL_HOST_USER": "samuelmarks@gmail.com",
-          "EMAIL_HOST_PASSWORD": "newpassword",
+          "EMAIL_HOST_PASSWORD": "nopasswordhere",
           "DEFAULT_FROM_EMAIL": "samuel@offscale.io",
           "USE_CUSTOM_THEME": false,
           "THEME_NAME": "edx-stanford-theme"
@@ -289,7 +295,7 @@
           "EMAIL_PORT": 587,
           "EMAIL_USE_TLS": true,
           "EMAIL_HOST_USER": "samuelmarks@gmail.com",
-          "EMAIL_HOST_PASSWORD": "newpassword",
+          "EMAIL_HOST_PASSWORD": "nopasswordhere",
           "DEFAULT_FROM_EMAIL": "samuel@offscale.io",
           "USE_CUSTOM_THEME": true,
           "THEME_NAME": "edx-stanford-theme"
@@ -331,7 +337,7 @@
               "EMAIL_PORT": 587,
               "EMAIL_USE_TLS": true,
               "EMAIL_HOST_USER": "samuelmarks@gmail.com",
-              "EMAIL_HOST_PASSWORD": "newpassword",
+              "EMAIL_HOST_PASSWORD": "nopasswordhere",
               "DEFAULT_FROM_EMAIL": "samuel@offscale.io",
               "USE_CUSTOM_THEME": true,
               "THEME_NAME": "edx-stanford-theme"
@@ -358,7 +364,7 @@
               "EMAIL_PORT": 587,
               "EMAIL_USE_TLS": true,
               "EMAIL_HOST_USER": "samuelmarks@gmail.com",
-              "EMAIL_HOST_PASSWORD": "newpassword",
+              "EMAIL_HOST_PASSWORD": "nopasswordhere",
               "DEFAULT_FROM_EMAIL": "samuel@offscale.io",
               "USE_CUSTOM_THEME": true,
               "THEME_NAME": "edx-stanford-theme"
@@ -520,7 +526,11 @@
           "cluster_name": "grc-githook",
           "kwargs": {
             "git_pull-init-context": {
+              "GIT_DIR": "/var/www/static/glaucoma-risk-calculator-dist",
+              "GIT_REPO": "https://github.com/SamuelMarks/glaucoma-risk-calculator-dist.git"
             },
+            "git_pull-init-name": "git_pull_glaucoma-risk-calculator.conf",
+            "hookserve-init-name": "hookserve_glaucoma-risk-calculator.conf"
           },
           "module": "offregister-githook"
         }
@@ -534,35 +544,39 @@
           "cluster_name": "grc-githook",
           "kwargs": {
             "git_pull-init-context": {
+              "GIT_DIR": "/var/www/static/glaucoma-risk-calculator-dist",
+              "GIT_REPO": "https://github.com/SamuelMarks/glaucoma-risk-calculator-dist.git"
             },
+            "git_pull-init-name": "git_pull_glaucoma-risk-calculator.conf",
+            "hookserve-init-name": "hookserve_glaucoma-risk-calculator.conf"
           },
           "module": "offregister-githook"
         },
         {
           "args": [],
-          "cluster_name": "org1frontend",
+          "cluster_name": "stockrankr-frontend",
           "kwargs": {
-            "GIT_REPO": "https://github.com/org1/web-frontend-dist",
-            "SERVER_LOCATION": "/var/www/static/org1frontend-dist",
-            "SERVER_NAME": "org1.*",
-            "nginx-conf-filename": "org1frontend-dist"
+            "GIT_REPO": "https://github.com/stockrankr/web-frontend-dist",
+            "SERVER_LOCATION": "/var/www/static/stockrankr-frontend-dist",
+            "SERVER_NAME": "stockrankr.*",
+            "nginx-conf-filename": "stockrankr-frontend-dist"
           },
           "module": "offregister-angular2"
         },
         {
           "args": [],
-          "cluster_name": "org1frontend",
+          "cluster_name": "stockrankr-frontend",
           "kwargs": {
             "git_pull-init-context": {
-              "GIT_DIR": "/var/www/static/org1frontend-dist",
-              "GIT_REPO": "https://github.com/org1/web-frontend-dist"
+              "GIT_DIR": "/var/www/static/stockrankr-frontend-dist",
+              "GIT_REPO": "https://github.com/stockrankr/web-frontend-dist"
             },
-            "git_pull-init-name": "git_pull_org1.conf",
+            "git_pull-init-name": "git_pull_stockrankr.conf",
             "hookserve-init-context": {
               "DAEMON_PORT": 8889,
-              "PID": "/var/run/hookserve_org1frontend.pid"
+              "PID": "/var/run/hookserve_stockrankr-frontend.pid"
             },
-            "hookserve-init-name": "hookserve_org1frontend.conf"
+            "hookserve-init-name": "hookserve_stockrankr-frontend.conf"
           },
           "module": "offregister-githook"
         }
@@ -571,16 +585,24 @@
     },
     {
       "args": [],
+      "cluster_name": "glaucoma-risk-calculator",
       "kwargs": {
+        "GIT_REPO": "https://github.com/SamuelMarks/glaucoma-risk-calculator-dist.git",
+        "SERVER_LOCATION": "/var/www/glaucoma-risk-calculator",
+        "SERVER_NAME": "glaucoma-risk-calculator.*",
+        "nginx-conf-filename": "glaucoma-risk-calculator-dist"
       },
       "module": "offregister-angular2",
       "type": "fabric"
     },
     {
       "args": [],
+      "cluster_name": "glaucoma-risk-calculator",
       "kwargs": {
         "nginx-init-context": {
           "NAME_OF_BLOCK": "static0",
+          "SERVER_LOCATION": "unix:/run/glaucoma-risk-calculator.sock",
+          "SERVER_NAME": "glaucoma-risk-calculator.*"
         }
       },
       "module": "offregister-nginx",
@@ -720,7 +742,11 @@
           "args": [],
           "kwargs": {
             "git_pull-init-context": {
+              "GIT_DIR": "/var/www/static/glaucoma-risk-calculator-dist",
+              "GIT_REPO": "https://github.com/SamuelMarks/glaucoma-risk-calculator-dist.git"
             },
+            "git_pull-init-name": "git_pull_glaucoma-risk-calculator",
+            "hookserve-init-name": "hookserve_glaucoma-risk-calculator"
           },
           "type": "fabric",
           "module": "offregister-githook"
@@ -734,7 +760,11 @@
           "args": [],
           "kwargs": {
             "git_pull-init-context": {
+              "GIT_DIR": "/var/www/static/glaucoma-risk-calculator-dist",
+              "GIT_REPO": "https://github.com/SamuelMarks/glaucoma-risk-calculator-dist.git"
             },
+            "git_pull-init-name": "git_pull_glaucoma-risk-calculator.conf",
+            "hookserve-init-name": "hookserve_glaucoma-risk-calculator.conf"
           },
           "type": "fabric",
           "module": "offregister-githook"

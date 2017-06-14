@@ -1,0 +1,317 @@
+{
+  "name": "Default",
+  "description": "Default register strategy",
+  "version": "0.0.1",
+  "provider": {
+    "options": [
+      {
+        "auth": {
+          "key_file": "${env.AZURE_KEY_FILE}",
+          "tenant_id": "${env.AZURE_TENANT_ID}",
+          "subscription_id": "${env.AZURE_SUBSCRIPTION}",
+          "key": "${env.AZURE_KEY}",
+          "secret": "${env.AZURE_SECRET}",
+          "region": "australiaeast"
+        },
+        "ssh": {
+          "public_key_path": "${env.PUBLIC_KEY_PATH}",
+          "private_key_path": "${env.PRIVATE_KEY_PATH}",
+          "key_name": "${env.PUBLIC_KEY_NAME}",
+          "node_password": "${env.AZURE_NODE_PASSWORD}"
+        },
+        "create_with": {
+          "ex_resource_group": "${env.AZURE_CLOUD_NAME}",
+          "ex_storage_account": null
+        },
+        "provider": {
+          "name": "AZURE_ARM",
+          "region": "Australia East"
+        }
+      },
+      {
+        "provider": {
+          "name": "EC2",
+          "region": "ap-southeast-2"
+        },
+        "auth": {
+          "key": "${env.AWS_KEY_ID}",
+          "secret": "${env.AWS_ACCESS_KEY}"
+        },
+        "ssh": {
+          "public_key_path": "${env.PUBLIC_KEY_PATH}",
+          "private_key_path": "${env.PRIVATE_KEY_PATH}",
+          "key_name": "${env.PUBLIC_KEY_NAME}"
+        },
+        "security_group": [
+          "all"
+        ],
+        "key_name": "${env.PUBLIC_KEY_NAME}"
+      },
+      {
+        "provider": {
+          "name": "SOFTLAYER",
+          "region": "syd01"
+        },
+        "auth": {
+          "key": "${env.SL_USER}",
+          "secret": "${env.SL_KEY}"
+        },
+        "ssh": {
+          "public_key_path": "${env.PUBLIC_KEY_PATH}",
+          "private_key_path": "${env.PRIVATE_KEY_PATH}",
+          "key_name": "${env.PUBLIC_KEY_NAME}"
+        }
+      },
+      {
+        "auth": {
+          "subscription_id": "${env.AZURE_SUBSCRIPTION}",
+          "key_file": "${env.AZURE_KEY_FILE}"
+        },
+        "ssh": {
+          "public_key_path": "${env.PUBLIC_KEY_PATH}",
+          "private_key_path": "${env.PRIVATE_KEY_PATH}",
+          "key_name": "${env.PUBLIC_KEY_NAME}",
+          "node_password": "${env.AZURE_NODE_PASSWORD}"
+        },
+        "create_with": {
+          "ex_cloud_service_name": "${env.AZURE_CLOUD_NAME}"
+        },
+        "provider": {
+          "name": "AZURE",
+          "region": "Australia East"
+        }
+      },
+      {
+        "provider": {
+          "name": "DIGITAL_OCEAN",
+          "region": "sgp1"
+        },
+        "auth": {
+          "key": "${env.DIGITAL_OCEAN_KEY}"
+        },
+        "ssh": {
+          "public_key_path": "${env.PUBLIC_KEY_PATH}",
+          "private_key_path": "${env.PRIVATE_KEY_PATH}",
+          "key_name": "${env.PUBLIC_KEY_NAME}"
+        }
+      },
+      {
+        "provider": {
+          "name": "VAGRANT",
+          "ex_vagrantfile": "/mnt/large_linux/vagrant/edx-fullstack/Vagrantfile",
+          "key": "/mnt/large_linux/vagrant/edx-fullstack/Vagrantfile"
+        }
+      }
+    ]
+  },
+  "register": {
+    "/unclustered/openedx": [
+      {
+        "module": "offregister-openedx",
+        "cluster_name": "openedx-ficus.1",
+        "args": [],
+        "kwargs": {
+          "treat_local_different": true,
+          "LOCAL": {
+            "LMS": "preview.localhost",
+            "CMS": "preview.localhost:18010"
+          },
+          "lms.env": {
+            "PLATFORM_NAME": "edu.complicated.io",
+            "EDXAPP_PLATFORM_NAME": "edu.complicated.io",
+            "ANALYTICS_DASHBOARD_URL": "https://studio.complicated.io",
+            "SITE_NAME": "edu.complicated.io",
+            "STUDIO_NAME": "studio.complicated.io",
+            "STUDIO_SHORT_NAME": "studio.complicated.io",
+            "LMS_ROOT_URL": "http://edu.complicated.io",
+            "LMS_BASE": "edu.complicated.io",
+            "CMS_BASE": "studio.complicated.io",
+            "TIME_ZONE": "Australia/Sydney",
+            "REGISTRATION_EXTRA_FIELDS": {
+              "city": "hidden",
+              "country": "hidden",
+              "gender": "hidden",
+              "goals": "optional",
+              "honor_code": "required",
+              "level_of_education": "hidden",
+              "mailing_address": "hidden",
+              "year_of_birth": "required"
+            },
+            "FEATURES": {
+              "AUTH_USE_OPENID_PROVIDER": true,
+              "AUTOMATIC_AUTH_FOR_TESTING": false,
+              "CUSTOM_COURSES_EDX": false,
+              "ENABLE_COMBINED_LOGIN_REGISTRATION": true,
+              "ENABLE_COURSE_DISCOVERY": false,
+              "ENABLE_CORS_HEADERS": false,
+              "ENABLE_COUNTRY_ACCESS": false,
+              "ENABLE_CREDIT_API": false,
+              "ENABLE_CREDIT_ELIGIBILITY": false,
+              "ENABLE_CROSS_DOMAIN_CSRF_COOKIE": false,
+              "ENABLE_CSMH_EXTENDED": true,
+              "ENABLE_DISCUSSION_HOME_PANEL": true,
+              "ENABLE_DISCUSSION_SERVICE": true,
+              "ENABLE_EDXNOTES": false,
+              "ENABLE_GRADE_DOWNLOADS": true,
+              "ENABLE_INSTRUCTOR_ANALYTICS": false,
+              "ENABLE_MKTG_SITE": false,
+              "ENABLE_MOBILE_REST_API": false,
+              "ENABLE_OAUTH2_PROVIDER": false,
+              "ENABLE_ONLOAD_BEACON": false,
+              "ENABLE_READING_FROM_MULTIPLE_HISTORY_TABLES": true,
+              "ENABLE_SPECIAL_EXAMS": false,
+              "ENABLE_SYSADMIN_DASHBOARD": false,
+              "ENABLE_THIRD_PARTY_AUTH": false,
+              "ENABLE_VIDEO_BEACON": false,
+              "ENABLE_VIDEO_UPLOAD_PIPELINE": false,
+              "PREVIEW_LMS_BASE": "preview.complicated.io",
+              "USE_CUSTOM_THEME": false,
+              "SKIP_EMAIL_VALIDATION": true,
+              "ALLOW_AUTOMATED_SIGNUPS": true,
+              "AUTO_ENROLL_IN": [
+                "course-v1:UniversityOfSydney+OPHTH101+2017_T2"
+              ]
+            },
+            "EMAIL_HOST": "smtp.gmail.com",
+            "EMAIL_PORT": 587,
+            "EMAIL_USE_TLS": true,
+            "EMAIL_HOST_USER": "samuel@offscale.io",
+            "EMAIL_HOST_PASSWORD": "no_password_hjereeee",
+            "DEFAULT_FROM_EMAIL": "samuel@offscale.io",
+            "USE_CUSTOM_THEME": false,
+            "THEME_NAME": "edx-stanford-theme"
+          },
+          "cms.env": {
+            "PLATFORM_NAME": "edu.complicated.io",
+            "EDXAPP_PLATFORM_NAME": "edu.complicated.io",
+            "ANALYTICS_DASHBOARD_URL": "https://studio.complicated.io",
+            "SITE_NAME": "edu.complicated.io",
+            "STUDIO_NAME": "studio.complicated.io",
+            "STUDIO_SHORT_NAME": "studio.complicated.io",
+            "LMS_ROOT_URL": "http://edu.complicated.io",
+            "LMS_BASE": "edu.complicated.io",
+            "CMS_BASE": "studio.complicated.io",
+            "TIME_ZONE": "Australia/Sydney",
+            "REGISTRATION_EXTRA_FIELDS": {
+              "city": "hidden",
+              "country": "hidden",
+              "gender": "hidden",
+              "goals": "optional",
+              "honor_code": "required",
+              "level_of_education": "hidden",
+              "mailing_address": "hidden",
+              "year_of_birth": "required"
+            },
+            "FEATURES": {
+              "AUTH_USE_OPENID_PROVIDER": true,
+              "AUTOMATIC_AUTH_FOR_TESTING": false,
+              "CUSTOM_COURSES_EDX": false,
+              "ENABLE_COMBINED_LOGIN_REGISTRATION": true,
+              "ENABLE_CORS_HEADERS": false,
+              "ENABLE_COURSE_DISCOVERY": true,
+              "ENABLE_COUNTRY_ACCESS": false,
+              "ENABLE_CREDIT_API": false,
+              "ENABLE_CREDIT_ELIGIBILITY": false,
+              "ENABLE_CROSS_DOMAIN_CSRF_COOKIE": false,
+              "ENABLE_CSMH_EXTENDED": true,
+              "ENABLE_DISCUSSION_HOME_PANEL": true,
+              "ENABLE_DISCUSSION_SERVICE": true,
+              "ENABLE_EDXNOTES": false,
+              "ENABLE_GRADE_DOWNLOADS": true,
+              "ENABLE_INSTRUCTOR_ANALYTICS": false,
+              "ENABLE_MKTG_SITE": false,
+              "ENABLE_MOBILE_REST_API": false,
+              "ENABLE_OAUTH2_PROVIDER": false,
+              "ENABLE_ONLOAD_BEACON": false,
+              "ENABLE_READING_FROM_MULTIPLE_HISTORY_TABLES": true,
+              "ENABLE_SPECIAL_EXAMS": false,
+              "ENABLE_SYSADMIN_DASHBOARD": false,
+              "ENABLE_THIRD_PARTY_AUTH": false,
+              "ENABLE_VIDEO_BEACON": false,
+              "ENABLE_VIDEO_UPLOAD_PIPELINE": false,
+              "PREVIEW_LMS_BASE": "preview.complicated.io",
+              "USE_CUSTOM_THEME": false,
+              "SKIP_EMAIL_VALIDATION": true,
+              "ALLOW_AUTOMATED_SIGNUPS": true
+            },
+            "EMAIL_HOST": "smtp.gmail.com",
+            "EMAIL_PORT": 587,
+            "EMAIL_USE_TLS": true,
+            "EMAIL_HOST_USER": "samuelmarks@gmail.com",
+            "EMAIL_HOST_PASSWORD": "no_password_hjereeee",
+            "DEFAULT_FROM_EMAIL": "samuel@offscale.io",
+            "USE_CUSTOM_THEME": false,
+            "THEME_NAME": "edx-stanford-theme"
+          },
+          "ALL_EMAILS_TO": "samuel@offscale.io",
+          "openedx_honor_html": "<p>By taking this course you are agreeing to be polite and respectful in all discourse.</p><p>This course it OPT-OUT, and here is the detailed participation information statement: Details <a href=\"https://edu.complicated.io/asset-v1:UniversityOfSydney+OPHTH101+2017_T2+type@asset+block@PIS-Phase_2___D-eye.3.pdf\">PIS-Phase 2 + D-eye.3</a>.</p>",
+          "openedx_banner_html": "<h1>Welcome to edu.complicated.io</h1><h2>Enrol in <a href=\"https://edu.complicated.io/courses/course-v1:UniversityOfSydney+OPHTH101+2017_T2/about\">eFocus</a> today</h2>"
+        },
+        "type": "fabric",
+        "run_cmds": {
+          "op": "==",
+          "val": 3
+        }
+      }
+    ]
+  },
+  "_comments": [
+    "any-cluster-ubuntu1604-bighd-b378dad553564ccd88d955b08ca5cd2e",
+    {
+      "module": "offregister-bootstrap",
+      "type": "fabric"
+    },
+    "openedx",
+    {
+      "module": "offregister-bootstrap",
+      "type": "fabric"
+    },
+    "any-cluster-ubuntu1604-bighd-b378dad553564ccd88d955b08ca5cd2e",
+    {
+      "module": "offregister-inline",
+      "kwargs": {
+        "sudo": [
+          "[ -d /var/www/static/glaucoma-risk-calculator-web-frontend-dist ] || git clone https://github.com/glaucoma-australia/glaucoma-risk-calculator-web-frontend-dist /var/www/static/glaucoma-risk-calculator-web-frontend-dist"
+        ]
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-backup",
+      "cluster_name": "backup",
+      "args": [],
+      "kwargs": {
+        "sudo": {
+          "before": [
+            "mongodump -o /edx/backup/mongo-backup",
+            "mysqldump -p --all-databases -r /edx/backup/mysql-backup.sql --password=''",
+            "echo -n '' > /edx/backup/backup.tar.xz",
+            "XZ_OPT=-9e tar -C /edx/backup -cJpf /edx/backup/backup.tar.xz . --exclude=backup.tar.xz"
+          ]
+        },
+        "REMOTE_PATHS": [
+          "/edx/app/edxapp/lms.env.json",
+          "/edx/app/edxapp/cms.env.json",
+          "/edx/backup/backup.tar.xz"
+        ],
+        "LOCAL_PATH": "$TMPDIR",
+        "LOCAL_PATH.append": [
+          "$DNS_NAME",
+          "backups"
+        ],
+        "use_sudo": true,
+        "flatten": true
+      },
+      "type": "fabric",
+      "run_cmds": {
+        "op": "==",
+        "val": 0
+      }
+    }
+  ],
+  "purpose": [
+    "any-cluster"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}
