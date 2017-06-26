@@ -105,7 +105,7 @@
     ]
   },
   "register": {
-    "/unclustered/any-cluster-ubuntu1604-2-Glaucoma0": [
+    "/unclustered/any-cluster-ubuntu1604-2-Glaucoma1": [
       {
         "module": "offregister-certbot",
         "kwargs": {
