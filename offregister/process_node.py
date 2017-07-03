@@ -201,7 +201,7 @@ class ProcessNode(object):
             self.dns_name = self.node.public_ips[0]  # LOL
         elif not self.dns_name and 'skydns2' not in self.process_dict['register'][dir_or_key] and \
                         'consul' not in self.process_dict['register'][dir_or_key]:
-            self.dns_name = '{public_ip}.xip.io'.format(public_ip=self.node.public_ips[0])
+            self.dns_name = self.node.public_ips[0] # '{public_ip}.xip.io'.format(public_ip=self.node.public_ips[0])
             # raise Exception('No DNS name and no way of acquiring one')
         self.env.hosts = [self.dns_name]
 

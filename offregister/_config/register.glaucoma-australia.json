@@ -145,21 +145,21 @@
           "val": 0
         },
         "type": "fabric"
+      },
+      {
+        "module": "offregister-app-push",
+        "kwargs": {
+          "GIT_DIR": "/var/www/static/glaucoma-risk-calculator-web-frontend-dist",
+          "GIT_REPO": "https://github.com/glaucoma-australia/glaucoma-risk-calculator-web-frontend-dist",
+          "use_sudo": true,
+          "node_sudo": false,
+          "nginx": false
+        },
+        "type": "fabric"
       }
     ]
   },
   "_comments": [
-    {
-      "module": "offregister-app-push",
-      "kwargs": {
-        "GIT_DIR": "/var/www/static/glaucoma-risk-calculator-web-frontend-dist",
-        "GIT_REPO": "https://github.com/glaucoma-australia/glaucoma-risk-calculator-web-frontend-dist",
-        "use_sudo": true,
-        "node_sudo": false,
-        "nginx": false
-      },
-      "type": "fabric"
-    },
     {
       "module": "offregister-postgres",
       "kwargs": {
