@@ -3,106 +3,7 @@
   "description": "Default register strategy",
   "version": "0.0.1",
   "provider": {
-    "options": [
-      {
-        "auth": {
-          "key_file": "${env.AZURE_KEY_FILE}",
-          "tenant_id": "${env.AZURE_TENANT_ID}",
-          "subscription_id": "${env.AZURE_SUBSCRIPTION}",
-          "key": "${env.AZURE_KEY}",
-          "secret": "${env.AZURE_SECRET}",
-          "region": "australiaeast"
-        },
-        "ssh": {
-          "public_key_path": "${env.PUBLIC_KEY_PATH}",
-          "private_key_path": "${env.PRIVATE_KEY_PATH}",
-          "key_name": "${env.PUBLIC_KEY_NAME}",
-          "node_password": "${env.AZURE_NODE_PASSWORD}"
-        },
-        "create_with": {
-          "ex_resource_group": "${env.AZURE_CLOUD_NAME}",
-          "ex_storage_account": null
-        },
-        "provider": {
-          "name": "AZURE_ARM",
-          "region": "Australia East"
-        }
-      },
-      {
-        "provider": {
-          "name": "EC2",
-          "region": "ap-southeast-2"
-        },
-        "auth": {
-          "key": "${env.AWS_KEY_ID}",
-          "secret": "${env.AWS_ACCESS_KEY}"
-        },
-        "ssh": {
-          "public_key_path": "${env.PUBLIC_KEY_PATH}",
-          "private_key_path": "${env.PRIVATE_KEY_PATH}",
-          "key_name": "${env.PUBLIC_KEY_NAME}"
-        },
-        "security_group": [
-          "all"
-        ],
-        "key_name": "${env.PUBLIC_KEY_NAME}"
-      },
-      {
-        "provider": {
-          "name": "SOFTLAYER",
-          "region": "syd01"
-        },
-        "auth": {
-          "key": "${env.SL_USER}",
-          "secret": "${env.SL_KEY}"
-        },
-        "ssh": {
-          "public_key_path": "${env.PUBLIC_KEY_PATH}",
-          "private_key_path": "${env.PRIVATE_KEY_PATH}",
-          "key_name": "${env.PUBLIC_KEY_NAME}"
-        }
-      },
-      {
-        "auth": {
-          "subscription_id": "${env.AZURE_SUBSCRIPTION}",
-          "key_file": "${env.AZURE_KEY_FILE}"
-        },
-        "ssh": {
-          "public_key_path": "${env.PUBLIC_KEY_PATH}",
-          "private_key_path": "${env.PRIVATE_KEY_PATH}",
-          "key_name": "${env.PUBLIC_KEY_NAME}",
-          "node_password": "${env.AZURE_NODE_PASSWORD}"
-        },
-        "create_with": {
-          "ex_cloud_service_name": "${env.AZURE_CLOUD_NAME}"
-        },
-        "provider": {
-          "name": "AZURE",
-          "region": "Australia East"
-        }
-      },
-      {
-        "provider": {
-          "name": "DIGITAL_OCEAN",
-          "region": "sgp1"
-        },
-        "auth": {
-          "key": "${env.DIGITAL_OCEAN_KEY}"
-        },
-        "ssh": {
-          "public_key_path": "${env.PUBLIC_KEY_PATH}",
-          "private_key_path": "${env.PRIVATE_KEY_PATH}",
-          "key_name": "${env.PUBLIC_KEY_NAME}"
-        }
-      },
-      {
-        "provider": {
-          "name": "VAGRANT",
-          "ex_vagrantfile": "/mnt/large_linux/vagrant/edx-fullstack/Vagrantfile",
-          "key": "/mnt/large_linux/vagrant/edx-fullstack/Vagrantfile"
-        }
-      }
-    ]
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
     "/unclustered/any-cluster-ubuntu1604-2-Glaucoma1": [
@@ -294,9 +195,13 @@
           "/edx/app/edxapp/cms.env.json",
           "/edx/backup/backup.tar.xz"
         ],
-        "LOCAL_PATH": "$TMPDIR",
+        "LOCAL_PATH": {
+          "$ref": "env:TMPDIR"
+        },
         "LOCAL_PATH.append": [
-          "$DNS_NAME",
+          {
+            "$ref": "env:DNS_NAME"
+          },
           "backups"
         ],
         "use_sudo": true,

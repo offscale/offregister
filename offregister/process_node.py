@@ -2,6 +2,7 @@ import json
 from collections import namedtuple
 from sys import modules
 
+import jsonref
 from etcd import Client
 from libcloud.common.vagrant import isIpPrivate
 
@@ -19,8 +20,6 @@ from libcloud.compute.types import Provider
 from offutils import pp, update_d
 
 from offutils_strategy_register import list_nodes, node_to_dict, save_node_info, KeyVal, dict_to_node
-
-from offconf import replace_variables
 
 from __init__ import get_logger
 from offregister.common.env import Env
@@ -49,8 +48,7 @@ class ProcessNode(object):
             node = next(n for n in nodes if 'global::' not in n.key) if len(nodes) > 1 else nodes[0]
 
         with open(process_filename) as f:
-            strategy = replace_variables(f.read())
-        self.process_dict = json.loads(strategy)
+            self.process_dict = jsonref.load(f)
 
         driver_cls = node.value['driver'] if '_' not in node.value['driver'] \
             else node.value['driver'][:node.value['driver'].find('_')
@@ -100,21 +98,23 @@ class ProcessNode(object):
         else:
             nodes = driver.list_nodes()
 
-        def ensure_node(n):
+        def ensure_node(n, skip_assert=False):
             if isinstance(n, KeyVal):
                 n = dict_to_node(n.value) if isinstance(n.value, dict) else n.value
             elif isinstance(n, dict):
                 n = dict_to_node(n)
-            assert isinstance(n, Node)
+            if not skip_assert:
+                assert isinstance(n, Node)
             return n
 
         if self.node:
             self.node = ensure_node(self.node)
         else:
-            self.node = ensure_node(next(ifilter(lambda _node: _node.value['uuid'] == node.value['uuid'], nodes), None))
-
-        if not self.node:
-            raise EnvironmentError('node not found. Maybe the cloud provider is still provisioning?')
+            self.node = ensure_node(next(ifilter(lambda _node: _node.value['uuid'] == node.value['uuid'], nodes), None),
+                                    skip_assert=True)
+            if not self.node:
+                raise EnvironmentError('node not found. Maybe the cloud provider is still provisioning?')
+            assert isinstance(self.node, Node)
 
         if self.node.extra is not None:
             if 'ssh_config' in self.node.extra:
@@ -142,7 +142,7 @@ class ProcessNode(object):
     def validate_conf(cls, process_filename, within):
         # Init
         with open(process_filename) as f:
-            process_dict = replace_variables(f.read())
+            process_dict = jsonref.load(f)
         process_dict = json.loads(process_dict)
 
         def handle_cluster(cluster):
@@ -201,7 +201,7 @@ class ProcessNode(object):
             self.dns_name = self.node.public_ips[0]  # LOL
         elif not self.dns_name and 'skydns2' not in self.process_dict['register'][dir_or_key] and \
                         'consul' not in self.process_dict['register'][dir_or_key]:
-            self.dns_name = self.node.public_ips[0] # '{public_ip}.xip.io'.format(public_ip=self.node.public_ips[0])
+            self.dns_name = self.node.public_ips[0]  # '{public_ip}.xip.io'.format(public_ip=self.node.public_ips[0])
             # raise Exception('No DNS name and no way of acquiring one')
         self.env.hosts = [self.dns_name]
 
