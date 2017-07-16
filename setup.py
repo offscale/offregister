@@ -1,9 +1,10 @@
-from setuptools import setup, find_packages
-from os import path, listdir
-from functools import partial
-from itertools import imap, ifilter
 from ast import parse
 from distutils.sysconfig import get_python_lib
+from functools import partial
+from itertools import imap, ifilter
+from os import path, listdir
+
+from setuptools import setup, find_packages
 
 if __name__ == '__main__':
     package_name = 'offregister'

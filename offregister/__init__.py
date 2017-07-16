@@ -1,11 +1,11 @@
-import yaml
 import logging
-
-from os import path
 from logging.config import dictConfig as _dictConfig
+from os import path
+
+import yaml
 
 __author__ = 'Samuel Marks'
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 
 def get_logger(name=None):

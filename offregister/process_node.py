@@ -1,25 +1,20 @@
 import json
 from collections import namedtuple
+from itertools import ifilter, imap
+from os import name as os_name, environ
 from sys import modules
+from types import NoneType
 
 import jsonref
 from etcd import Client
-from libcloud.common.vagrant import isIpPrivate
-
-from os import name as os_name, environ
-
-from libcloud.compute.base import Node
-from pkg_resources import resource_filename
-from itertools import ifilter, imap
-from types import NoneType
-
 from libcloud import security
+from libcloud.common.vagrant import isIpPrivate
+from libcloud.compute.base import Node
 from libcloud.compute.providers import get_driver, DRIVERS
 from libcloud.compute.types import Provider
-
 from offutils import pp, update_d
-
 from offutils_strategy_register import list_nodes, node_to_dict, save_node_info, KeyVal, dict_to_node
+from pkg_resources import resource_filename
 
 from __init__ import get_logger
 from offregister.common.env import Env
@@ -143,7 +138,6 @@ class ProcessNode(object):
         # Init
         with open(process_filename) as f:
             process_dict = jsonref.load(f)
-        process_dict = json.loads(process_dict)
 
         def handle_cluster(cluster):
             if cls.is_comment_cluster(cluster):
