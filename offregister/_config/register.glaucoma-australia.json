@@ -1,6 +1,6 @@
 {
-  "name": "Default",
-  "description": "Default register strategy",
+  "name": "GlaucomaAustralia",
+  "description": "Offregister strategy for Glaucoma Australia",
   "version": "0.0.1",
   "env": {
     "OFFAUTH_JSON": {

@@ -32,8 +32,7 @@ logger = get_logger(modules[__name__].__name__)
 class ProcessNode(object):
     node = None  # type: Node
 
-    def __init__(self, process_filename, node=None, previous_clustering_results=None,
-                 redis_client_kwargs=None):
+    def __init__(self, process_filename, node=None, previous_clustering_results=None, redis_client_kwargs=None):
         self.env = Env()
         self.previous_clustering_results = previous_clustering_results
 

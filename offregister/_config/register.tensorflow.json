@@ -1,0 +1,29 @@
+{
+  "name": "TensorFlow",
+  "description": "Offregister strategy for TensorFlow",
+  "version": "0.0.1",
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "register": {
+    "/unclustered/nongpu0": [
+      {
+        "module": "offregister-tensorflow",
+        "cluster_name": "tensorflow.southeast.0",
+        "args": [],
+        "kwargs": {
+        },
+        "type": "fabric",
+        "_run_cmds": {
+          "op": "==",
+          "val": 3
+        }
+      }
+    ]
+  },
+  "purpose": [
+    "tensorflow"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}
