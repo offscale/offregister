@@ -1,0 +1,30 @@
+{
+  "name": "Apache Guacamole",
+  "description": "Offregister strategy for Apache Guacamole",
+  "version": "0.0.1",
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "register": {
+    "/unclustered/any-cluster-ubuntu1604-3-OpenEdX1": [
+      {
+        "module": "offregister-guac",
+        "cluster_name": "guac",
+        "args": [],
+        "kwargs": {
+          "ADMIN_PASSWORD": "$ADMIN_PASSWORD"
+        },
+        "type": "fabric",
+        "_run_cmds": {
+          "op": "==",
+          "val": 1
+        }
+      }
+    ]
+  },
+  "purpose": [
+    "any-cluster"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}

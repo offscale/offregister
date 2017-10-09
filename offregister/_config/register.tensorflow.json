@@ -8,15 +8,24 @@
   "register": {
     "/unclustered/nongpu0": [
       {
+        "module": "offregister-bootstrap",
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-redis",
+        "type": "fabric"
+      },
+      {
         "module": "offregister-tensorflow",
         "cluster_name": "tensorflow.southeast.0",
         "args": [],
         "kwargs": {
+          "from": "source"
         },
         "type": "fabric",
-        "_run_cmds": {
-          "op": "==",
-          "val": 3
+        "run_cmds": {
+          "op": ">",
+          "val": 1
         }
       }
     ]
