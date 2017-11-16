@@ -47,7 +47,8 @@
               "ENABLE_VIDEO_UPLOAD_PIPELINE": false,
               "PREVIEW_LMS_BASE": "preview.localhost:80",
               "SHOW_FOOTER_LANGUAGE_SELECTOR": false,
-              "SHOW_HEADER_LANGUAGE_SELECTOR": false
+              "SHOW_HEADER_LANGUAGE_SELECTOR": false,
+              "homepage_overlay_html": "<h1>Take an Open edX Course</h1>"
             },
             "FOOTER_ORGANIZATION_IMAGE": "images/logo.png",
             "LMS_BASE": "edu.complicated.io",
@@ -138,50 +139,17 @@
         },
         "type": "fabric",
         "run_cmds": {
-          "op": "==",
-          "val": 3
+          "op": "in",
+          "val": [
+            "restart_openedx666",
+            "foo"
+          ]
         }
       }
     ]
   },
   "_comments": [
     "any-cluster-ubuntu1604-3-OpenEdX2",
-    {
-      "module": "offregister-backup",
-      "cluster_name": "backup",
-      "args": [],
-      "kwargs": {
-        "sudo": {
-          "before": [
-            "mongodump -o /edx/backup/mongo-backup",
-            "mysqldump -p --all-databases -r /edx/backup/mysql-backup.sql --password=''",
-            "echo -n '' > /edx/backup/backup.tar.xz",
-            "XZ_OPT=-9e tar -C /edx/backup -cJpf /edx/backup/backup.tar.xz . --exclude=backup.tar.xz"
-          ]
-        },
-        "REMOTE_PATHS": [
-          "/edx/app/edxapp/lms.env.json",
-          "/edx/app/edxapp/cms.env.json",
-          "/edx/backup/backup.tar.xz"
-        ],
-        "LOCAL_PATH": {
-          "$ref": "env:TMPDIR"
-        },
-        "LOCAL_PATH.append": [
-          {
-            "$ref": "env:DNS_NAME"
-          },
-          "backups"
-        ],
-        "use_sudo": true,
-        "flatten": true
-      },
-      "type": "fabric",
-      "run_cmds": {
-        "op": "==",
-        "val": 0
-      }
-    },
     {
       "module": "offregister-openedx",
       "cluster_name": "openedx-ginkgo.master.0",

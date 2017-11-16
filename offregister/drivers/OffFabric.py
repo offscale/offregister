@@ -1,7 +1,7 @@
 import json
 from collections import OrderedDict
 from functools import partial
-from itertools import ifilter, izip, imap
+from itertools import ifilter, imap
 from operator import add
 from os import environ, path
 from os import listdir
@@ -10,8 +10,7 @@ from time import time
 
 from fabric.api import env
 from fabric.tasks import execute
-
-from offutils import update_d, get_sorted_strnum, filter_strnums, binary_search, raise_f, pp, is_sequence
+from offutils import update_d, get_sorted_strnum, filter_strnums, binary_search, raise_f
 from offutils_strategy_register import save_node_info
 
 from offregister import root_logger
@@ -162,7 +161,21 @@ class OffFabric(OffregisterBaseDriver):
                 {DictType: filter_by(cluster['run_cmds'], func_names)
            }.get(run_cmds_type, raise_f(NotImplementedError, '{!s} unexpected for run_cmds'.format(run_cmds_type)))'''
 
-        return tuple(filter_strnums(cluster['run_cmds'].get('op'), cluster['run_cmds']['val'], func_names))
+        if cluster['run_cmds'].get('op') == 'in':
+            fnames_set = frozenset(func_names)
+            values_set = frozenset(cluster['run_cmds']['val'])
+            inters_set = fnames_set & values_set
+            results = tuple(v for v in cluster['run_cmds']['val']
+                            if v in inters_set)
+            if not (len(values_set) == len(cluster['run_cmds']['val']) == len(results)):
+                root_logger.error('Expected {results} to be subset of {fnames_set}'.format(
+                    results=results, fnames_set=fnames_set)
+                )
+                exit(3)
+            return results
+
+        return tuple(filter_strnums(cluster['run_cmds'].get('op'), cluster['run_cmds']['val'],
+                                    func_names))
 
     @staticmethod
     def handle_deprecations(func_names):
