@@ -1,0 +1,38 @@
+{
+  "name": "Jupyter",
+  "description": "Offregister strategy for Jupyter Notebook",
+  "version": "0.0.1",
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "register": {
+    "/unclustered/any-cluster-ubuntu1604-3-OpenEdX1": [
+      {
+        "module": "offregister-jupyter",
+        "cluster_name": "jupyter0",
+        "args": [],
+        "kwargs": {
+          "domain": "notebook.complicated.io"
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-certbot",
+        "cluster_name": "jupyter0",
+        "args": [],
+        "kwargs": {
+          "domains": [
+            "notebook.complicated.io"
+          ],
+          "email": "samuel@offscale.io"
+        },
+        "type": "fabric"
+      }
+    ]
+  },
+  "purpose": [
+    "tensorflow"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}
