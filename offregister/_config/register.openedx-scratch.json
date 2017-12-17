@@ -1,0 +1,54 @@
+{
+  "name": "OpenEdX-scratch",
+  "description": "Offregister strategy for OpenEdX-scratch",
+  "version": "0.0.1",
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "register": {
+    "/unclustered/any-cluster-ubuntu1604-3-OpenEdX3": [
+      {
+        "module": "offregister-openedx",
+        "type": "fabric",
+        "kwargs": {
+          "PLATFORM_NAME": "edu by complicated.io",
+          "LMS_ROOT_URL": "http://edu2.complicated.io",
+          "CMS_ROOT_URL": "http://studio2.complicated.io",
+          "LMS_SITE_NAME": "edu2.complicated.io",
+          "CMS_SITE_NAME": "studio2.complicated.io",
+          "PREVIEW_LMS_BASE": "preview.edu2.complicated.io",
+          "MYSQL_PASSWORD": {
+            "$ref": "env:MYSQL_PASSWORD"
+          },
+          "staff_user": "samuel",
+          "staff_email": "samuel@offscale.io",
+          "staff_pass": "3333333333",
+          "LMS_LISTEN": 80,
+          "CMS_LISTEN": 80,
+          "LMS_EXTRA_BLOCK": "",
+          "CMS_EXTRA_BLOCK": "",
+          "db_migration": false,
+          "cms_paver": false,
+          "lms_paver": false,
+          "destroy_edx_platform": false,
+          "git_team": "SamuelMarks",
+          "git_branch": "SamuelMarks/ginkgo",
+          "git_skip_reset": true,
+          "git_skip_checkout": true,
+          "destroy_virtualenv": false
+        }
+      }
+    ]
+  },
+  "_comments": [
+    {
+      "module": "offregister-bootstrap",
+      "type": "fabric"
+    }
+  ],
+  "purpose": [
+    "openedx-scratch"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}
