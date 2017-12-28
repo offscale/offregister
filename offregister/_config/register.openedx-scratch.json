@@ -27,15 +27,15 @@
           "CMS_LISTEN": 80,
           "LMS_EXTRA_BLOCK": "",
           "CMS_EXTRA_BLOCK": "",
-          "db_migration": false,
-          "cms_paver": false,
-          "lms_paver": false,
-          "destroy_edx_platform": false,
+          "db_migration": true,
+          "cms_paver": true,
+          "lms_paver": true,
+          "destroy_edx_platform": true,
           "git_team": "SamuelMarks",
           "git_branch": "SamuelMarks/ginkgo",
           "git_skip_reset": true,
           "git_skip_checkout": true,
-          "destroy_virtualenv": false
+          "destroy_virtualenv": true
         }
       }
     ]
