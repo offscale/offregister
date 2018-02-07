@@ -35,12 +35,16 @@
         "cluster_name": "tensorflow.southeast.0",
         "args": [],
         "kwargs": {
-          "from": "source"
+          "from": "source",
+          "virtual_env": "/opt/venvs/tflow3.5",
+          "python3": true
         },
         "type": "fabric",
         "run_cmds": {
-          "op": ">",
-          "val": 1
+          "op": "in",
+          "val": [
+            "install_jupyter_notebook1"
+          ]
         }
       }
     ]

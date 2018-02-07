@@ -2,19 +2,31 @@
   "name": "GlaucomaAustralia",
   "description": "Offregister strategy for Glaucoma Australia",
   "version": "0.0.1",
-  "env": {
-    "OFFAUTH_JSON": {
-      "$ref": "env:OFFAUTH_JSON"
-    }
-  },
   "provider": {
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
-  "test_pkg": {
-    "$ref": "pkg_file:offregister::_config::auth.sample.json"
-  },
   "register": {
-    "/unclustered/any-cluster-ubuntu1604-2-Glaucoma1": [
+    "/unclustered/glaucoma-australia": [
+      {
+        "module": "offregister-postgres",
+        "kwargs": {
+          "users": [
+            {
+              "name": "glaucoma_user",
+              "password": ""
+            }
+          ],
+          "dbs": [
+            "glaucoma_db"
+          ],
+          "cluster": false
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-redis",
+        "type": "fabric"
+      },
       {
         "module": "offregister-app-push",
         "kwargs": {
@@ -25,7 +37,7 @@
           "destroy_node_modules": true,
           "use_sudo": true,
           "node_sudo": false,
-          "node_version": "8.6.0",
+          "node_version": "8.9.4",
           "ExecStart": "/bin/bash -c 'PATH={home_dir}/n/bin:$PATH {home_dir}/n/bin/node main.js'",
           "npm_global_packages": [
             "typings",
@@ -38,7 +50,7 @@
           "app_name": "glaucoma-risk-calculator",
           "DESCRIPTION": "Glaucoma risk calculator frontend and backend",
           "DNS_NAMES": [
-            "glaucoma-risk-calculator.complicated.io"
+            "calculator.glaucoma.org.au"
           ],
           "PROXY_ROUTE": "/api",
           "PROXY_PASS": "http://localhost:5465",
@@ -49,44 +61,21 @@
           "nginx_secure": "certbot",
           "https_cert_email": "samuel@offscale.io"
         },
-        "run_cmds": {
-          "op": "==",
-          "val": 0
-        },
-        "type": "fabric"
-      },
-      {
-        "module": "offregister-app-push",
-        "kwargs": {
-          "GIT_DIR": "/var/www/static/glaucoma-risk-calculator-web-frontend-dist",
-          "GIT_REPO": "https://github.com/glaucoma-australia/glaucoma-risk-calculator-web-frontend-dist",
-          "use_sudo": true,
-          "node_sudo": false,
-          "nginx": false
-        },
         "type": "fabric"
       }
     ]
   },
   "_comments": [
+    "/unclustered/any-cluster-ubuntu1604-2-Glaucoma1",
     {
-      "module": "offregister-postgres",
+      "module": "offregister-app-push",
       "kwargs": {
-        "users": [
-          {
-            "name": "glaucoma_user",
-            "password": "newPassword"
-          }
-        ],
-        "dbs": [
-          "glaucoma_db"
-        ],
-        "cluster": false
+        "GIT_DIR": "/var/www/static/glaucoma-risk-calculator-web-frontend-dist",
+        "GIT_REPO": "https://github.com/glaucoma-australia/glaucoma-risk-calculator-web-frontend-dist",
+        "use_sudo": true,
+        "node_sudo": false,
+        "nginx": false
       },
-      "type": "fabric"
-    },
-    {
-      "module": "offregister-redis",
       "type": "fabric"
     }
   ],

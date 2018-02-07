@@ -25,7 +25,7 @@
           "destroy_node_modules": true,
           "use_sudo": true,
           "node_sudo": false,
-          "node_version": "8.6.0",
+          "node_version": "8.9.4",
           "ExecStart": "/bin/bash -c 'PATH={home_dir}/n/bin:$PATH {home_dir}/n/bin/node main.js'",
           "npm_global_packages": [
             "typings",

@@ -12,7 +12,7 @@ from libcloud.common.vagrant import isIpPrivate
 from libcloud.compute.base import Node
 from libcloud.compute.providers import get_driver, DRIVERS
 from libcloud.compute.types import Provider
-from offutils import pp, update_d
+from offutils import pp, update_d, obj_to_d
 from offutils_strategy_register import list_nodes, node_to_dict, save_node_info, KeyVal, dict_to_node
 from pkg_resources import resource_filename
 
@@ -180,10 +180,10 @@ class ProcessNode(object):
             if 'node_password' in self.config_provider['ssh']:
                 self.env.password = self.config_provider['ssh']['node_password']
 
-        if self.env.user is None:
-            self.env.user = self.guess_os_username()
+        if self.env.user is None or self.env.user == 'user':
+            self.env.user = self.node.extra['user'] if 'user' in self.node.extra else self.guess_os_username()
 
-        if self.env.password is None and 'password' in self.node.extra:
+        if (self.env.password is None or self.env.password == 'unspecified') and 'password' in self.node.extra:
             self.env.password = self.node.extra['password']
 
         dir_or_key = (lambda d_or_k: d_or_k.directory or d_or_k.file)(
@@ -197,6 +197,13 @@ class ProcessNode(object):
             self.dns_name = self.node.public_ips[0]  # '{public_ip}.xip.io'.format(public_ip=self.node.public_ips[0])
             # raise Exception('No DNS name and no way of acquiring one')
         self.env.hosts = [self.dns_name]
+
+        if 'no_key_filename' in self.node.extra and self.node.extra['no_key_filename']:
+            del self.env.key_filename
+            self.env.use_ssh_config = False
+        print '<env>'
+        pp(obj_to_d(self.env))
+        print '</env>'
 
     def get_directory_or_key(self, within):
         return ProcessNode.get_directory_or_key(self.process_dict, within)
