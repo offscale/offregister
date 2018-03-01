@@ -66,7 +66,7 @@
         "kwargs": {
           "STOCKRANKR_ROOT": "/var/www/static",
           "TRADING_DATA_STOCK_ROOT": "/mnt/Stocks",
-          "PARSED_TRADING_DATA_STOCK_ROOT": "/mnt/ParsedStocks"
+          "TRADING_DATA_ROOT": "/mnt/ParsedStocks"
         },
         "type": "fabric"
       },
@@ -80,9 +80,10 @@
             "DEFAULT_ADMIN_PASSWORD": {
               "$ref": "env:DEFAULT_ADMIN_PASSWORD"
             },
-            "TRADING_DATA_PATHS": null,
-            "SYMBOL_CSVS": null,
-            "STRIPE_S_KEY": null
+            "$$ENV_JSON_FILE": "/var/www/static/stockrankr-rest-api/bootstrap/env.json",
+            "STRIPE_S_KEY": {
+              "$ref": "env:STRIPE_S_KEY"
+            }
           },
           "GIT_DIR": "/var/www/static/stockrankr-rest-api",
           "GIT_REPO": "https://github.com/stockrankr/stockrankr-rest-api",
