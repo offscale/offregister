@@ -16,41 +16,6 @@
   "register": {
     "/unclustered/any-cluster-ubuntu1604-2-Glaucoma1": [
       {
-        "module": "offregister-postgres",
-        "kwargs": {
-          "create": [
-            {
-              "user": {
-                "$ref": "env:DB_USER"
-              },
-              "password": {
-                "$ref": "env:DB_PASS"
-              },
-              "dbname": {
-                "$ref": "env:DB_NAME"
-              }
-            }
-          ],
-          "users": [
-            {
-              "name": {
-                "$ref": "env:DB_USER"
-              },
-              "password": {
-                "$ref": "env:DB_PASS"
-              }
-            }
-          ],
-          "dbs": [
-            {
-              "$ref": "env:DB_NAME"
-            }
-          ],
-          "cluster": false
-        },
-        "type": "fabric"
-      },
-      {
         "module": "offregister-git",
         "kwargs": {
           "GIT_DIR": "/var/www/static/stockrankr-rest-api",
@@ -87,6 +52,7 @@
           },
           "GIT_DIR": "/var/www/static/stockrankr-rest-api",
           "GIT_REPO": "https://github.com/stockrankr/stockrankr-rest-api",
+          "GIT_BRANCH": "ben-company-details",
           "service_name": "stockrankr-rest-api",
           "skip_reset": false,
           "destroy_node_modules": true,
@@ -155,6 +121,41 @@
   "_comments": [
     {
       "module": "offregister-redis",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-postgres",
+      "kwargs": {
+        "create": [
+          {
+            "user": {
+              "$ref": "env:DB_USER"
+            },
+            "password": {
+              "$ref": "env:DB_PASS"
+            },
+            "dbname": {
+              "$ref": "env:DB_NAME"
+            }
+          }
+        ],
+        "users": [
+          {
+            "name": {
+              "$ref": "env:DB_USER"
+            },
+            "password": {
+              "$ref": "env:DB_PASS"
+            }
+          }
+        ],
+        "dbs": [
+          {
+            "$ref": "env:DB_NAME"
+          }
+        ],
+        "cluster": false
+      },
       "type": "fabric"
     }
   ],
