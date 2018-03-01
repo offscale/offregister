@@ -8,14 +8,10 @@
   "register": {
     "/unclustered/any-cluster-ubuntu1604-3-OpenEdX4": [
       {
-        "module": "offregister-bootstrap",
-        "type": "fabric"
-      },
-      {
         "module": "offregister-openedx",
         "cluster_name": "openedx-ginkgo.master.1",
-        "args": [],
         "kwargs": {
+          "run_paver": true,
           "ALL_EMAILS_TO": "samuel@offscale.io",
           "lms.env": {
             "ACTIVATION_EMAIL_SUPPORT_LINK": "http://edu.complicated.io",
@@ -142,17 +138,20 @@
           }
         },
         "type": "fabric",
-        "___run_cmds": {
+        "run_cmds": {
           "op": "in",
           "val": [
-            "restart_openedx666",
-            "foo"
+            "restart_openedx666"
           ]
         }
       }
     ]
   },
   "_comments": [
+    {
+      "module": "offregister-bootstrap",
+      "type": "fabric"
+    },
     {
       "module": "offregister-inline",
       "kwargs": {

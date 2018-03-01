@@ -1,0 +1,89 @@
+{
+  "name": "StereoStream",
+  "description": "StereoStream strategy",
+  "version": "0.0.1",
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "register": {
+    "/unclustered/any-cluster-ubuntu1604-3-OpenEdX1": [
+      {
+        "module": "offregister-postgres",
+        "kwargs": {
+          "users": [
+            {
+              "name": "stereostream_user",
+              "password": {
+                "$ref": "env:DBPASS"
+              }
+            }
+          ],
+          "dbs": [
+            "stereostream_db"
+          ],
+          "cluster": false
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-redis",
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-app-push",
+        "kwargs": {
+          "GIT_DIR": "/var/www/static/stereostream-rest-api",
+          "GIT_REPO": "https://github.com/stereostream/stereostream-rest-api",
+          "service_name": "stereostream-rest-api",
+          "skip_reset": false,
+          "destroy_node_modules": true,
+          "use_sudo": true,
+          "node_sudo": false,
+          "node_version": "8.9.4",
+          "ExecStart": "/bin/bash -c 'PATH={home_dir}/n/bin:$PATH {home_dir}/n/bin/node main.js'",
+          "npm_global_packages": [
+            "typings",
+            "mocha",
+            "typescript",
+            "bunyan"
+          ],
+          "post_npm_step": "tsc",
+          "nginx": true,
+          "app_name": "stereostream",
+          "DESCRIPTION": "StereoStream frontend and backend",
+          "DNS_NAMES": [
+            "stereostream.complicated.io"
+          ],
+          "PROXY_ROUTE": "/api",
+          "PROXY_PASS": "http://localhost:5466",
+          "REST_API_PORT": 5466,
+          "NGINX_PORT": 80,
+          "WWWROOT": "/var/www/static/stereostream-web-frontend-dist/dist",
+          "WWWPATH": "/",
+          "____nginx_secure": "certbot",
+          "https_cert_email": "samuel@offscale.io"
+        },
+        "type": "fabric"
+      }
+    ]
+  },
+  "_comments": [
+    "/unclustered/any-cluster-ubuntu1604-2-Glaucoma1",
+    {
+      "module": "offregister-app-push",
+      "kwargs": {
+        "GIT_DIR": "/var/www/static/stereostream-web-frontend-dist",
+        "GIT_REPO": "https://github.com/stereostream/stereostream-web-frontend-dist",
+        "use_sudo": true,
+        "node_sudo": false,
+        "nginx": false
+      },
+      "type": "fabric"
+    }
+  ],
+  "purpose": [
+    "any-cluster"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}
