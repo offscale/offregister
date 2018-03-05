@@ -1,7 +1,7 @@
 {
   "name": "StereoStream",
   "description": "StereoStream strategy",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "provider": {
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
@@ -10,16 +10,33 @@
       {
         "module": "offregister-postgres",
         "kwargs": {
+          "create": [
+            {
+              "user": {
+                "$ref": "env:DB_USER"
+              },
+              "password": {
+                "$ref": "env:DB_PASS"
+              },
+              "dbname": {
+                "$ref": "env:DB_NAME"
+              }
+            }
+          ],
           "users": [
             {
-              "name": "stereostream_user",
+              "name": {
+                "$ref": "env:DB_USER"
+              },
               "password": {
-                "$ref": "env:DBPASS"
+                "$ref": "env:DB_PASS"
               }
             }
           ],
           "dbs": [
-            "stereostream_db"
+            {
+              "$ref": "env:DB_NAME"
+            }
           ],
           "cluster": false
         },
@@ -41,6 +58,30 @@
           "node_sudo": false,
           "node_version": "8.9.4",
           "ExecStart": "/bin/bash -c 'PATH={home_dir}/n/bin:$PATH {home_dir}/n/bin/node main.js'",
+          "RDBMS_URI": [
+            "postgres://",
+            {
+              "$ref": "env:DB_USER"
+            },
+            ":",
+            {
+              "$ref": "env:DB_PASS"
+            },
+            "@",
+            "localhost",
+            "/",
+            {
+              "$ref": "env:DB_NAME"
+            }
+          ],
+          "DAEMON_ENV": {
+            "DEFAULT_ADMIN_EMAIL": {
+              "$ref": "env:DEFAULT_ADMIN_EMAIL"
+            },
+            "DEFAULT_ADMIN_PASSWORD": {
+              "$ref": "env:DEFAULT_ADMIN_PASSWORD"
+            }
+          },
           "npm_global_packages": [
             "typings",
             "mocha",
@@ -55,31 +96,32 @@
             "stereostream.complicated.io"
           ],
           "PROXY_ROUTE": "/api",
-          "PROXY_PASS": "http://localhost:5466",
-          "REST_API_PORT": 5466,
+          "PROXY_PASS": "http://localhost:5467",
+          "REST_API_PORT": 5467,
           "NGINX_PORT": 80,
-          "WWWROOT": "/var/www/static/stereostream-web-frontend-dist/dist",
+          "WWWROOT": "/var/www/static/stereostream-angular-dist/dist",
           "WWWPATH": "/",
           "____nginx_secure": "certbot",
-          "https_cert_email": "samuel@offscale.io"
+          "https_cert_email": "samuel@offscale.io",
+          "EXTRA_BLOCKS": "    location /Downloads {\n        if ($request_method = 'OPTIONS') {\n            add_header 'Access-Control-Allow-Origin' 'http://localhost:4400';\n            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';\n            #\n            # Custom headers and headers various browsers *should* be OK with but aren't\n            #\n            add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range';\n            #\n            # Tell client that this pre-flight info is valid for 20 days\n            #\n            add_header 'Access-Control-Max-Age' 1728000;\n            add_header 'Content-Type' 'text/plain; charset=utf-8';\n            add_header 'Content-Length' 0;\n            return 204;\n        }\n        root /mnt/stereostream;\n        autoindex on;\n        autoindex_exact_size off;\n        autoindex_format json;\n        autoindex_localtime on;\n    }"
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-app-push",
+        "kwargs": {
+          "GIT_DIR": "/var/www/static/stereostream-angular-dist",
+          "GIT_REPO": "https://github.com/stereostream/stereostream-angular-dist",
+          "use_sudo": true,
+          "node_sudo": false,
+          "nginx": false
         },
         "type": "fabric"
       }
     ]
   },
   "_comments": [
-    "/unclustered/any-cluster-ubuntu1604-2-Glaucoma1",
-    {
-      "module": "offregister-app-push",
-      "kwargs": {
-        "GIT_DIR": "/var/www/static/stereostream-web-frontend-dist",
-        "GIT_REPO": "https://github.com/stereostream/stereostream-web-frontend-dist",
-        "use_sudo": true,
-        "node_sudo": false,
-        "nginx": false
-      },
-      "type": "fabric"
-    }
+    "/unclustered/any-cluster-ubuntu1604-2-Glaucoma1"
   ],
   "purpose": [
     "any-cluster"
