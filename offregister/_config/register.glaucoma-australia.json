@@ -69,10 +69,10 @@
           ],
           "service_name": "glaucoma-risk-calculator-rest-api",
           "skip_reset": false,
-          "destroy_node_modules": true,
+          "destory_cache": true,
           "use_sudo": true,
           "node_sudo": false,
-          "node_version": "8.9.4",
+          "node_version": "lts",
           "ExecStart": "/bin/bash -c 'PATH={home_dir}/n/bin:$PATH {home_dir}/n/bin/node main.js'",
           "npm_global_packages": [
             "typings",

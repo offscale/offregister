@@ -38,7 +38,7 @@
         "GIT_DIR": "/var/www/static/glaucoma-risk-calculator-rest-api",
         "GIT_REPO": "https://github.com/glaucoma-australia/glaucoma-risk-calculator-rest-api",
         "skip_reset": true,
-        "destroy_node_modules": false,
+        "destory_cache": false,
         "use_sudo": true,
         "ExecStart": "/bin/bash -c 'PATH={home_dir}/n/bin:$PATH {home_dir}/n/bin/node main.js'"
       },

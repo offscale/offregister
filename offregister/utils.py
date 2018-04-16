@@ -1,7 +1,7 @@
 import importlib
 import pkgutil
 from collections import namedtuple
-from sys import stderr, modules
+from sys import modules
 from types import FunctionType
 
 from etcd import Client
@@ -109,7 +109,7 @@ def guess_os(node, hint=None):
         return 'ubuntu'
     elif 'core' in node_name:
         return 'core'
-    return hint or 'ubuntu'
+    return hint or '{}'.format(node.extra['user']) if 'user' in node.extra else 'ubuntu'
 
 
 # stolen from fabric.api!

@@ -14,24 +14,15 @@
     "$ref": "pkg_file:offregister::_config::auth.sample.json"
   },
   "register": {
-    "/unclustered/any-cluster-ubuntu1604-2-Glaucoma1": [
+    "/unclustered/stockrankr": [
       {
-        "module": "offregister-git",
+        "module": "offregister-app-push",
         "kwargs": {
-          "GIT_DIR": "/var/www/static/stockrankr-rest-api",
-          "GIT_REPO": "https://github.com/stockrankr/stockrankr-rest-api",
-          "GIT_BRANCH": "ben-company-details",
-          "skip_reset": false,
-          "use_sudo": true
-        },
-        "type": "fabric"
-      },
-      {
-        "module": "offregister-stockrankr",
-        "kwargs": {
-          "STOCKRANKR_ROOT": "/var/www/static",
-          "TRADING_DATA_STOCK_ROOT": "/mnt/Stocks",
-          "TRADING_DATA_ROOT": "/mnt/ParsedStocks"
+          "GIT_DIR": "/var/www/static/stockrankr-web-frontend-dist",
+          "GIT_REPO": "https://github.com/stockrankr/stockrankr-web-frontend-dist",
+          "use_sudo": true,
+          "node_sudo": false,
+          "nginx": false
         },
         "type": "fabric"
       },
@@ -55,11 +46,11 @@
           "GIT_BRANCH": "ben-company-details",
           "service_name": "stockrankr-rest-api",
           "skip_reset": false,
-          "destroy_node_modules": true,
+          "destory_cache": true,
           "use_sudo": true,
           "node_sudo": false,
-          "node_version": "8.9.4",
-          "ExecStart": "/bin/bash -c 'PATH={home_dir}/n/bin:$PATH {home_dir}/n/bin/node main.js'",
+          "node_version": "lts",
+          "node_main": "main.js",
           "RDBMS_URI": [
             "postgres://",
             {
@@ -77,6 +68,7 @@
             }
           ],
           "npm_global_packages": [
+            "npm",
             "typings",
             "mocha",
             "typescript",
@@ -87,7 +79,7 @@
           "app_name": "stockrankr",
           "DESCRIPTION": "stockrankr frontend and backend",
           "DNS_NAMES": [
-            "stockrankr.complicated.io"
+            "stockrankr.com"
           ],
           "PROXY_ROUTE": "/api",
           "PROXY_PASS": "http://localhost:5466",
@@ -95,32 +87,28 @@
           "NGINX_PORT": 80,
           "WWWROOT": "/var/www/static/stockrankr-web-frontend-dist/dist",
           "WWWPATH": "/",
-          "___nginx_secure": "certbot",
-          "___https_cert_email": "samuel@offscale.io",
-          "Environments": "\nEnvironment=TRADING_DATA_PATHS=/data/Indices.csv:"
+          "nginx_secure": "certbot",
+          "https_cert_email": "samuel@offscale.io"
         },
-        "____run_cmds": {
+        "___run_cmds": {
           "op": "==",
-          "val": 0
-        },
-        "type": "fabric"
-      },
-      {
-        "module": "offregister-app-push",
-        "kwargs": {
-          "GIT_DIR": "/var/www/static/stockrankr-web-frontend-dist",
-          "GIT_REPO": "https://github.com/stockrankr/stockrankr-web-frontend-dist",
-          "use_sudo": true,
-          "node_sudo": false,
-          "nginx": false
+          "val": 2
         },
         "type": "fabric"
       }
     ]
   },
   "_comments": [
+    "any-cluster-ubuntu1604-2-Glaucoma1",
+    {
+      "module": "offregister-bootstrap",
+      "type": "fabric"
+    },
     {
       "module": "offregister-redis",
+      "kwargs": {
+        "skip_if_avail": false
+      },
       "type": "fabric"
     },
     {
@@ -154,7 +142,28 @@
             "$ref": "env:DB_NAME"
           }
         ],
+        "superuser": true,
         "cluster": false
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-git",
+      "kwargs": {
+        "GIT_DIR": "/var/www/static/stockrankr-rest-api",
+        "GIT_REPO": "https://github.com/stockrankr/stockrankr-rest-api",
+        "GIT_BRANCH": "ben-company-details",
+        "skip_reset": false,
+        "use_sudo": true
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-stockrankr",
+      "kwargs": {
+        "STOCKRANKR_ROOT": "/var/www/static",
+        "TRADING_DATA_STOCK_ROOT": "/mnt/Stocks",
+        "TRADING_DATA_ROOT": "/mnt/ParsedStocks"
       },
       "type": "fabric"
     }
