@@ -1,0 +1,39 @@
+{
+  "name": "Mesosphere DC/OS",
+  "description": "Offregister strategy for Mesosphere DC/OS",
+  "version": "0.0.1",
+  "env": {
+    "OFFAUTH_JSON": {
+      "$ref": "env:OFFAUTH_JSON"
+    }
+  },
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "test_pkg": {
+    "$ref": "pkg_file:offregister::_config::auth.sample.json"
+  },
+  "register": {
+    "/dcos0/*": [
+      {
+        "module": "offregister-docker",
+        "kwargs": {
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-mesosphere-dcos",
+        "kwargs": {
+        },
+        "type": "fabric"
+      }
+    ]
+  },
+  "_comments": [
+  ],
+  "purpose": [
+    "any-cluster"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}

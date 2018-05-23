@@ -8,42 +8,13 @@
   "register": {
     "/unclustered/glaucoma-australia": [
       {
-        "module": "offregister-postgres",
+        "module": "offregister-git",
         "kwargs": {
-          "create": [
-            {
-              "user": {
-                "$ref": "env:DB_USER"
-              },
-              "password": {
-                "$ref": "env:DB_PASS"
-              },
-              "dbname": {
-                "$ref": "env:DB_NAME"
-              }
-            }
-          ],
-          "users": [
-            {
-              "name": {
-                "$ref": "env:DB_USER"
-              },
-              "password": {
-                "$ref": "env:DB_PASS"
-              }
-            }
-          ],
-          "dbs": [
-            {
-              "$ref": "env:DB_NAME"
-            }
-          ],
-          "cluster": false
+          "GIT_DIR": "/var/www/static/glaucoma-risk-calculator-web-frontend-dist",
+          "GIT_REPO": "https://github.com/glaucoma-australia/glaucoma-risk-calculator-web-frontend-dist",
+          "skip_reset": false,
+          "use_sudo": true
         },
-        "type": "fabric"
-      },
-      {
-        "module": "offregister-redis",
         "type": "fabric"
       },
       {
@@ -67,21 +38,30 @@
               "$ref": "env:DB_NAME"
             }
           ],
+          "DAEMON_ENV": {
+            "DEFAULT_ADMIN_EMAIL": {
+              "$ref": "env:DEFAULT_ADMIN_EMAIL"
+            },
+            "DEFAULT_ADMIN_PASSWORD": {
+              "$ref": "env:DEFAULT_ADMIN_PASSWORD"
+            }
+          },
           "service_name": "glaucoma-risk-calculator-rest-api",
           "skip_reset": false,
           "destory_cache": true,
           "use_sudo": true,
           "node_sudo": false,
           "node_version": "lts",
-          "ExecStart": "/bin/bash -c 'PATH={home_dir}/n/bin:$PATH {home_dir}/n/bin/node main.js'",
+          "node_main": "main.js",
           "npm_global_packages": [
+            "npm",
             "typings",
             "mocha",
             "typescript",
             "bunyan"
           ],
           "post_npm_step": "tsc",
-          "nginx": true,
+          "nginx": false,
           "app_name": "glaucoma-risk-calculator",
           "DESCRIPTION": "Glaucoma risk calculator frontend and backend",
           "DNS_NAMES": [
@@ -94,23 +74,51 @@
           "WWWROOT": "/var/www/static/glaucoma-risk-calculator-web-frontend-dist/dist",
           "WWWPATH": "/",
           "____nginx_secure": "certbot",
-          "https_cert_email": "samuel@offscale.io"
+          "____https_cert_email": "samuel@offscale.io"
         },
         "type": "fabric"
       }
     ]
   },
   "_comments": [
-    "/unclustered/any-cluster-ubuntu1604-2-Glaucoma1",
+    "any-cluster-ubuntu1604-2-Glaucoma1",
     {
-      "module": "offregister-app-push",
+      "module": "offregister-postgres",
       "kwargs": {
-        "GIT_DIR": "/var/www/static/glaucoma-risk-calculator-web-frontend-dist",
-        "GIT_REPO": "https://github.com/glaucoma-australia/glaucoma-risk-calculator-web-frontend-dist",
-        "use_sudo": true,
-        "node_sudo": false,
-        "nginx": false
+        "create": [
+          {
+            "user": {
+              "$ref": "env :DB_USER"
+            },
+            "password": {
+              "$ref": "env:DB_PASS"
+            },
+            "dbname": {
+              "$ref": "env:DB_NAME"
+            }
+          }
+        ],
+        "users": [
+          {
+            "name": {
+              "$ref": "env:DB_USER"
+            },
+            "password": {
+              "$ref": "env:DB_PASS"
+            }
+          }
+        ],
+        "dbs": [
+          {
+            "$ref": "env:DB_NAME"
+          }
+        ],
+        "cluster": false
       },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-redis",
       "type": "fabric"
     }
   ],

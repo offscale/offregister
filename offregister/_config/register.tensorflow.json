@@ -6,7 +6,7 @@
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/unclustered/any-cluster-ubuntu1604-3-ai0": [
+    "/unclustered/ai0-nogpu0": [
       {
         "module": "offregister-bootstrap",
         "type": "fabric"
@@ -16,27 +16,12 @@
         "type": "fabric"
       },
       {
-        "module": "offregister-users",
-        "type": "fabric",
-        "args": [],
-        "kwargs": {
-          "add_users_with_ssh": [
-            {
-              "username": "jeremy",
-              "fullname": "Jeremy",
-              "sudo": true,
-              "ssh_authorized_keys": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDxbq7d2G7hA3jVG2Yun+VUIOSSPzmGtlBYdV/9jS5HaCzeJB+VeP4M2Ac36rYp4BRL1ayYi3b+2+XIlZWYEIkjmFqGzsCYttYnIMUVf7msWWUfTuriRoJ6tWZrz0yOt5Ez8uUMlYCUt5tMEg2sGQtDDax9/PuOymdJFrc78V3zpYnP6XEQTeXQV8z+a0q+evtnVRXkFyiLvH1fAOW0P2EoxmrKRtyBHEpybNFqpetq15TnMrZhZ+ZztudFxDtusQ2luI1jqT1n7e80alEcGx5Acbiy1C+ncjDyadUv714omNx2P6dWA3SEGBuTjyuC2m0hmdh5RiqUuuBuwrnyt9cD/7jFhLO1FTob2Sx9RBPSzJ7RuN1wwFqcIZyLmHEiZ1XqP15HKCic7kwocfZB6Za6h2nY8dQUPOBF9PQZ9fU5fcIQARQZv09Rge7Ku1CP1qCuHbG2fqh1pxA3CsfV64cgPsUz74bT7UO2OObubkghJpgRfdephy7+6rgxuLHn3yNFMT5Lw8ASmpdOZuSR93RX+AALSwfFlQf2+/5B5ImMrrGn/wwfiM4dn2a7ptpuiFN4yEcjuj45bix6soZFPShVjniGpWGyZisoMHA/BgPdvZXVMBkT2BXoOpQ2fohfbRFS8fLEyMRoVjMICEn+nVwCgtzd4kEVnmbRwsy0eUPq4w=="
-            }
-          ]
-        }
-      },
-      {
         "module": "offregister-tensorflow",
         "cluster_name": "tensorflow.southeast.0",
         "args": [],
         "kwargs": {
           "from": "source",
-          "virtual_env": "/opt/venvs/tflow3.5",
+          "virtual_env": "/opt/venvs/tflow3.6",
           "python3": true
         },
         "type": "fabric",
@@ -49,6 +34,23 @@
       }
     ]
   },
+  "_comments": [
+    {
+      "module": "offregister-users",
+      "type": "fabric",
+      "args": [],
+      "kwargs": {
+        "add_users_with_ssh": [
+          {
+            "username": "jeremy",
+            "fullname": "Jeremy",
+            "sudo": true,
+            "ssh_authorized_keys": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDxbq7d2G7hA3jVG2Yun+VUIOSSPzmGtlBYdV/9jS5HaCzeJB+VeP4M2Ac36rYp4BRL1ayYi3b+2+XIlZWYEIkjmFqGzsCYttYnIMUVf7msWWUfTuriRoJ6tWZrz0yOt5Ez8uUMlYCUt5tMEg2sGQtDDax9/PuOymdJFrc78V3zpYnP6XEQTeXQV8z+a0q+evtnVRXkFyiLvH1fAOW0P2EoxmrKRtyBHEpybNFqpetq15TnMrZhZ+ZztudFxDtusQ2luI1jqT1n7e80alEcGx5Acbiy1C+ncjDyadUv714omNx2P6dWA3SEGBuTjyuC2m0hmdh5RiqUuuBuwrnyt9cD/7jFhLO1FTob2Sx9RBPSzJ7RuN1wwFqcIZyLmHEiZ1XqP15HKCic7kwocfZB6Za6h2nY8dQUPOBF9PQZ9fU5fcIQARQZv09Rge7Ku1CP1qCuHbG2fqh1pxA3CsfV64cgPsUz74bT7UO2OObubkghJpgRfdephy7+6rgxuLHn3yNFMT5Lw8ASmpdOZuSR93RX+AALSwfFlQf2+/5B5ImMrrGn/wwfiM4dn2a7ptpuiFN4yEcjuj45bix6soZFPShVjniGpWGyZisoMHA/BgPdvZXVMBkT2BXoOpQ2fohfbRFS8fLEyMRoVjMICEn+nVwCgtzd4kEVnmbRwsy0eUPq4w=="
+          }
+        ]
+      }
+    }
+  ],
   "purpose": [
     "tensorflow"
   ],

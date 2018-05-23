@@ -105,6 +105,8 @@ def guess_os_username(node, hint=None):
 
 def guess_os(node, hint=None):
     node_name = node.name.lower()
+    if node.extra and 'os' in node.extra:
+        return '{}'.format(node.extra['os'])
     if 'ubuntu' in node_name:
         return 'ubuntu'
     elif 'core' in node_name:

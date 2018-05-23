@@ -1,0 +1,53 @@
+{
+  "name": "Service",
+  "description": "Offregister strategy for a long-running service",
+  "version": "0.0.1",
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "register": {
+    "/unclustered/ai0-nogpu0": [
+      {
+        "module": "offregister-git",
+        "kwargs": {
+          "GIT_DIR": "/var/repos/ml-glaucoma",
+          "GIT_REPO": "https://github.com/SamuelMarks/ml-glaucoma",
+          "GIT_BRANCH": "cnn",
+          "skip_reset": false,
+          "use_sudo": true
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-python",
+        "args": [],
+        "kwargs": {
+          "virtual_env": "/opt/venvs/ml_glaucoma",
+          "python3": true,
+          "requirements": true,
+          "package_directory": "/var/repos/ml-glaucoma",
+          "pip_version": "9.0.3"
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-service",
+        "args": [],
+        "kwargs": {
+          "conf_name": "ml_glaucoma0",
+          "Environments": "Environment=VIRTUALENV=/opt/venvs/ml_glaucoma/bin\nEnvironment=PYTHONPATH=/opt/venvs/ml_glaucoma/bin",
+          "WorkingDirectory": "/tmp",
+          "User": "root",
+          "Group": "root",
+          "ExecStart": "/opt/venvs/ml_glaucoma/bin/python -m ml_glaucoma -m /mnt/datasets/400x400balanced_dataset.hdf5 -o /mnt/datasets/produced/ml_glaucoma0.000.hdf5"
+        },
+        "type": "fabric"
+      }
+    ]
+  },
+  "purpose": [
+    "tensorflow"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}
