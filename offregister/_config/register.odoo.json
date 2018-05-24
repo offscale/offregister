@@ -1,19 +1,33 @@
 {
-  "name": "Certbot",
-  "description": "Offregister strategy for Certbot (LetsEncrypt; automatic HTTPS certs)",
+  "name": "Service",
+  "description": "Offregister strategy for Odoo",
   "version": "0.0.1",
   "provider": {
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/unclustered/REPLACE_NODE_NAME": [
+    "/unclustered/OpenEdX4": [
+      {
+        "module": "offregister-postgres",
+        "kwargs": {
+          "cluster": false
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-odoo",
+        "kwargs": {
+          "DNS_NAME": "business.offscale.io"
+        },
+        "type": "fabric"
+      },
       {
         "module": "offregister-certbot",
         "cluster_name": "certbot0",
         "args": [],
         "kwargs": {
           "domains": [
-            "studio0.complicated.io"
+            "business.offscale.io"
           ],
           "email": "samuel@offscale.io"
         },
@@ -26,7 +40,7 @@
     ]
   },
   "purpose": [
-    "tensorflow"
+    "odoo"
   ],
   "etcd_server": "http://localhost:2379",
   "default_pick": "first"

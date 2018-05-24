@@ -34,12 +34,12 @@
         "module": "offregister-service",
         "args": [],
         "kwargs": {
-          "conf_name": "ml_glaucoma0",
+          "conf_name": "ml_glaucoma1",
           "Environments": "Environment=VIRTUALENV=/opt/venvs/ml_glaucoma/bin\nEnvironment=PYTHONPATH=/opt/venvs/ml_glaucoma/bin",
           "WorkingDirectory": "/tmp",
           "User": "root",
           "Group": "root",
-          "ExecStart": "/opt/venvs/ml_glaucoma/bin/python -m ml_glaucoma -m /mnt/datasets/400x400balanced_dataset.hdf5 -o /mnt/datasets/produced/ml_glaucoma0.000.hdf5"
+          "ExecStart": "/opt/venvs/ml_glaucoma/bin/python -m ml_glaucoma -m /mnt/datasets/400x400balanced_dataset.hdf5 -e 200 -o /mnt/datasets/produced/ml_glaucoma0.001.hdf5"
         },
         "type": "fabric"
       }

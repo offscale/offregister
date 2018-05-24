@@ -6,7 +6,7 @@
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/unclustered/any-cluster-ubuntu1604-2-Glaucoma1": [
+    "/unclustered/REPLACE_NODE_NAME": [
       {
         "module": "offregister-certbot",
         "kwargs": {

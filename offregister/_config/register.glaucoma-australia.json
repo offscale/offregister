@@ -81,7 +81,7 @@
     ]
   },
   "_comments": [
-    "any-cluster-ubuntu1604-2-Glaucoma1",
+    "REPLACE_NODE_NAME",
     {
       "module": "offregister-postgres",
       "kwargs": {
