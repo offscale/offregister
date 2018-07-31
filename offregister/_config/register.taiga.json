@@ -1,0 +1,43 @@
+{
+  "name": "Taiga",
+  "description": "Default register strategy",
+  "version": "0.0.1",
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "register": {
+    "/unclustered/OpenEdX4": [
+      {
+        "module": "offregister-app-push",
+        "cluster_name": "openedx-ginkgo.master.1",
+        "kwargs": {
+          "nginx_secure": "certbot",
+          "https_cert_email": "samuel@offscale.io"
+        },
+        "type": "fabric",
+        "run_cmds": {
+          "op": "in",
+          "val": [
+            "nginx_secure4"
+          ]
+        }
+      }
+    ]
+  },
+  "_comments": [
+    {
+      "module": "offregister-taiga",
+      "kwargs": {
+        "LISTEN_PORT": 80,
+        "SERVER_NAME": "taiga",
+        "TAIGA_ROOT": "/var/www/taiga"
+      },
+      "type": "fabric"
+    }
+  ],
+  "purpose": [
+    "any-cluster"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}

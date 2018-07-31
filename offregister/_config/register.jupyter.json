@@ -6,23 +6,33 @@
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/unclustered/REPLACE_NODE_NAME": [
+    "/unclustered/ai0-nogpu0": [
+      {
+        "module": "offregister-git",
+        "kwargs": {
+          "GIT_DIR": "/home/ubuntu/notebooks/optic-nerve-cnn",
+          "GIT_REPO": "https://github.com/SamuelMarks/optic-nerve-cnn",
+          "skip_reset": true,
+          "use_sudo": false
+        },
+        "type": "fabric"
+      },
       {
         "module": "offregister-jupyter",
-        "cluster_name": "jupyter0",
+        "cluster_name": "jupyter1",
         "args": [],
         "kwargs": {
-          "domain": "notebook.complicated.io"
+          "domain": "notebook.ai0.complicated.io"
         },
         "type": "fabric"
       },
       {
         "module": "offregister-certbot",
-        "cluster_name": "jupyter0",
+        "cluster_name": "jupyter1",
         "args": [],
         "kwargs": {
           "domains": [
-            "notebook.complicated.io"
+            "notebook.ai0.complicated.io"
           ],
           "email": "samuel@offscale.io"
         },
@@ -30,6 +40,20 @@
       }
     ]
   },
+  "_comments": [
+    {
+      "module": "offregister-python",
+      "args": [],
+      "kwargs": {
+        "virtual_env": "/opt/venvs/tflow3.6",
+        "python3": true,
+        "requirements": true,
+        "package_directory": "/var/repos/optic-nerve-cnn",
+        "pip_version": "9.0.3"
+      },
+      "type": "fabric"
+    }
+  ],
   "purpose": [
     "tensorflow"
   ],

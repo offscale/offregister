@@ -1,6 +1,6 @@
 {
   "name": "Service",
-  "description": "Offregister strategy for a long-running service",
+  "description": "Offregister strategy for ai0-nogpu0",
   "version": "0.0.1",
   "provider": {
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
@@ -35,12 +35,12 @@
         "module": "offregister-service",
         "args": [],
         "kwargs": {
-          "conf_name": "ml_glaucoma_400px_d3_adadelta_binaryclass_binarycrossentropy_100epochs",
+          "conf_name": "ml_glaucoma_dc0_binary_crossentropy_max20_300epochs",
           "Environments": "Environment=VIRTUALENV=/opt/venvs/tflow3.6/bin\nEnvironment=PYTHONPATH=/opt/venvs/tflow3.6/bin",
           "WorkingDirectory": "/tmp",
           "User": "root",
           "Group": "root",
-          "ExecStart": "/opt/venvs/tflow3.6/bin/python -m ml_glaucoma cnn -d /mnt/datasets/downloaded -m 400x400balanced_dataset.ml_glaucoma_400px_d3_adadelta_binaryclass_binarycrossentropy_100epochs.weights.hdf5 -s /mnt/datasets/produced/ml_glaucoma_400px_d3_adadelta_binaryclass_binarycrossentropy_100epochs.prepoc.hdf5 --tensorboard-log-dir /mnt/tensorboard/ml_glaucoma_400px_d3_adadelta_binaryclass_binarycrossentropy_100epochs --metrics precision_recall --bmes123-pardir /mnt --split-dir /mnt/partitioned -p 400 -e 100 --dropout=3 --optimizer=Adadelta  --loss binary_crossentropy --class-mode binary"
+          "ExecStart": "/opt/venvs/tflow3.6/bin/python -m ml_glaucoma cnn -d /mnt/datasets/downloaded -m 400x400balanced_dataset.ml_glaucoma_dc0_binary_crossentropy_max20_300epochs.weights.hdf5 -s /mnt/datasets/produced/ml_glaucoma_dc0_binary_crossentropy_max20_300epochs.prepoc.hdf5 --tensorboard-log-dir /mnt/tensorboard/ml_glaucoma_dc0_binary_crossentropy_max20_300epochs --metrics precision_recall --bmes123-pardir /mnt --split-dir /mnt/partitioned -p 400 -e 300 --architecture dc0 --class-mode binary --optimizer Adam --loss binary_crossentropy --max-imgs 20"
         },
         "type": "fabric"
       },
@@ -53,7 +53,7 @@
           "WorkingDirectory": "/mnt/tensorboard",
           "User": "root",
           "Group": "root",
-          "ExecStart": "/opt/venvs/tflow3.6/bin/tensorboard --logdir /mnt/tensorboard/ml_glaucoma_400px_d3_adadelta_binaryclass_binarycrossentropy_100epochs"
+          "ExecStart": "/opt/venvs/tflow3.6/bin/tensorboard --logdir /mnt/tensorboard/ml_glaucoma_dc0_binary_crossentropy_max20_300epochs"
         },
         "type": "fabric"
       }
@@ -64,8 +64,8 @@
       "module": "offregister-inline",
       "kwargs": {
         "run": [
-          "rm -f /mnt/datasets/400x400balanced_dataset.ml_glaucoma_400px_d3_adadelta_binaryclass_binarycrossentropy_100epochs.hdf5",
-          "/opt/venvs/tflow3.6/bin/python -m ml_glaucoma data -s /mnt/datasets/400x400balanced_dataset.ml_glaucoma_400px_d3_adadelta_binaryclass_binarycrossentropy_100epochs.hdf5 -f -p 400"
+          "rm -f /mnt/datasets/400x400balanced_dataset.ml_glaucoma_dc0_binary_crossentropy_max20_300epochs.hdf5",
+          "/opt/venvs/tflow3.6/bin/python -m ml_glaucoma data -s /mnt/datasets/400x400balanced_dataset.ml_glaucoma_dc0_binary_crossentropy_max20_300epochs.hdf5 -f -p 400"
         ]
       },
       "type": "fabric"

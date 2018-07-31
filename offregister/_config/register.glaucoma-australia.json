@@ -1,5 +1,5 @@
 {
-  "name": "GlaucomaAustralia",
+  "name": "Glaucoma Australia",
   "description": "Offregister strategy for Glaucoma Australia",
   "version": "0.0.1",
   "provider": {
@@ -16,8 +16,11 @@
           "use_sudo": true
         },
         "type": "fabric"
-      },
-      {
+      }
+    ]
+  },
+  "_comments": [
+    {
         "module": "offregister-app-push",
         "kwargs": {
           "GIT_DIR": "/var/www/static/glaucoma-risk-calculator-rest-api",
@@ -73,14 +76,11 @@
           "NGINX_PORT": 80,
           "WWWROOT": "/var/www/static/glaucoma-risk-calculator-web-frontend-dist/dist",
           "WWWPATH": "/",
-          "____nginx_secure": "certbot",
-          "____https_cert_email": "samuel@offscale.io"
+          "___nginx_secure": "certbot",
+          "___https_cert_email": "samuel@offscale.io"
         },
         "type": "fabric"
-      }
-    ]
-  },
-  "_comments": [
+      },
     "REPLACE_NODE_NAME",
     {
       "module": "offregister-postgres",

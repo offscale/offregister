@@ -6,7 +6,7 @@
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/unclustered/ai0-nogpu0": [
+    "/unclustered/ai0-nogpu2": [
       {
         "module": "offregister-bootstrap",
         "type": "fabric"
@@ -22,13 +22,14 @@
         "kwargs": {
           "from": "source",
           "virtual_env": "/opt/venvs/tflow3.6",
+          "force_rebuild": true,
           "python3": true
         },
         "type": "fabric",
         "run_cmds": {
           "op": "in",
           "val": [
-            "install_jupyter_notebook1"
+            "install_tensorflow0"
           ]
         }
       }

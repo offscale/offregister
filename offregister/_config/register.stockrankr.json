@@ -1,7 +1,7 @@
 {
   "name": "Stockrankr",
   "description": "Offregister strategy for Stockrankr",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "env": {
     "OFFAUTH_JSON": {
       "$ref": "env:OFFAUTH_JSON"
@@ -15,6 +15,73 @@
   },
   "register": {
     "/unclustered/stockrankr": [
+      {
+        "module": "offregister-bootstrap",
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-redis",
+        "kwargs": {
+          "skip_if_avail": false
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-postgres",
+        "kwargs": {
+          "create": [
+            {
+              "user": {
+                "$ref": "env:DB_USER"
+              },
+              "password": {
+                "$ref": "env:DB_PASS"
+              },
+              "dbname": {
+                "$ref": "env:DB_NAME"
+              }
+            }
+          ],
+          "users": [
+            {
+              "name": {
+                "$ref": "env:DB_USER"
+              },
+              "password": {
+                "$ref": "env:DB_PASS"
+              }
+            }
+          ],
+          "dbs": [
+            {
+              "$ref": "env:DB_NAME"
+            }
+          ],
+          "superuser": true,
+          "cluster": false
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-git",
+        "kwargs": {
+          "GIT_DIR": "/var/www/static/stockrankr-rest-api",
+          "GIT_REPO": "https://github.com/stockrankr/stockrankr-rest-api",
+          "GIT_BRANCH": "ben-company-details",
+          "skip_reset": false,
+          "use_sudo": true
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-stockrankr",
+        "kwargs": {
+          "STOCKRANKR_ROOT": "/var/www/static",
+          "TRADING_DATA_STOCK_ROOT": "/mnt/Stocks",
+          "TRADING_DATA_ROOT": "/mnt/ParsedStocks"
+        },
+        "type": "fabric"
+      },
       {
         "module": "offregister-app-push",
         "kwargs": {
@@ -99,74 +166,7 @@
     ]
   },
   "_comments": [
-    "REPLACE_NODE_NAME",
-    {
-      "module": "offregister-bootstrap",
-      "type": "fabric"
-    },
-    {
-      "module": "offregister-redis",
-      "kwargs": {
-        "skip_if_avail": false
-      },
-      "type": "fabric"
-    },
-    {
-      "module": "offregister-postgres",
-      "kwargs": {
-        "create": [
-          {
-            "user": {
-              "$ref": "env:DB_USER"
-            },
-            "password": {
-              "$ref": "env:DB_PASS"
-            },
-            "dbname": {
-              "$ref": "env:DB_NAME"
-            }
-          }
-        ],
-        "users": [
-          {
-            "name": {
-              "$ref": "env:DB_USER"
-            },
-            "password": {
-              "$ref": "env:DB_PASS"
-            }
-          }
-        ],
-        "dbs": [
-          {
-            "$ref": "env:DB_NAME"
-          }
-        ],
-        "superuser": true,
-        "cluster": false
-      },
-      "type": "fabric"
-    },
-    {
-      "module": "offregister-git",
-      "kwargs": {
-        "GIT_DIR": "/var/www/static/stockrankr-rest-api",
-        "GIT_REPO": "https://github.com/stockrankr/stockrankr-rest-api",
-        "GIT_BRANCH": "ben-company-details",
-        "skip_reset": false,
-        "use_sudo": true
-      },
-      "type": "fabric"
-    },
-    {
-      "module": "offregister-stockrankr",
-      "kwargs": {
-        "STOCKRANKR_ROOT": "/var/www/static",
-        "TRADING_DATA_STOCK_ROOT": "/mnt/Stocks",
-        "TRADING_DATA_ROOT": "/mnt/ParsedStocks"
-      },
-      "type": "fabric"
-    }
+    "REPLACE_NODE_NAME"
   ],
   "purpose": [
     "any-cluster"
