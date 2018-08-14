@@ -6,31 +6,54 @@
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/unclustered/OpenEdX4": [
+    "/fantom/devbox1": [
       {
-        "module": "offregister-app-push",
-        "cluster_name": "openedx-ginkgo.master.1",
+        "module": "offregister-taiga",
         "kwargs": {
-          "nginx_secure": "certbot",
-          "https_cert_email": "samuel@offscale.io"
+          "LISTEN_PORT": 80,
+          "SERVER_NAME": "projects.offscale.io",
+          "TAIGA_ROOT": "/var/www/taiga"
         },
-        "type": "fabric",
-        "run_cmds": {
-          "op": "in",
-          "val": [
-            "nginx_secure4"
-          ]
-        }
+        "type": "fabric"
       }
     ]
   },
   "_comments": [
     {
-      "module": "offregister-taiga",
+      "module": "offregister-app-push",
+      "cluster_name": "openedx-ginkgo.master.1",
       "kwargs": {
-        "LISTEN_PORT": 80,
-        "SERVER_NAME": "taiga",
-        "TAIGA_ROOT": "/var/www/taiga"
+        "nginx_secure": "certbot",
+        "https_cert_email": "samuel@offscale.io"
+      },
+      "type": "fabric",
+      "run_cmds": {
+        "op": "in",
+        "val": [
+          "nginx_secure4"
+        ]
+      }
+    },
+    {
+      "module": "offregister-bootstrap",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-app-push",
+      "kwargs": {
+        "GIT_DIR": "/var/www/static/certbot",
+        "GIT_REPO": "https://github.com/SamuelMarks/hotel-kiosk-dist",
+        "use_sudo": true,
+        "node_sudo": false,
+        "app_name": "projects.offscale.io",
+        "NGINX_PORT": 80,
+        "DESCRIPTION": "certbot frontend",
+        "DNS_NAMES": [
+          "projects.offscale.io"
+        ],
+        "WWWROOT": "/var/www/static/certbot/dist",
+        "WWWPATH": "/",
+        "nginx": true
       },
       "type": "fabric"
     }

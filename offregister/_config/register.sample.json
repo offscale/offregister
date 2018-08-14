@@ -6,7 +6,7 @@
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/unclustered/REPLACE_NODE_NAME": [
+    "/unclustered/OpenEdX4": [
       {
         "module": "offregister-certbot",
         "kwargs": {
@@ -14,7 +14,7 @@
             "/var/www/static/glaucoma-risk-calculator-rest-api"
           ],
           "domains": [
-            "glaucoma-australia.complicated.io"
+            "edu.complicated.io"
           ],
           "email": "samuel@offscale.io"
         },

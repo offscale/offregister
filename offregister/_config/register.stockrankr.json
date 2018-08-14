@@ -16,84 +16,103 @@
   "register": {
     "/unclustered/stockrankr": [
       {
-        "module": "offregister-bootstrap",
-        "type": "fabric"
-      },
-      {
-        "module": "offregister-redis",
+        "module": "offregister-certbot",
+        "cluster_name": "certbot0",
+        "args": [],
         "kwargs": {
-          "skip_if_avail": false
+          "domains": [
+            "stockrankr.com"
+          ],
+          "email": "samuel@offscale.io"
         },
-        "type": "fabric"
+        "type": "fabric",
+        "_run_cmds": {
+          "op": ">",
+          "val": 1
+        }
+      }
+    ]
+  },
+  "_comments": [
+    {
+      "module": "offregister-bootstrap",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-redis",
+      "kwargs": {
+        "skip_if_avail": false
       },
-      {
-        "module": "offregister-postgres",
-        "kwargs": {
-          "create": [
-            {
-              "user": {
-                "$ref": "env:DB_USER"
-              },
-              "password": {
-                "$ref": "env:DB_PASS"
-              },
-              "dbname": {
-                "$ref": "env:DB_NAME"
-              }
-            }
-          ],
-          "users": [
-            {
-              "name": {
-                "$ref": "env:DB_USER"
-              },
-              "password": {
-                "$ref": "env:DB_PASS"
-              }
-            }
-          ],
-          "dbs": [
-            {
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-postgres",
+      "kwargs": {
+        "create": [
+          {
+            "user": {
+              "$ref": "env:DB_USER"
+            },
+            "password": {
+              "$ref": "env:DB_PASS"
+            },
+            "dbname": {
               "$ref": "env:DB_NAME"
             }
-          ],
-          "superuser": true,
-          "cluster": false
-        },
-        "type": "fabric"
+          }
+        ],
+        "users": [
+          {
+            "name": {
+              "$ref": "env:DB_USER"
+            },
+            "password": {
+              "$ref": "env:DB_PASS"
+            }
+          }
+        ],
+        "dbs": [
+          {
+            "$ref": "env:DB_NAME"
+          }
+        ],
+        "superuser": true,
+        "cluster": false
       },
-      {
-        "module": "offregister-git",
-        "kwargs": {
-          "GIT_DIR": "/var/www/static/stockrankr-rest-api",
-          "GIT_REPO": "https://github.com/stockrankr/stockrankr-rest-api",
-          "GIT_BRANCH": "ben-company-details",
-          "skip_reset": false,
-          "use_sudo": true
-        },
-        "type": "fabric"
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-git",
+      "kwargs": {
+        "GIT_DIR": "/var/www/static/stockrankr-rest-api",
+        "GIT_REPO": "https://github.com/stockrankr/stockrankr-rest-api",
+        "GIT_BRANCH": "ben-company-details",
+        "skip_reset": false,
+        "use_sudo": true
       },
-      {
-        "module": "offregister-stockrankr",
-        "kwargs": {
-          "STOCKRANKR_ROOT": "/var/www/static",
-          "TRADING_DATA_STOCK_ROOT": "/mnt/Stocks",
-          "TRADING_DATA_ROOT": "/mnt/ParsedStocks"
-        },
-        "type": "fabric"
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-stockrankr",
+      "kwargs": {
+        "STOCKRANKR_ROOT": "/var/www/static",
+        "TRADING_DATA_STOCK_ROOT": "/mnt/Stocks",
+        "TRADING_DATA_ROOT": "/mnt/ParsedStocks"
       },
-      {
-        "module": "offregister-app-push",
-        "kwargs": {
-          "GIT_DIR": "/var/www/static/stockrankr-web-frontend-dist",
-          "GIT_REPO": "https://github.com/stockrankr/stockrankr-web-frontend-dist",
-          "use_sudo": true,
-          "node_sudo": false,
-          "nginx": false
-        },
-        "type": "fabric"
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-app-push",
+      "kwargs": {
+        "GIT_DIR": "/var/www/static/stockrankr-web-frontend-dist",
+        "GIT_REPO": "https://github.com/stockrankr/stockrankr-web-frontend-dist",
+        "use_sudo": true,
+        "node_sudo": false,
+        "nginx": false
       },
-      {
+      "type": "fabric"
+    },
+    {
         "module": "offregister-app-push",
         "kwargs": {
           "DAEMON_ENV": {
@@ -157,16 +176,12 @@
           "nginx_secure": "certbot",
           "https_cert_email": "samuel@offscale.io"
         },
-        "___run_cmds": {
+        "__run_cmds": {
           "op": "==",
-          "val": 2
+          "val": 4
         },
         "type": "fabric"
       }
-    ]
-  },
-  "_comments": [
-    "REPLACE_NODE_NAME"
   ],
   "purpose": [
     "any-cluster"
