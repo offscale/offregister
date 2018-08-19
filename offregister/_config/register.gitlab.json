@@ -1,0 +1,28 @@
+{
+  "name": "Taiga",
+  "description": "Default register strategy",
+  "version": "0.0.1",
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "register": {
+    "/fantom/devbox0": [
+      {
+        "module": "offregister-gitlab",
+        "kwargs": {
+          "SERVER_NAME": "ec2-18-218-54-141.us-east-2.compute.amazonaws.com",
+          "https": true
+        },
+        "type": "fabric"
+      }
+    ]
+  },
+  "_comments": [
+
+  ],
+  "purpose": [
+    "any-cluster"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}

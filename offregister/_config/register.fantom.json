@@ -1,0 +1,62 @@
+{
+  "name": "Fantom",
+  "description": "Default Fantom strategy",
+  "version": "0.0.1",
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "register": {
+    "/fantom/devbox1": [
+      {
+        "module": "offregister-inline",
+        "kwargs": {
+          "run": [
+            "$GOPATH/src/github.com/andrecronje/evm/scripts/build.bash"
+          ]
+        },
+        "type": "fabric"
+      }
+    ]
+  },
+  "_comments": [
+    {
+      "module": "offregister-bootstrap",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-taiga",
+      "kwargs": {
+        "LISTEN_PORT": 443,
+        "SERVER_NAME": null,
+        "TAIGA_ROOT": "/var/www/taiga"
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-docker",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-go",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-inline",
+      "kwargs": {
+        "run": [
+          "command -v glide || curl https://glide.sh/get | sh",
+          "go get -d github.com/andrecronje/evm/cmd/evm",
+          "cd $GOPATH/src/github.com/andrecronje/evm      && glide install",
+          "go get -d github.com/andrecronje/lachesis/cmd/lachesis",
+          "cd $GOPATH/src/github.com/andrecronje/lachesis && glide install"
+        ]
+      },
+      "type": "fabric"
+    }
+  ],
+  "purpose": [
+    "any-cluster"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}
