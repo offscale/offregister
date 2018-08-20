@@ -8,10 +8,30 @@
   "register": {
     "/fantom/devbox1": [
       {
-        "module": "offregister-inline",
+        "module": "offregister-hook",
         "kwargs": {
-          "run": [
-            "$GOPATH/src/github.com/andrecronje/evm/scripts/build.bash"
+          "HOOK_IP": "127.0.0.1",
+          "HOOK_PORT": 9000,
+          "HOOK_VERBOSE": true,
+          "HOOK_HOOKS_JSON": [
+            {
+              "id": "crossbuild-webhook",
+              "execute-command": "$GOPATH/src/github.com/andrecronje/evm/scripts/build.bash",
+              "command-working-directory": "$GOPATH/src/github.com/andrecronje/evm",
+              "include-command-output-in-response": true,
+              "pass-environment-to-command": [
+                {
+                  "source": "string",
+                  "envname": "GOPATH",
+                  "name": "$GOPATH"
+                },
+                {
+                  "source": "string",
+                  "envname": "PATH",
+                  "name": "$PATH:/usr/local/go/bin:$GOPATH/bin"
+                }
+              ]
+            }
           ]
         },
         "type": "fabric"
@@ -49,6 +69,15 @@
           "cd $GOPATH/src/github.com/andrecronje/evm      && glide install",
           "go get -d github.com/andrecronje/lachesis/cmd/lachesis",
           "cd $GOPATH/src/github.com/andrecronje/lachesis && glide install"
+        ]
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-inline",
+      "kwargs": {
+        "run": [
+          "$GOPATH/src/github.com/andrecronje/evm/scripts/build.bash"
         ]
       },
       "type": "fabric"
