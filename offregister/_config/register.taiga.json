@@ -8,36 +8,31 @@
   "register": {
     "/fantom/devbox1": [
       {
-      "module": "offregister-app-push",
-      "cluster_name": "openedx-ginkgo.master.1",
-      "kwargs": {
-        "nginx_secure": "certbot",
-        "https_cert_email": "samuel@offscale.io"
-      },
-      "type": "fabric",
-      "run_cmds": {
-        "op": "in",
-        "val": [
-          "nginx_secure4"
-        ]
+        "module": "offregister-taiga",
+        "kwargs": {
+          "LISTEN_PORT": 443,
+          "SERVER_NAME": "project.fantom.foundation",
+          "TAIGA_ROOT": "/var/www/taiga",
+          "skip_migrate": true
+        },
+        "type": "fabric"
       }
-    }
     ]
   },
   "_comments": [
     {
-        "module": "offregister-bootstrap",
-        "type": "fabric"
+      "module": "offregister-bootstrap",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-taiga",
+      "kwargs": {
+        "LISTEN_PORT": 443,
+        "SERVER_NAME": "ec2-18-219-48-16.us-east-2.compute.amazonaws.com",
+        "TAIGA_ROOT": "/var/www/taiga"
       },
-      {
-        "module": "offregister-taiga",
-        "kwargs": {
-          "LISTEN_PORT": 443,
-          "SERVER_NAME": "SERVER_NAME",
-          "TAIGA_ROOT": "/var/www/taiga"
-        },
-        "type": "fabric"
-      },
+      "type": "fabric"
+    },
     {
       "module": "offregister-app-push",
       "cluster_name": "openedx-ginkgo.master.1",
@@ -64,7 +59,7 @@
         "GIT_REPO": "https://github.com/SamuelMarks/hotel-kiosk-dist",
         "use_sudo": true,
         "node_sudo": false,
-        "app_name": "SERVER_NAME",
+        "app_name": "ec2-18-219-48-16.us-east-2.compute.amazonaws.com",
         "NGINX_PORT": 80,
         "DESCRIPTION": "certbot frontend",
         "DNS_NAMES": [

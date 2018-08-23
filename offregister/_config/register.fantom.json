@@ -1,6 +1,6 @@
 {
-  "name": "Fantom",
-  "description": "Default Fantom strategy",
+  "name": "REPLACEME",
+  "description": "Default REPLACEME strategy",
   "version": "0.0.1",
   "provider": {
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
@@ -8,31 +8,11 @@
   "register": {
     "/fantom/devbox1": [
       {
-        "module": "offregister-hook",
+        "module": "offregister-taiga",
         "kwargs": {
-          "HOOK_IP": "127.0.0.1",
-          "HOOK_PORT": 9000,
-          "HOOK_VERBOSE": true,
-          "HOOK_HOOKS_JSON": [
-            {
-              "id": "crossbuild-webhook",
-              "execute-command": "$GOPATH/src/github.com/andrecronje/evm/scripts/build.bash",
-              "command-working-directory": "$GOPATH/src/github.com/andrecronje/evm",
-              "include-command-output-in-response": true,
-              "pass-environment-to-command": [
-                {
-                  "source": "string",
-                  "envname": "GOPATH",
-                  "name": "$GOPATH"
-                },
-                {
-                  "source": "string",
-                  "envname": "PATH",
-                  "name": "$PATH:/usr/local/go/bin:$GOPATH/bin"
-                }
-              ]
-            }
-          ]
+          "LISTEN_PORT": 443,
+          "SERVER_NAME": null,
+          "TAIGA_ROOT": "/var/www/taiga"
         },
         "type": "fabric"
       }
@@ -80,6 +60,50 @@
           "$GOPATH/src/github.com/andrecronje/evm/scripts/build.bash"
         ]
       },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-hook",
+      "kwargs": {
+        "HOOK_IP": "127.0.0.1",
+        "HOOK_PORT": 9000,
+        "HOOK_VERBOSE": true,
+        "HOOK_HOOKS_JSON": [
+          {
+            "id": "crossbuild-webhook",
+            "execute-command": "$GOPATH/src/github.com/andrecronje/evm/scripts/build.bash",
+            "command-working-directory": "$GOPATH/src/github.com/andrecronje/evm",
+            "include-command-output-in-response": true,
+            "pass-environment-to-command": [
+              {
+                "source": "string",
+                "envname": "GOPATH",
+                "name": "$GOPATH"
+              },
+              {
+                "source": "string",
+                "envname": "PATH",
+                "name": "$PATH:/usr/local/go/bin:$GOPATH/bin"
+              }
+            ]
+          }
+        ],
+        "NGINX_CONF": "taiga"
+      },
+      "run_cmds": {
+        "op": "in",
+        "val": [
+          "configure_nginx1"
+        ]
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-gopherci",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-gocd",
       "type": "fabric"
     }
   ],

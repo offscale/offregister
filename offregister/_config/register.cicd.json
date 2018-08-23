@@ -1,0 +1,47 @@
+{
+  "name": "Taiga",
+  "description": "Default register strategy",
+  "version": "0.0.1",
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "register": {
+    "/fantom/devbox0": [
+      {
+        "module": "offregister-bootstrap",
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-docker",
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-go",
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-gocd",
+        "kwargs": {
+          "SERVER_NAME": "REPLACEME",
+          "LISTEN_PORT": 443,
+          "self_signed": true,
+          "SSL_SUBJ": "/C=AU/ST=NSW/L=Sydney/O=REPLACEME/CN=REPLACEME",
+          "SSL_CERTOUT": "/etc/ssl/certs/REPLACEME.crt",
+          "SSL_KEYOUT": "/etc/ssl/private/REPLACEME.key"
+        },
+        "type": "fabric"
+      }
+    ]
+  },
+  "_comments": [
+    {
+      "module": "offregister-gopherci",
+      "type": "fabric"
+    }
+  ],
+  "purpose": [
+    "any-cluster"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}
