@@ -1,0 +1,47 @@
+{
+  "name": "Matrix",
+  "description": "Default Matrix strategy",
+  "version": "0.0.1",
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "register": {
+    "/unclustered/OpenEdX4": [
+      {
+        "module": "offregister-bootstrap",
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-matrix",
+        "kwargs": {
+          "SERVER_NAME": "comms.offscale.io"
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-certbot",
+        "cluster_name": "offscale",
+        "args": [],
+        "kwargs": {
+          "domains": [
+            "comms.offscale.io"
+          ],
+          "email": "samuel@offscale.io",
+          "redirect_block": true
+        },
+        "type": "fabric",
+        "run_cmds": {
+          "op": ">",
+          "val": 1
+        }
+      }
+    ]
+  },
+  "_comments": [
+  ],
+  "purpose": [
+    "any-cluster"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}

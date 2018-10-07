@@ -1,18 +1,31 @@
 {
-  "name": "REPLACEME",
-  "description": "Default REPLACEME strategy",
+  "name": "Fantom",
+  "description": "Default Fantom strategy",
   "version": "0.0.1",
   "provider": {
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/fantom/devbox1": [
+    "/fantom/devbox2": [
       {
-        "module": "offregister-taiga",
+        "module": "offregister-bootstrap",
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-docker",
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-go",
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-inline",
         "kwargs": {
-          "LISTEN_PORT": 443,
-          "SERVER_NAME": null,
-          "TAIGA_ROOT": "/var/www/taiga"
+          "run": [
+            "mkdir -p \"$GOPATH/src/github.com/andrecronje/lachesis\"",
+            "git clone https://github.com/SamuelMarks/lachesis \"$GOPATH/src/github.com/andrecronje/lachesis\""
+          ]
         },
         "type": "fabric"
       }
@@ -104,6 +117,70 @@
     },
     {
       "module": "offregister-gocd",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-taiga",
+      "kwargs": {
+        "LISTEN_PORT": 443,
+        "SERVER_NAME": null,
+        "TAIGA_ROOT": "/var/www/taiga"
+      },
+      "type": "fabric"
+    },
+    "3/9/2018",
+    {
+      "module": "offregister-go",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-git",
+      "kwargs": {
+        "GIT_DIR": "$GOPATH/src/github.com/andrecronje/evm",
+        "GIT_REPO": "https://github.com/SamuelMarks/evm",
+        "GIT_BRANCH": "master",
+        "skip_reset": false,
+        "use_sudo": false
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-inline",
+      "kwargs": {
+        "run": [
+          "command -v glide || curl https://glide.sh/get | sh",
+          "go get -d github.com/andrecronje/evm/cmd/evm",
+          "cd $GOPATH/src/github.com/andrecronje/evm && glide install",
+          "go get -d github.com/andrecronje/lachesis/cmd/lachesis",
+          "cd $GOPATH/src/github.com/andrecronje/lachesis && glide install"
+        ]
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-inline",
+      "kwargs": {
+        "sudo": [
+          "apt-get install -y libc6-dev* gcc-multilib g++-multilib",
+          "apt-get install -y rpm"
+        ]
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-inline",
+      "kwargs": {
+        "run": [
+          "command -v dep || curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh",
+          "command -v goreleaser || ( go get -d github.com/goreleaser/goreleaser && cd $GOPATH/src/github.com/goreleaser/goreleaser && dep ensure -vendor-only && make setup build && mv $GOPATH/src/github.com/goreleaser/goreleaser/goreleaser $GOPATH/bin )",
+          "cd $GOPATH/src/github.com/andrecronje/evm && goreleaser --rm-dist"
+        ],
+        "ENV": {
+          "GITHUB_TOKEN": {
+            "$ref": "env:GITHUB_TOKEN"
+          }
+        }
+      },
       "type": "fabric"
     }
   ],

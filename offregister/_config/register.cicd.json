@@ -22,12 +22,12 @@
       {
         "module": "offregister-gocd",
         "kwargs": {
-          "SERVER_NAME": "REPLACEME",
+          "SERVER_NAME": "REPLACE_ME",
           "LISTEN_PORT": 443,
           "self_signed": true,
-          "SSL_SUBJ": "/C=AU/ST=NSW/L=Sydney/O=REPLACEME/CN=REPLACEME",
-          "SSL_CERTOUT": "/etc/ssl/certs/REPLACEME.crt",
-          "SSL_KEYOUT": "/etc/ssl/private/REPLACEME.key"
+          "SSL_SUBJ": "/C=AU/ST=NSW/L=Sydney/O=Fantom/CN=REPLACE_ME",
+          "SSL_CERTOUT": "/etc/ssl/certs/REPLACE_ME.crt",
+          "SSL_KEYOUT": "/etc/ssl/private/REPLACE_ME.key"
         },
         "type": "fabric"
       }

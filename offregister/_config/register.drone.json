@@ -1,0 +1,37 @@
+{
+  "name": "Drone",
+  "description": "Drone strategy",
+  "version": "0.0.1",
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "register": {
+    "/fantom/devbox0": [
+      {
+        "module": "offregister-droneci",
+        "kwargs": {
+          "GITHUB": {
+            "client_id": "815b74ed294fc35a2aa8",
+            "client_secret": {
+              "$ref": "env:GITHUB_CLIENT_SECRET"
+            }
+          },
+          "DRONE_SERVER_PORTS": [
+            "8000:8000",
+            9000
+          ],
+          "DRONE_HOST": "https://REPLACE_ME",
+          "SERVER_NAME": "REPLACE_ME"
+        },
+        "type": "fabric"
+      }
+    ]
+  },
+  "_comments": [
+  ],
+  "purpose": [
+    "any-cluster"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}

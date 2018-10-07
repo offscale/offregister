@@ -6,14 +6,24 @@
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/fantom/devbox1": [
+    "/local/macos": [
       {
         "module": "offregister-taiga",
         "kwargs": {
-          "LISTEN_PORT": 443,
-          "SERVER_NAME": "project.fantom.foundation",
+          "LISTEN_PORT": 80,
+          "SERVER_NAME": "localhost",
           "TAIGA_ROOT": "/var/www/taiga",
-          "skip_migrate": true
+          "GITHUB": {
+            "client_id": "REPLACE_ME",
+            "client_secret": {
+              "$ref": "env:GITHUB_CLIENT_SECRET"
+            }
+          },
+          "skip_migrate": false,
+          "remote_user": "REPLACE_ME",
+          "RDBMS_URI": {
+            "$ref": "env:RDBMS_URI"
+          }
         },
         "type": "fabric"
       }
