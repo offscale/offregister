@@ -1,7 +1,7 @@
 {
   "name": "Matrix",
   "description": "Default Matrix strategy",
-  "version": "0.0.1",
+  "version": "0.0.2-alpha",
   "provider": {
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
@@ -14,9 +14,17 @@
       {
         "module": "offregister-matrix",
         "kwargs": {
-          "SERVER_NAME": "comms.offscale.io"
+          "MATRIX_SERVER_NAME": "matrix.offscale.io",
+          "SERVER_NAME": "comms.offscale.io",
+          "clean_riot": false
         },
-        "type": "fabric"
+        "type": "fabric",
+        "__run_cmds": {
+          "op": "in",
+          "val": [
+            "configure_riot4"
+          ]
+        }
       },
       {
         "module": "offregister-certbot",
@@ -24,15 +32,18 @@
         "args": [],
         "kwargs": {
           "domains": [
-            "comms.offscale.io"
+            "comms.offscale.io",
+            "matrix.offscale.io"
           ],
           "email": "samuel@offscale.io",
           "redirect_block": true
         },
         "type": "fabric",
-        "run_cmds": {
-          "op": ">",
-          "val": 1
+        "__run_cmds": {
+          "op": "in",
+          "val": [
+            "apply_cert2"
+          ]
         }
       }
     ]
