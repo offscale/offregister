@@ -1,0 +1,41 @@
+{
+  "name": "GopherCI",
+  "description": "Default GopherCI strategy",
+  "version": "0.0.1",
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "register": {
+    "/fantom/devbox1": [
+      {
+        "module": "offregister-gopherci",
+        "run_cmds": {
+          "op": "in",
+          "val": [
+            "services1"
+          ]
+        },
+        "type": "fabric"
+      }
+    ]
+  },
+  "_comments": [
+    {
+      "module": "offregister-bootstrap",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-docker",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-go",
+      "type": "fabric"
+    }
+  ],
+  "purpose": [
+    "any-cluster"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}
