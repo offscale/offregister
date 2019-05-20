@@ -6,14 +6,14 @@
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/unclustered/REPLACE_NODE_NAME": [
+    "/unclustered/OpenEdX4": [
       {
         "module": "offregister-certbot",
         "cluster_name": "certbot0",
         "args": [],
         "kwargs": {
           "domains": [
-            "studio0.complicated.io"
+            "projects.offscale.io"
           ],
           "email": "samuel@offscale.io"
         },
@@ -25,8 +25,48 @@
       }
     ]
   },
+  "comments": [
+    {
+      "module": "offregister-app-push",
+      "kwargs": {
+        "GIT_DIR": "/var/www/static/openapi-designer",
+        "GIT_REPO": "https://github.com/offscale/offsetup-rfc",
+        "use_sudo": true,
+        "node_sudo": false,
+        "app_name": "openapi-designer-rfc",
+        "NGINX_PORT": 80,
+        "DESCRIPTION": "openapi-designer-rfc",
+        "DNS_NAMES": [
+          "openapi-designer.offscale.io"
+        ],
+        "WWWROOT": "/var/www/static/openapi-designer-rfc",
+        "WWWPATH": "/",
+        "nginx": true
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-app-push",
+      "kwargs": {
+        "GIT_DIR": "/var/www/static/cdd-rfc-web",
+        "GIT_REPO": "https://github.com/SamuelMarks/cdd-rfc-web",
+        "use_sudo": true,
+        "node_sudo": false,
+        "app_name": "complicate",
+        "NGINX_PORT": 80,
+        "DESCRIPTION": "complicate.io",
+        "DNS_NAMES": [
+          "complicate.io"
+        ],
+        "WWWROOT": "/var/www/static/cdd-rfc-web",
+        "WWWPATH": "/",
+        "nginx": true
+      },
+      "type": "fabric"
+    }
+  ],
   "purpose": [
-    "tensorflow"
+    "certbot"
   ],
   "etcd_server": "http://localhost:2379",
   "default_pick": "first"

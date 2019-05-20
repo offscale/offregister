@@ -30,6 +30,25 @@
           "op": ">",
           "val": 1
         }
+      },
+      {
+        "module": "offregister-app-push",
+        "kwargs": {
+          "GIT_DIR": "/var/www/static/fantom",
+          "GIT_REPO": "https://github.com/SamuelMarks/hotel-kiosk-dist",
+          "use_sudo": true,
+          "node_sudo": false,
+          "app_name": "fantom",
+          "NGINX_PORT": 80,
+          "DESCRIPTION": "fantom frontend",
+          "DNS_NAMES": [
+            "fantom.offscale.io"
+          ],
+          "WWWROOT": "/var/www/static/fantom/dist",
+          "WWWPATH": "/",
+          "nginx": true
+        },
+        "type": "fabric"
       }
     ]
   },

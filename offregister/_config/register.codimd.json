@@ -1,0 +1,55 @@
+{
+  "name": "CodiMD",
+  "description": "Default CodiMD strategy",
+  "version": "0.0.1",
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "register": {
+    "/fantom/devbox1": [
+      {
+        "module": "offregister-app-push",
+        "kwargs": {
+          "GIT_DIR": "/var/www/codimd",
+          "GIT_REPO": "https://github.com/hackmdio/codimd",
+          "use_sudo": true,
+          "node_sudo": false,
+          "nginx": true,
+          "npm_global_packages": [
+            "node-gyp"
+          ]
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-codimd",
+        "_run_cmds": {
+          "op": "in",
+          "val": [
+            "services1"
+          ]
+        },
+        "type": "fabric"
+      }
+    ]
+  },
+  "_comments": [
+    {
+      "module": "offregister-bootstrap",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-docker",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-go",
+      "type": "fabric"
+    }
+  ],
+  "purpose": [
+    "any-cluster"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}

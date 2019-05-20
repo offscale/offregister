@@ -6,13 +6,18 @@
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/fantom/devbox2": [
+    "fantom/*": [
       {
         "module": "offregister-bootstrap",
         "type": "fabric"
       },
       {
-        "module": "offregister-docker",
+        "module": "offregister-inline",
+        "kwargs": {
+          "sudo": [
+            "apt-get update && apt-get install -y jq gcc joe mc tree build-essential"
+          ]
+        },
         "type": "fabric"
       },
       {
@@ -20,18 +25,67 @@
         "type": "fabric"
       },
       {
+        "module": "offregister-git",
+        "kwargs": {
+          "GIT_DIR": "/home/ubuntu/go/src/github.com/SamuelMarks/dag1",
+          "GIT_REPO": "https://github.com/SamuelMarks/dag1",
+          "GIT_BRANCH": "master",
+          "GIT_RESET_TO_FIRST": false,
+          "skip_reset": false,
+          "use_sudo": false
+        },
+        "type": "fabric"
+      },
+      {
         "module": "offregister-inline",
         "kwargs": {
           "run": [
-            "mkdir -p \"$GOPATH/src/github.com/andrecronje/lachesis\"",
-            "git clone https://github.com/SamuelMarks/lachesis \"$GOPATH/src/github.com/andrecronje/lachesis\""
+            "rm -rf /home/ubuntu/go/src/github.com/Fantom-foundation/go-evm"
           ]
+        },
+        "type": "fabric"
+      },
+
+      {
+        "module": "offregister-git",
+        "kwargs": {
+          "GIT_DIR": "/home/ubuntu/go/src/github.com/SamuelMarks/go-evm",
+          "GIT_REPO": "https://github.com/SamuelMarks/go-evm",
+          "GIT_BRANCH": "master",
+          "GIT_RESET_TO_FIRST": false,
+          "skip_reset": false,
+          "use_sudo": false
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-inline",
+        "kwargs": {
+          "run": [
+            "ln -s /home/ubuntu/go/src/github.com/SamuelMarks/go-evm /home/ubuntu/go/src/github.com/Fantom-foundation/go-evm",
+            "logout",
+            "source ~/.bashrc",
+            "command -v glide || curl https://glide.sh/get | sh",
+            "logout",
+            "go get -v github.com/SamuelMarks/batch-ethkey"
+          ]
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-inline",
+        "kwargs": {
+          "run": [
+
+          ],
+          "CWD": "/home/ubuntu/go/src/github.com/Fantom-foundation/go-evm"
         },
         "type": "fabric"
       }
     ]
   },
   "_comments": [
+    "make vendor build",
     {
       "module": "offregister-bootstrap",
       "type": "fabric"
@@ -59,9 +113,9 @@
         "run": [
           "command -v glide || curl https://glide.sh/get | sh",
           "go get -d github.com/andrecronje/evm/cmd/evm",
-          "cd $GOPATH/src/github.com/andrecronje/evm      && glide install",
-          "go get -d github.com/andrecronje/lachesis/cmd/lachesis",
-          "cd $GOPATH/src/github.com/andrecronje/lachesis && glide install"
+          "cd /home/ubuntu/go/src/github.com/andrecronje/evm      && glide install",
+          "go get -d github.com/andrecronje/dag1/cmd/dag1",
+          "cd /home/ubuntu/go/src/github.com/andrecronje/dag1 && glide install"
         ]
       },
       "type": "fabric"
@@ -70,7 +124,7 @@
       "module": "offregister-inline",
       "kwargs": {
         "run": [
-          "$GOPATH/src/github.com/andrecronje/evm/scripts/build.bash"
+          "/home/ubuntu/go/src/github.com/andrecronje/evm/scripts/build.bash"
         ]
       },
       "type": "fabric"
@@ -84,19 +138,19 @@
         "HOOK_HOOKS_JSON": [
           {
             "id": "crossbuild-webhook",
-            "execute-command": "$GOPATH/src/github.com/andrecronje/evm/scripts/build.bash",
-            "command-working-directory": "$GOPATH/src/github.com/andrecronje/evm",
+            "execute-command": "/home/ubuntu/go/src/github.com/andrecronje/evm/scripts/build.bash",
+            "command-working-directory": "/home/ubuntu/go/src/github.com/andrecronje/evm",
             "include-command-output-in-response": true,
             "pass-environment-to-command": [
               {
                 "source": "string",
                 "envname": "GOPATH",
-                "name": "$GOPATH"
+                "name": "/home/ubuntu/"
               },
               {
                 "source": "string",
                 "envname": "PATH",
-                "name": "$PATH:/usr/local/go/bin:$GOPATH/bin"
+                "name": "$PATH:/usr/local/go/bin:/home/ubuntu/go/bin"
               }
             ]
           }
@@ -136,7 +190,7 @@
     {
       "module": "offregister-git",
       "kwargs": {
-        "GIT_DIR": "$GOPATH/src/github.com/andrecronje/evm",
+        "GIT_DIR": "/home/ubuntu/go/src/github.com/andrecronje/evm",
         "GIT_REPO": "https://github.com/SamuelMarks/evm",
         "GIT_BRANCH": "master",
         "skip_reset": false,
@@ -150,9 +204,9 @@
         "run": [
           "command -v glide || curl https://glide.sh/get | sh",
           "go get -d github.com/andrecronje/evm/cmd/evm",
-          "cd $GOPATH/src/github.com/andrecronje/evm && glide install",
-          "go get -d github.com/andrecronje/lachesis/cmd/lachesis",
-          "cd $GOPATH/src/github.com/andrecronje/lachesis && glide install"
+          "cd /home/ubuntu/go/src/github.com/andrecronje/evm && glide install",
+          "go get -d github.com/andrecronje/dag1/cmd/dag1",
+          "cd /home/ubuntu/go/src/github.com/andrecronje/dag1 && glide install"
         ]
       },
       "type": "fabric"
@@ -172,14 +226,53 @@
       "kwargs": {
         "run": [
           "command -v dep || curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh",
-          "command -v goreleaser || ( go get -d github.com/goreleaser/goreleaser && cd $GOPATH/src/github.com/goreleaser/goreleaser && dep ensure -vendor-only && make setup build && mv $GOPATH/src/github.com/goreleaser/goreleaser/goreleaser $GOPATH/bin )",
-          "cd $GOPATH/src/github.com/andrecronje/evm && goreleaser --rm-dist"
+          "command -v goreleaser || ( go get -d github.com/goreleaser/goreleaser && cd /home/ubuntu/go/src/github.com/goreleaser/goreleaser && dep ensure -vendor-only && make setup build && mv /home/ubuntu/go/src/github.com/goreleaser/goreleaser/goreleaser /home/ubuntu/go/bin )",
+          "cd /home/ubuntu/go/src/github.com/andrecronje/evm && goreleaser --rm-dist"
         ],
         "ENV": {
           "GITHUB_TOKEN": {
             "$ref": "env:GITHUB_TOKEN"
           }
         }
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-bootstrap",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-docker",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-go",
+      "type": "fabric"
+    },
+    "WORKING:::",
+    {
+      "module": "offregister-bootstrap",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-go",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-inline",
+      "kwargs": {
+        "run": [
+          "logout",
+          "source ~/.bashrc",
+          "command -v glide || curl https://glide.sh/get | sh",
+          "logout",
+          "go get -v github.com/SamuelMarks/batch-ethkey",
+          "mkdir -p \"/home/ubuntu/go/src/github.com/SamuelMarks/dag1\"",
+          "[ -f \"/home/ubuntu/go/src/github.com/SamuelMarks/dag1/README.md\" ] || git clone https://github.com/SamuelMarks/dag1 \"/home/ubuntu/go/src/github.com/SamuelMarks/dag1\""
+        ],
+        "sudo": [
+          "apt-get update && apt-get install -y jq gcc joe mc"
+        ]
       },
       "type": "fabric"
     }

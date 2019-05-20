@@ -6,21 +6,22 @@
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/local/macos": [
+    "/unclustered/OpenEdX4": [
       {
         "module": "offregister-taiga",
         "kwargs": {
-          "LISTEN_PORT": 80,
-          "SERVER_NAME": "localhost",
+          "LISTEN_PORT": 443,
+          "SERVER_NAME": "projects.offscale.io",
           "TAIGA_ROOT": "/var/www/taiga",
-          "GITHUB": {
+          "__GITHUB": {
             "client_id": "REPLACE_ME",
             "client_secret": {
               "$ref": "env:GITHUB_CLIENT_SECRET"
             }
           },
           "skip_migrate": false,
-          "remote_user": "REPLACE_ME",
+          "skip_nginx": true,
+          "__remote_user": "samuel",
           "RDBMS_URI": {
             "$ref": "env:RDBMS_URI"
           }
@@ -38,7 +39,7 @@
       "module": "offregister-taiga",
       "kwargs": {
         "LISTEN_PORT": 443,
-        "SERVER_NAME": "ec2-18-219-48-16.us-east-2.compute.amazonaws.com",
+        "SERVER_NAME": "ec2-REPLACE_ME",
         "TAIGA_ROOT": "/var/www/taiga"
       },
       "type": "fabric"
@@ -69,11 +70,11 @@
         "GIT_REPO": "https://github.com/SamuelMarks/hotel-kiosk-dist",
         "use_sudo": true,
         "node_sudo": false,
-        "app_name": "ec2-18-219-48-16.us-east-2.compute.amazonaws.com",
+        "app_name": "ec2-REPLACE_ME",
         "NGINX_PORT": 80,
         "DESCRIPTION": "certbot frontend",
         "DNS_NAMES": [
-          "ec2-18-222-121-40.us-east-2.compute.amazonaws.com"
+          "ec2-REPLACE_ME.us-east-2.compute.amazonaws.com"
         ],
         "WWWROOT": "/var/www/static/certbot/dist",
         "WWWPATH": "/",

@@ -6,7 +6,7 @@
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/unclustered/ai0-nogpu2": [
+    "/unclustered/ai0-nogpu0": [
       {
         "module": "offregister-bootstrap",
         "type": "fabric"
@@ -29,7 +29,7 @@
         "run_cmds": {
           "op": "in",
           "val": [
-            "install_tensorflow0"
+            "install_tensorboard3"
           ]
         }
       }

@@ -22,12 +22,12 @@
       {
         "module": "offregister-gocd",
         "kwargs": {
-          "SERVER_NAME": "REPLACE_ME",
+          "SERVER_NAME": "ec2-REPLACE_ME",
           "LISTEN_PORT": 443,
           "self_signed": true,
-          "SSL_SUBJ": "/C=AU/ST=NSW/L=Sydney/O=Fantom/CN=REPLACE_ME",
-          "SSL_CERTOUT": "/etc/ssl/certs/REPLACE_ME.crt",
-          "SSL_KEYOUT": "/etc/ssl/private/REPLACE_ME.key"
+          "SSL_SUBJ": "/C=AU/ST=NSW/L=Sydney/O=Fantom/CN=ec2-REPLACE_ME",
+          "SSL_CERTOUT": "/etc/ssl/certs/ec2-REPLACE_ME.crt",
+          "SSL_KEYOUT": "/etc/ssl/private/ec2-REPLACE_ME.key"
         },
         "type": "fabric"
       }

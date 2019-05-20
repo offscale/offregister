@@ -1,0 +1,76 @@
+{
+  "name": "RentBetter",
+  "description": "Default RentBetter strategy",
+  "version": "0.0.1",
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "register": {
+    "rentbetter/devbox4": [
+      {
+        "module": "offregister-docker",
+        "type": "fabric"
+      },  
+      {
+        "module": "offregister-inline",
+        "kwargs": {
+          "run": [
+            "docker-compose up --force-recreate"
+          ],
+          "CWD": "~/repos/RentBetter/ms-property"
+        },
+        "type": "fabric"
+      }
+    ]
+  },
+  "_comments": [
+    {
+      "module": "offregister-bootstrap",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-docker",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-inline",
+      "kwargs": {
+        "run": [
+          "curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y",
+          "mkdir -p repos/RentBetter"
+        ]
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-inline",
+      "kwargs": {
+        "sudo": [
+          "apt update -qq",
+          "apt install -y tree",
+          "DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get -q -y -o \"Dpkg::Options::=--force-confdef\" -o \"Dpkg::Options::=--force-confold\" full-upgrade",
+          "reboot"
+        ]
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-inline",
+      "kwargs": {
+        "run": [
+          "docker build --compress --force-rm --tag \"${PWD##*/}\" .",
+          "docker run -d --rm --name \"${PWD##*/}-c\" -p 5432:5432 --entrypoint '/bin/sh' \"${PWD##*/}\" '-c' 'echo \"ADDRESS=localhost:5432\" >> /built/.env && /bin/cat /built/.env && RUST_BACKTRACE=1 /built/server'",
+          "docker ps -a",
+          "docker logs -f \"${PWD##*/}\"-c"
+        ],
+        "CWD": "~/repos/RentBetter/ms-property"
+      },
+      "type": "fabric"
+    }
+  ],
+  "purpose": [
+    "any-cluster"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}

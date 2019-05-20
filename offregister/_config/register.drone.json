@@ -11,7 +11,7 @@
         "module": "offregister-droneci",
         "kwargs": {
           "GITHUB": {
-            "client_id": "815b74ed294fc35a2aa8",
+            "client_id": "REPLACE_ME",
             "client_secret": {
               "$ref": "env:GITHUB_CLIENT_SECRET"
             }
@@ -20,8 +20,8 @@
             "8000:8000",
             9000
           ],
-          "DRONE_HOST": "https://REPLACE_ME",
-          "SERVER_NAME": "REPLACE_ME"
+          "DRONE_HOST": "https://ec2-REPLACE_ME.us-east-2.compute.amazonaws.com",
+          "SERVER_NAME": "ec2-REPLACE_ME.us-east-2.compute.amazonaws.com"
         },
         "type": "fabric"
       }

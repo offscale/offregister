@@ -10,19 +10,31 @@
       {
         "module": "offregister-app-push",
         "kwargs": {
-          "GIT_DIR": "/var/www/static/hotel-kiosk-dist",
+          "GIT_DIR": "/var/www/static/fantom-updates",
           "GIT_REPO": "https://github.com/SamuelMarks/hotel-kiosk-dist",
           "use_sudo": true,
           "node_sudo": false,
-          "app_name": "kiosk",
+          "app_name": "fantom",
           "NGINX_PORT": 80,
-          "DESCRIPTION": "hotel-kiosk frontend",
+          "DESCRIPTION": "fantom frontend",
           "DNS_NAMES": [
-            "kiosk.offscale.io"
+            "notebook.complicated.io"
           ],
-          "WWWROOT": "/var/www/static/hotel-kiosk-dist/dist",
+          "WWWROOT": "/var/www/static/fantom-updates/dist",
           "WWWPATH": "/",
           "nginx": true
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-certbot",
+        "cluster_name": "certbot0",
+        "args": [],
+        "kwargs": {
+          "domains": [
+            "notebook.complicated.io"
+          ],
+          "email": "samuel@offscale.io"
         },
         "type": "fabric"
       }

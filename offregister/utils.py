@@ -43,7 +43,7 @@ def import_submodules(package, recursive=True):
             if recursive and is_pkg:
                 results.update(import_submodules(full_name))
         except ImportError:
-            logger.warning('[sym2mod] Failed to import: {!r}'.format(full_name))
+            pass  # logger.warning('[sym2mod] Failed to import: {!r}'.format(full_name))
     return results
 
 

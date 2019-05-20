@@ -1,4 +1,5 @@
 import json
+import logging
 from collections import OrderedDict
 from functools import partial
 from itertools import ifilter, imap
@@ -16,6 +17,9 @@ from offutils_strategy_register import save_node_info
 from offregister import root_logger
 from offregister.drivers import OffregisterBaseDriver, PreparedClusterObj
 from offregister.utils import guess_os, get_pip_packages, pip_install
+
+logging.getLogger("paramiko").setLevel(logging.WARNING)
+logging.getLogger('offregister.utils').setLevel(logging.ERROR)
 
 
 class OffFabric(OffregisterBaseDriver):
