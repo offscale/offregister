@@ -26,6 +26,18 @@ if __name__ == '__main__':
         name=package_name,
         author=__author__,
         version=__version__,
+        description='Configuration driven deployments with Fabric',
+        classifiers=[
+            'Development Status :: 7 - Inactive',
+            'Intended Audience :: Developers',
+            'Topic :: Software Development',
+            'Topic :: Software Development :: Libraries :: Python Modules',
+            'License :: OSI Approved :: MIT License',
+            'License :: OSI Approved :: Apache Software License',
+            'Programming Language :: Python',
+            'Programming Language :: Python :: 2.7',
+            'Programming Language :: Python :: 2 :: Only'
+        ],
         test_suite=package_name + '.tests',
         packages=find_packages(),
         package_dir={package_name: package_name},
