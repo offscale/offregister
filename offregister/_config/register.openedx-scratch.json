@@ -25,7 +25,7 @@
             "$ref": "env:MYSQL_PASSWORD"
           },
           "staff_user": "samuel",
-          "staff_email": "samuel@offscale.io",
+          "staff_email": "EMAIL_ADDRESS_HERE",
           "staff_pass": "3333333333",
           "LMS_LISTEN": 80,
           "CMS_LISTEN": 80,

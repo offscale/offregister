@@ -73,7 +73,7 @@ class ProcessNode(object):
             pass
         elif self.driver_name in ('azure',):  # ('azure', 'azure_arm'):
             if 'create_with' not in self.config_provider or \
-                            'ex_cloud_service_name' not in self.config_provider['create_with']:
+                'ex_cloud_service_name' not in self.config_provider['create_with']:
                 raise KeyError('`ex_cloud_service_name` must be defined. '
                                'See: http://libcloud.readthedocs.org/en/latest/compute/drivers/azure.html'
                                '#libcloud.compute.drivers.azure.AzureNodeDriver.create_node')
@@ -116,9 +116,8 @@ class ProcessNode(object):
                     self.config_provider['ssh'] = {'private_key_path': self.node.extra['ssh_config']['IdentityFile']}
                     self.config_provider['ssh'].update(self.config_provider.get('ssh', {}))
                 self.env.ssh_config = self.node.extra['ssh_config']
-            if 'password' in self.node.extra:
-                print 'password =', self.node.extra['password']
-            pp(self.node.extra)
+            # if 'password' in self.node.extra:
+            pp({'node.extra': self.node.extra})
 
         # pp(node_to_dict(self.node))
         self.dns_name = self.node.extra.get('dns_name')
@@ -180,6 +179,8 @@ class ProcessNode(object):
             if 'node_password' in self.config_provider['ssh']:
                 self.env.password = self.config_provider['ssh']['node_password']
 
+        assert self.env.key_filename or self.env.password, 'Set a private key or password to have unattended deploys'
+
         if self.env.user is None or self.env.user == 'user':
             self.env.user = self.node.extra['user'] if 'user' in self.node.extra else self.guess_os_username()
 
@@ -193,7 +194,7 @@ class ProcessNode(object):
         if isIpPrivate(self.node.public_ips[0]):
             self.dns_name = self.node.public_ips[0]  # LOL
         elif not self.dns_name and 'skydns2' not in self.process_dict['register'][dir_or_key] and \
-                        'consul' not in self.process_dict['register'][dir_or_key]:
+            'consul' not in self.process_dict['register'][dir_or_key]:
             self.dns_name = self.node.public_ips[0]  # '{public_ip}.xip.io'.format(public_ip=self.node.public_ips[0])
             # raise Exception('No DNS name and no way of acquiring one')
         self.env.hosts = [self.dns_name]
@@ -212,7 +213,7 @@ class ProcessNode(object):
     def get_directory_or_key(process_dict, within):
         directory = next((directory for directory in process_dict['register']), None)
         if type(directory) is NoneType or directory != within \
-                and len(directory) >= len(within) + 3 or directory[-1] != '*':
+            and len(directory) >= len(within) + 3 or directory[-1] != '*':
 
             v = Client().read(directory).value  # Maybe pass this along?
             if v is not None:

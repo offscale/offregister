@@ -6,22 +6,28 @@
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/unclustered/OpenEdX4": [
+    "/unclustered/200-srv": [
+      {
+        "module": "offregister-jupyter",
+        "cluster_name": "jupyter2",
+        "args": [],
+        "kwargs": {
+          "domain": "notebook.complicated.io",
+          "virtual_env": "/opt/venvs/tflow3.6"
+        },
+        "type": "fabric"
+      },
       {
         "module": "offregister-certbot",
-        "cluster_name": "certbot0",
+        "cluster_name": "jupyter2",
         "args": [],
         "kwargs": {
           "domains": [
-            "projects.offscale.io"
+            "notebook.complicated.io"
           ],
-          "email": "samuel@offscale.io"
+          "email": "EMAIL_ADDRESS_HERE"
         },
-        "type": "fabric",
-        "_run_cmds": {
-          "op": ">",
-          "val": 1
-        }
+        "type": "fabric"
       }
     ]
   },

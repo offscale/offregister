@@ -6,7 +6,7 @@
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/unclustered/ai0-nogpu0": [
+    "/unclustered/ai0-gpu0": [
       {
         "module": "offregister-bootstrap",
         "type": "fabric"
@@ -26,13 +26,23 @@
           "python3": true
         },
         "type": "fabric",
-        "run_cmds": {
+        "__run_cmds": {
           "op": "in",
           "val": [
             "install_tensorboard3"
           ]
         }
-      }
+      },
+      {
+      "module": "offregister-git",
+      "kwargs": {
+        "GIT_DIR": "/mnt-lg/ml-glaucoma",
+        "GIT_REPO": "https://github.com/SamuelMarks/ml-glaucoma",
+        "skip_reset": false,
+        "use_sudo": true
+      },
+      "type": "fabric"
+    }
     ]
   },
   "_comments": [

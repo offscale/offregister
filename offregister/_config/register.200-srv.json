@@ -1,0 +1,305 @@
+{
+  "name": "200-srv",
+  "description": "Offregister strategy for 200-srv",
+  "version": "0.0.1",
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "register": {
+    "/unclustered/tpu5": [
+      {
+        "module": "offregister-inline",
+        "kwargs": {
+          "sudo": [
+            "apt-get install -y python3-venv",
+            "test -d /opt/venvs/tflow-3.6 || python3 -m venv /opt/venvs/tflow-3.6 --system-site-packages",
+            "test -e /opt/venvs/tflow-3.6/bin/jupyter || ln -s $(which jupyter) /opt/venvs/tflow-3.6/bin/jupyter",
+            "test -e /opt/venvs/tflow-3.6/bin/tensorboard || ln -s $(which tensorboard) /opt/venvs/tflow-3.6/bin/tensorboard"
+          ],
+          "run": [
+            "mkdir -p ~/ml-logs ~/notebooks"
+          ]
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-app-push",
+        "kwargs": {
+          "GIT_DIR": "/var/www/static/certbot",
+          "GIT_REPO": "https://github.com/SamuelMarks/hotel-kiosk-dist",
+          "use_sudo": true,
+          "node_sudo": false,
+          "app_name": "g5.notebook.offscale.io",
+          "NGINX_PORT": 80,
+          "DESCRIPTION": "notebook frontend",
+          "DNS_NAMES": [
+            "g5.notebook.offscale.io"
+          ],
+          "WWWROOT": "/var/www/static/certbot/dist",
+          "WWWPATH": "/",
+          "nginx": true
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-app-push",
+        "kwargs": {
+          "GIT_DIR": "/var/www/static/certbot",
+          "GIT_REPO": "https://github.com/SamuelMarks/hotel-kiosk-dist",
+          "use_sudo": true,
+          "node_sudo": false,
+          "app_name": "g5.tensorboard.offscale.io",
+          "NGINX_PORT": 80,
+          "DESCRIPTION": "tensorboard frontend",
+          "DNS_NAMES": [
+            "g5.tensorboard.offscale.io"
+          ],
+          "WWWROOT": "/var/www/static/certbot/dist",
+          "WWWPATH": "/",
+          "nginx": true
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-certbot",
+        "cluster_name": "certbot0",
+        "args": [],
+        "kwargs": {
+          "domains": [
+            "g5.notebook.offscale.io"
+          ],
+          "email": "EMAIL_ADDRESS_HERE"
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-certbot",
+        "cluster_name": "certbot0",
+        "args": [],
+        "kwargs": {
+          "domains": [
+            "g5.tensorboard.offscale.io"
+          ],
+          "email": "EMAIL_ADDRESS_HERE"
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-tensorflow",
+        "cluster_name": "tensorflow.southeast.0",
+        "args": [],
+        "kwargs": {
+          "from": "source",
+          "virtual_env": "/opt/venvs/tflow-3.6",
+          "virtual_env_args": "--system-site-packages",
+          "tensorboard_logs_dir": "/home/samuel/ml-logs",
+          "pip_install_args": "--user",
+          "tensorflow_tag": "v1.14.0",
+          "User": "samuel",
+          "Group": "samuel",
+          "Environments": "Environment=VIRTUALENV=/opt/venvs/tflow-3.6/bin\nEnvironment=PYTHONPATH=/opt/venvs/tflow-3.6/bin",
+          "force_rebuild": false,
+          "python3": true
+        },
+        "type": "fabric",
+        "run_cmds": {
+          "op": "in",
+          "val": [
+            "install_jupyter_notebook1",
+            "install_tensorboard3"
+          ]
+        }
+      }
+    ]
+  },
+  "_comments": [
+    "------",
+    {
+      "module": "offregister-service",
+      "args": [],
+      "kwargs": {
+        "conf_name": "ml_glaucoma_bmes_train",
+        "Environments": "Environment=VIRTUALENV=/opt/venvs/tflow-3.6/bin\nEnvironment=PYTHONPATH=/opt/venvs/tflow-3.6/bin\nEnvironment=data_pardir=/mnt-lg\nEnvironment=dc_gin=/var/repos/ml-glaucoma/ml_glaucoma/model_configs/dc.gin",
+        "WorkingDirectory": "/mnt-lg/tmp",
+        "User": "root",
+        "Group": "root",
+        "ExecStart": "/opt/venvs/tflow-3.6/bin/python -m ml_glaucoma v2 train -ds bmes --data_dir /mnt-lg/tensorflow_datasets --model_file /var/repos/ml-glaucoma/ml_glaucoma/model_configs/dc.gin --model_dir /mnt-lg/ml_glaucoma_models/bmes-dc0-epochs-250 --epochs 250"
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-service",
+      "args": [],
+      "kwargs": {
+        "conf_name": "tensorboard",
+        "Environments": "Environment=VIRTUALENV=/opt/venvs/tflow-3.6/bin\nEnvironment=PYTHONPATH=/opt/venvs/tflow-3.6/bin",
+        "WorkingDirectory": "/mnt-lg/tensorboard",
+        "User": "root",
+        "Group": "root",
+        "ExecStart": "/opt/venvs/tflow-3.6/bin/tensorboard --logdir /mnt-lg"
+      },
+      "type": "fabric"
+    },
+    "-----------------",
+    {
+      "module": "offregister-docker",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-redis",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-git",
+      "kwargs": {
+        "GIT_DIR": "/var/repos/ml-glaucoma",
+        "GIT_REPO": "https://github.com/SamuelMarks/ml-glaucoma",
+        "GIT_BRANCH": "master",
+        "GIT_RESET_TO_FIRST": false,
+        "skip_reset": false,
+        "use_sudo": true
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-python",
+      "args": [],
+      "kwargs": {
+        "virtual_env": "/opt/venvs/tflow-3.6",
+        "python3": true,
+        "requirements": true,
+        "package_directory": "/var/repos/ml-glaucoma",
+        "pip_version": "19.2.2"
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-docker",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-redis",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-app-push",
+      "kwargs": {
+        "GIT_DIR": "/var/www/static/certbot",
+        "GIT_REPO": "https://github.com/SamuelMarks/hotel-kiosk-dist",
+        "use_sudo": true,
+        "node_sudo": false,
+        "app_name": "tensorboard.offscale.io",
+        "NGINX_PORT": 80,
+        "DESCRIPTION": "tensorboard frontend",
+        "DNS_NAMES": [
+          "notebook.offscale.io"
+        ],
+        "WWWROOT": "/var/www/static/certbot/dist",
+        "WWWPATH": "/",
+        "nginx": true
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-app-push",
+      "kwargs": {
+        "GIT_DIR": "/var/www/static/certbot",
+        "GIT_REPO": "https://github.com/SamuelMarks/hotel-kiosk-dist",
+        "use_sudo": true,
+        "node_sudo": false,
+        "app_name": "tensorboard.offscale.io",
+        "NGINX_PORT": 80,
+        "DESCRIPTION": "tensorboard frontend",
+        "DNS_NAMES": [
+          "tensorboard.offscale.io"
+        ],
+        "WWWROOT": "/var/www/static/certbot/dist",
+        "WWWPATH": "/",
+        "nginx": true
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-certbot",
+      "cluster_name": "certbot0",
+      "args": [],
+      "kwargs": {
+        "domains": [
+          "tensorboard.offscale.io"
+        ],
+        "email": "EMAIL_ADDRESS_HERE"
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-jupyter",
+      "cluster_name": "jupyter2",
+      "args": [],
+      "kwargs": {
+        "domain": "notebook.offscale.io"
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-certbot",
+      "cluster_name": "jupyter2",
+      "args": [],
+      "kwargs": {
+        "domains": [
+          "notebook.offscale.io"
+        ],
+        "email": "EMAIL_ADDRESS_HERE"
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-git",
+      "kwargs": {
+        "GIT_DIR": "/var/repos/ml-glaucoma",
+        "GIT_REPO": "https://github.com/SamuelMarks/ml-glaucoma",
+        "GIT_BRANCH": "master",
+        "GIT_RESET_TO_FIRST": false,
+        "skip_reset": false,
+        "skip_clean": false,
+        "use_sudo": true
+      },
+      "type": "fabric"
+    },
+    "============================",
+    {
+      "module": "offregister-inline",
+      "kwargs": {
+        "run": [
+          "rm -f /mnt/datasets/400x400balanced_dataset.ml_glaucoma_max20_batch32_binary_crossentropy_dc0_300epochs.hdf5",
+          "/opt/venvs/tflow-3.6/bin/python -m ml_glaucoma data -s /mnt/datasets/400x400balanced_dataset.ml_glaucoma_max20_batch32_binary_crossentropy_dc0_300epochs.hdf5 -f -p 400"
+        ]
+      },
+      "type": "fabric"
+    },
+    "================",
+    {
+      "module": "offregister-app-push",
+      "kwargs": {
+        "GIT_DIR": "/var/www/static/certbot",
+        "GIT_REPO": "https://github.com/SamuelMarks/hotel-kiosk-dist",
+        "use_sudo": true,
+        "node_sudo": false,
+        "app_name": "tensorboard.offscale.io",
+        "NGINX_PORT": 80,
+        "DESCRIPTION": "tensorboard frontend",
+        "DNS_NAMES": [
+          "tensorboard.offscale.io"
+        ],
+        "WWWROOT": "/var/www/static/certbot/dist",
+        "WWWPATH": "/",
+        "nginx": true
+      },
+      "type": "fabric"
+    }
+  ],
+  "purpose": [
+    "tensorflow"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}

@@ -32,7 +32,7 @@
           "domains": [
             "notebook.ai0.complicated.io"
           ],
-          "email": "samuel@offscale.io"
+          "email": "EMAIL_ADDRESS_HERE"
         },
         "type": "fabric"
       },
@@ -186,7 +186,7 @@
           "EMAIL_USE_TLS": true,
           "EMAIL_HOST_USER": "samuelmarks@gmail.com",
           "EMAIL_HOST_PASSWORD": "nopasswordhere",
-          "DEFAULT_FROM_EMAIL": "samuel@offscale.io",
+          "DEFAULT_FROM_EMAIL": "EMAIL_ADDRESS_HERE",
           "USE_CUSTOM_THEME": false,
           "THEME_NAME": "edx-stanford-theme"
         },
@@ -214,11 +214,11 @@
           "EMAIL_USE_TLS": true,
           "EMAIL_HOST_USER": "samuelmarks@gmail.com",
           "EMAIL_HOST_PASSWORD": "nopasswordhere",
-          "DEFAULT_FROM_EMAIL": "samuel@offscale.io",
+          "DEFAULT_FROM_EMAIL": "EMAIL_ADDRESS_HERE",
           "USE_CUSTOM_THEME": true,
           "THEME_NAME": "edx-stanford-theme"
         },
-        "ALL_EMAILS_TO": "samuel@offscale.io"
+        "ALL_EMAILS_TO": "EMAIL_ADDRESS_HERE"
       },
       "type": "fabric",
       "run_cmds": {
@@ -256,7 +256,7 @@
               "EMAIL_USE_TLS": true,
               "EMAIL_HOST_USER": "samuelmarks@gmail.com",
               "EMAIL_HOST_PASSWORD": "nopasswordhere",
-              "DEFAULT_FROM_EMAIL": "samuel@offscale.io",
+              "DEFAULT_FROM_EMAIL": "EMAIL_ADDRESS_HERE",
               "USE_CUSTOM_THEME": true,
               "THEME_NAME": "edx-stanford-theme"
             },
@@ -283,11 +283,11 @@
               "EMAIL_USE_TLS": true,
               "EMAIL_HOST_USER": "samuelmarks@gmail.com",
               "EMAIL_HOST_PASSWORD": "nopasswordhere",
-              "DEFAULT_FROM_EMAIL": "samuel@offscale.io",
+              "DEFAULT_FROM_EMAIL": "EMAIL_ADDRESS_HERE",
               "USE_CUSTOM_THEME": true,
               "THEME_NAME": "edx-stanford-theme"
             },
-            "ALL_EMAILS_TO": "samuel@offscale.io"
+            "ALL_EMAILS_TO": "EMAIL_ADDRESS_HERE"
           },
           "type": "fabric",
           "run_cmds": {

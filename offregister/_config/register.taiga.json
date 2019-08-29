@@ -49,7 +49,7 @@
       "cluster_name": "openedx-ginkgo.master.1",
       "kwargs": {
         "nginx_secure": "certbot",
-        "https_cert_email": "samuel@offscale.io"
+        "https_cert_email": "EMAIL_ADDRESS_HERE"
       },
       "type": "fabric",
       "run_cmds": {

@@ -35,7 +35,7 @@
             "comms.offscale.io",
             "matrix.offscale.io"
           ],
-          "email": "samuel@offscale.io",
+          "email": "EMAIL_ADDRESS_HERE",
           "redirect_block": true
         },
         "type": "fabric",

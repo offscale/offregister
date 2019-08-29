@@ -23,7 +23,7 @@
           "domains": [
             "stockrankr.com"
           ],
-          "email": "samuel@offscale.io"
+          "email": "EMAIL_ADDRESS_HERE"
         },
         "type": "fabric",
         "_run_cmds": {
@@ -193,7 +193,7 @@
           "WWWROOT": "/var/www/static/stockrankr-web-frontend-dist/dist",
           "WWWPATH": "/",
           "nginx_secure": "certbot",
-          "https_cert_email": "samuel@offscale.io"
+          "https_cert_email": "EMAIL_ADDRESS_HERE"
         },
         "__run_cmds": {
           "op": "==",

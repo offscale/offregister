@@ -6,7 +6,17 @@
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/unclustered/ai0-nogpu1": [
+    "/unclustered/gpu0": [
+      {
+        "module": "offregister-inline",
+        "kwargs": {
+          "run": [
+            "echo hello",
+            "sleep 20s"
+          ]
+        },
+        "type": "fabric"
+      },
       {
         "module": "offregister-git",
         "kwargs": {

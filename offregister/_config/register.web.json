@@ -34,7 +34,7 @@
           "domains": [
             "notebook.complicated.io"
           ],
-          "email": "samuel@offscale.io"
+          "email": "EMAIL_ADDRESS_HERE"
         },
         "type": "fabric"
       }

@@ -1,0 +1,137 @@
+{
+  "name": "Superset",
+  "description": "Offregister strategy for Apache Superset",
+  "version": "0.0.1",
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "register": {
+    "/unclustered/ai0-gpu0": [
+      {
+        "module": "offregister-postgres",
+        "kwargs": {
+          "create": [
+            {
+              "user": {
+                "$ref": "env:DB_USER"
+              },
+              "password": {
+                "$ref": "env:DB_PASS"
+              },
+              "dbname": {
+                "$ref": "env:DB_NAME"
+              }
+            }
+          ],
+          "users": [
+            {
+              "name": {
+                "$ref": "env:DB_USER"
+              },
+              "password": {
+                "$ref": "env:DB_PASS"
+              }
+            }
+          ],
+          "dbs": [
+            {
+              "$ref": "env:DB_NAME"
+            }
+          ],
+          "cluster": false
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-redis",
+        "type": "fabric"
+      }
+    ]
+  },
+  "_comments": [
+    {
+      "module": "offregister-git",
+      "kwargs": {
+        "GIT_DIR": "/home/ubuntu/repos/incubator-superset",
+        "GIT_REPO": "https://github.com/glaucoma/glaucoma-analytics-rest-api",
+        "GIT_BRANCH": "master",
+        "GIT_RESET_TO_FIRST": false,
+        "skip_reset": true,
+        "use_sudo": true
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-bootstrap",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-app-push",
+      "kwargs": {
+        "GIT_DIR": "/var/www/static/certbot",
+        "GIT_REPO": "https://github.com/SamuelMarks/hotel-kiosk-dist",
+        "use_sudo": true,
+        "node_sudo": false,
+        "app_name": "tz-minerals.offscale.io",
+        "NGINX_PORT": 80,
+        "DESCRIPTION": "certbot frontend",
+        "DNS_NAMES": [
+          "tz-minerals.offscale.io"
+        ],
+        "WWWROOT": "/var/www/static/certbot/dist",
+        "WWWPATH": "/",
+        "nginx": true
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-certbot",
+      "cluster_name": "certbot0",
+      "args": [],
+      "kwargs": {
+        "domains": [
+          "tz-minerals.offscale.io"
+        ],
+        "email": "EMAIL_ADDRESS_HERE"
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-python",
+      "args": [],
+      "kwargs": {
+        "virtual_env": "/opt/venvs/superset",
+        "python3": true,
+        "requirements": true,
+        "package_directory": "/home/ubuntu/repos/incubator-superset",
+        "pip_version": "19.1.1",
+        "use_sudo": false,
+        "circus_name": "supserset",
+        "circus_cmd": "gunicorn",
+        "circus_args": "superset:app",
+        "circus_home": "/home/ubuntu/repos",
+        "circus_working_dir": "/home/ubuntu/repos/incubator-superset",
+        "remote_user": "ubuntu",
+        "circus_env": {
+          "SERVER": "gunicorn",
+          "PORT": "8080"
+        }
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-inline",
+      "kwargs": {
+        "sudo": [
+          "systemctl stop circusd; systemctl start $_"
+        ]
+      },
+      "type": "fabric"
+    }
+  ],
+  "purpose": [
+    "any-cluster"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}

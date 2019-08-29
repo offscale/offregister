@@ -32,28 +32,37 @@
         "type": "fabric"
       },
       {
-        "module": "offregister-python",
-        "args": [],
+        "module": "offregister-inline",
         "kwargs": {
-          "virtual_env": "/opt/venvs/glaucoma-analytics",
-          "python3": false,
-          "requirements": true,
-          "package_directory": "/var/www/glaucoma/glaucoma-analytics-rest-api",
-          "pip_version": "19.1.1",
-          "use_sudo": true,
-          "circus_name": "glaucoma_analytics_rest_api",
-          "circus_cmd": "python",
-          "circus_args": "-m glaucoma_analytics_rest_api",
-          "circus_home": "/var/www",
-          "circus_working_dir": "/var/www/glaucoma/glaucoma-analytics-rest-api",
-          "remote_user": "thankq",
-          "circus_env": {
-            "SERVER": "gunicorn",
-            "PORT": "5454",
-            "RDBMS_URI": {
-              "$ref": "env:CIRCUS_RDBMS_URI"
-            }
-          }
+          "sudo": [
+            "systemctl stop circusd; systemctl start $_"
+          ]
+        },
+        "type": "fabric"
+      }
+    ],
+    "/unclustered/OpenEdX4": [
+      {
+        "module": "offregister-git",
+        "kwargs": {
+          "GIT_DIR": "/var/www/static/glaucoma-risk-calculator-analytics-dist",
+          "GIT_REPO": "https://github.com/glaucoma/glaucoma-risk-calculator-analytics-dist",
+          "GIT_BRANCH": "master",
+          "GIT_RESET_TO_FIRST": false,
+          "skip_reset": false,
+          "use_sudo": true
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-git",
+        "kwargs": {
+          "GIT_DIR": "/var/www/glaucoma/glaucoma-analytics-rest-api",
+          "GIT_REPO": "https://github.com/glaucoma/glaucoma-analytics-rest-api",
+          "GIT_BRANCH": "master",
+          "GIT_RESET_TO_FIRST": false,
+          "skip_reset": false,
+          "use_sudo": true
         },
         "type": "fabric"
       },
@@ -69,6 +78,58 @@
     ]
   },
   "_comments": [
+    "BELOW_WORKS:",
+    {
+      "module": "offregister-git",
+      "kwargs": {
+        "GIT_DIR": "/var/www/static/glaucoma-risk-calculator-analytics-dist",
+        "GIT_REPO": "https://github.com/glaucoma/glaucoma-risk-calculator-analytics-dist",
+        "GIT_BRANCH": "master",
+        "GIT_RESET_TO_FIRST": false,
+        "skip_reset": false,
+        "use_sudo": true
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-git",
+      "kwargs": {
+        "GIT_DIR": "/var/www/glaucoma/glaucoma-analytics-rest-api",
+        "GIT_REPO": "https://github.com/glaucoma/glaucoma-analytics-rest-api",
+        "GIT_BRANCH": "master",
+        "GIT_RESET_TO_FIRST": false,
+        "skip_reset": false,
+        "use_sudo": true
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-python",
+      "args": [],
+      "kwargs": {
+        "virtual_env": "/opt/venvs/glaucoma-analytics",
+        "python3": false,
+        "requirements": true,
+        "package_directory": "/var/www/glaucoma/glaucoma-analytics-rest-api",
+        "pip_version": "19.1.1",
+        "use_sudo": true,
+        "circus_name": "glaucoma_analytics_rest_api",
+        "circus_cmd": "python",
+        "circus_args": "-m glaucoma_analytics_rest_api",
+        "circus_home": "/var/www",
+        "circus_working_dir": "/var/www/glaucoma/glaucoma-analytics-rest-api",
+        "remote_user": "thankq",
+        "circus_env": {
+          "SERVER": "gunicorn",
+          "PORT": "5454",
+          "RDBMS_URI": {
+            "$ref": "env:CIRCUS_RDBMS_URI"
+          }
+        }
+      },
+      "type": "fabric"
+    },
+    "^ABOVE WORKS^",
     {
       "module": "offregister-redis",
       "type": "fabric"
@@ -140,7 +201,7 @@
         "WWWROOT": "/var/www/static/glaucoma-risk-calculator-web-frontend-dist/dist",
         "WWWPATH": "/",
         "nginx_secure": "certbot",
-        "https_cert_email": "samuel@offscale.io"
+        "https_cert_email": "EMAIL_ADDRESS_HERE"
       },
       "type": "fabric"
     },

@@ -6,160 +6,180 @@
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/unclustered/REPLACE_NODE_NAME": [
+    "/unclustered/OpenEdX2": [
       {
-        "module": "offregister-openedx",
-        "cluster_name": "openedx-ginkgo.master.tmp",
-        "kwargs": {
-          "run_paver": true,
-          "ALL_EMAILS_TO": "samuel@offscale.io",
-          "lms.env": {
-            "ACTIVATION_EMAIL_SUPPORT_LINK": "http://edu-demo.complicated.io",
-            "CMS_BASE": "studio-demo.complicated.io",
-            "COMMENTS_SERVICE_KEY": "password",
-            "COMMENTS_SERVICE_URL": "http://localhost:18080",
-            "EDXAPP_LMS_BASE_SCHEME": "http",
-            "EMAIL_USE_TLS": false,
-            "FEATURES": {
-              "AUTH_USE_OPENID_PROVIDER": false,
-              "AUTOMATIC_AUTH_FOR_TESTING": false,
-              "CUSTOM_COURSES_EDX": false,
-              "ENABLE_COMBINED_LOGIN_REGISTRATION": true,
-              "ENABLE_CORS_HEADERS": false,
-              "ENABLE_COUNTRY_ACCESS": false,
-              "ENABLE_CREDIT_API": false,
-              "ENABLE_CREDIT_ELIGIBILITY": false,
-              "ENABLE_CROSS_DOMAIN_CSRF_COOKIE": false,
-              "ENABLE_CSMH_EXTENDED": true,
-              "ENABLE_DISCUSSION_HOME_PANEL": true,
-              "ENABLE_DISCUSSION_SERVICE": true,
-              "ENABLE_EDXNOTES": false,
-              "ENABLE_GRADE_DOWNLOADS": true,
-              "ENABLE_INSTRUCTOR_ANALYTICS": false,
-              "ENABLE_MKTG_SITE": false,
-              "ENABLE_MOBILE_REST_API": false,
-              "ENABLE_OAUTH2_PROVIDER": false,
-              "ENABLE_ONLOAD_BEACON": false,
-              "ENABLE_READING_FROM_MULTIPLE_HISTORY_TABLES": true,
-              "ENABLE_SPECIAL_EXAMS": false,
-              "ENABLE_SYSADMIN_DASHBOARD": false,
-              "ENABLE_THIRD_PARTY_AUTH": false,
-              "ENABLE_VIDEO_BEACON": false,
-              "ENABLE_VIDEO_UPLOAD_PIPELINE": false,
-              "PREVIEW_LMS_BASE": "preview.localhost",
-              "SHOW_FOOTER_LANGUAGE_SELECTOR": false,
-              "SHOW_HEADER_LANGUAGE_SELECTOR": false,
-              "homepage_overlay_html": "<h1>Take an Open edX Course</h1>",
-              "course_index_overlay_text": "<h1>Take an Open edX Course</h1>",
-              "OAUTH_ENFORCE_SECURE": false
-            },
-            "FOOTER_ORGANIZATION_IMAGE": "images/logo.png",
-            "LMS_BASE": "edu-demo.complicated.io",
-            "LMS_ROOT_URL": "http://edu-demo.complicated.io",
-            "PAID_COURSE_REGISTRATION_CURRENCY": [
-              "aud",
-              "$"
-            ],
-            "PLATFORM_NAME": "edu-demo.complicated.io by Sydney Scientific Pty Ltd",
-            "REGISTRATION_EXTRA_FIELDS": {
-              "city": "hidden",
-              "confirm_email": "hidden",
-              "country": "required",
-              "gender": "optional",
-              "goals": "optional",
-              "honor_code": "required",
-              "level_of_education": "optional",
-              "mailing_address": "hidden",
-              "terms_of_service": "hidden",
-              "year_of_birth": "required"
-            },
-            "SITE_NAME": "edu-demo.complicated.io",
-            "STATIC_ROOT_BASE": "/edx/var/edxapp/staticfiles",
-            "STATIC_URL_BASE": "/static/",
-            "STUDIO_NAME": "Studio",
-            "STUDIO_SHORT_NAME": "Studio",
-            "SUPPORT_SITE_LINK": "",
-            "SYSLOG_SERVER": "",
-            "TIME_ZONE": "Australia/Sydney",
-            "WIKI_ENABLED": true,
-            "homepage_overlay_html": "<h1>Take a free edu-demo.complicated.io course today &#57430;</h1>"
-          },
-          "cms.env": {
-            "ACTIVATION_EMAIL_SUPPORT_LINK": "http://edu-demo.complicated.io",
-            "CMS_BASE": "studio-demo.complicated.io",
-            "EMAIL_USE_TLS": false,
-            "FEATURES": {
-              "AUTH_USE_OPENID_PROVIDER": true,
-              "AUTOMATIC_AUTH_FOR_TESTING": false,
-              "CUSTOM_COURSES_EDX": false,
-              "ENABLE_COMBINED_LOGIN_REGISTRATION": true,
-              "ENABLE_CORS_HEADERS": false,
-              "ENABLE_COUNTRY_ACCESS": false,
-              "ENABLE_CREDIT_API": false,
-              "ENABLE_CREDIT_ELIGIBILITY": false,
-              "ENABLE_CROSS_DOMAIN_CSRF_COOKIE": false,
-              "ENABLE_CSMH_EXTENDED": true,
-              "ENABLE_DISCUSSION_HOME_PANEL": true,
-              "ENABLE_DISCUSSION_SERVICE": true,
-              "ENABLE_EDXNOTES": false,
-              "ENABLE_GRADE_DOWNLOADS": true,
-              "ENABLE_INSTRUCTOR_ANALYTICS": false,
-              "ENABLE_MKTG_SITE": false,
-              "ENABLE_MOBILE_REST_API": false,
-              "ENABLE_OAUTH2_PROVIDER": false,
-              "ENABLE_ONLOAD_BEACON": false,
-              "ENABLE_READING_FROM_MULTIPLE_HISTORY_TABLES": true,
-              "ENABLE_SPECIAL_EXAMS": false,
-              "ENABLE_SYSADMIN_DASHBOARD": false,
-              "ENABLE_THIRD_PARTY_AUTH": true,
-              "ENABLE_VIDEO_BEACON": false,
-              "ENABLE_VIDEO_UPLOAD_PIPELINE": false,
-              "PREVIEW_LMS_BASE": "preview.localhost",
-              "SHOW_FOOTER_LANGUAGE_SELECTOR": false,
-              "SHOW_HEADER_LANGUAGE_SELECTOR": false
-            },
-            "FOOTER_ORGANIZATION_IMAGE": "images/logo.png",
-            "LMS_BASE": "edu-demo.complicated.io",
-            "LMS_ROOT_URL": "http://edu-demo.complicated.io",
-            "PLATFORM_NAME": "edu-demo.complicated.io by offscale.io",
-            "REGISTRATION_EXTRA_FIELDS": {
-              "city": "hidden",
-              "confirm_email": "hidden",
-              "country": "hidden",
-              "gender": "hidden",
-              "goals": "hidden",
-              "honor_code": "required",
-              "level_of_education": "hidden",
-              "mailing_address": "hidden",
-              "terms_of_service": "hidden",
-              "year_of_birth": "hidden"
-            },
-            "SITE_NAME": "studio-demo.complicated.io",
-            "STUDIO_NAME": "Studio",
-            "STUDIO_SHORT_NAME": "Studio",
-            "TIME_ZONE": "Australia/Sydney",
-            "WIKI_ENABLED": true
-          }
-        },
-        "run_cmds": {
-          "op": "in",
-          "val": [
-            "update_conf3"
-          ]
-        },
+        "module": "offregister-bootstrap",
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-docker",
         "type": "fabric"
       }
     ]
   },
   "_comments": [
     {
+      "module": "offregister-openedx",
+      "cluster_name": "openedx-ironwood.master.tmp",
+      "kwargs": {
+        "run_paver": true,
+        "ALL_EMAILS_TO": "EMAIL_ADDRESS_HERE",
+        "lms.env": {
+          "ACTIVATION_EMAIL_SUPPORT_LINK": "http://edu-demo.complicated.io",
+          "CMS_BASE": "studio-demo.complicated.io",
+          "COMMENTS_SERVICE_KEY": "password",
+          "COMMENTS_SERVICE_URL": "http://localhost:18080",
+          "EDXAPP_LMS_BASE_SCHEME": "http",
+          "EMAIL_USE_TLS": false,
+          "FEATURES": {
+            "AUTH_USE_OPENID_PROVIDER": false,
+            "AUTOMATIC_AUTH_FOR_TESTING": false,
+            "CUSTOM_COURSES_EDX": false,
+            "ENABLE_COMBINED_LOGIN_REGISTRATION": true,
+            "ENABLE_CORS_HEADERS": false,
+            "ENABLE_COUNTRY_ACCESS": false,
+            "ENABLE_CREDIT_API": false,
+            "ENABLE_CREDIT_ELIGIBILITY": false,
+            "ENABLE_CROSS_DOMAIN_CSRF_COOKIE": false,
+            "ENABLE_CSMH_EXTENDED": true,
+            "ENABLE_DISCUSSION_HOME_PANEL": true,
+            "ENABLE_DISCUSSION_SERVICE": true,
+            "ENABLE_EDXNOTES": false,
+            "ENABLE_GRADE_DOWNLOADS": true,
+            "ENABLE_INSTRUCTOR_ANALYTICS": false,
+            "ENABLE_MKTG_SITE": false,
+            "ENABLE_MOBILE_REST_API": false,
+            "ENABLE_OAUTH2_PROVIDER": false,
+            "ENABLE_ONLOAD_BEACON": false,
+            "ENABLE_READING_FROM_MULTIPLE_HISTORY_TABLES": true,
+            "ENABLE_SPECIAL_EXAMS": false,
+            "ENABLE_SYSADMIN_DASHBOARD": false,
+            "ENABLE_THIRD_PARTY_AUTH": false,
+            "ENABLE_VIDEO_BEACON": false,
+            "ENABLE_VIDEO_UPLOAD_PIPELINE": false,
+            "PREVIEW_LMS_BASE": "preview.localhost",
+            "SHOW_FOOTER_LANGUAGE_SELECTOR": false,
+            "SHOW_HEADER_LANGUAGE_SELECTOR": false,
+            "homepage_overlay_html": "<h1>Take an Open edX Course</h1>",
+            "course_index_overlay_text": "<h1>Take an Open edX Course</h1>",
+            "OAUTH_ENFORCE_SECURE": false
+          },
+          "FOOTER_ORGANIZATION_IMAGE": "images/logo.png",
+          "LMS_BASE": "edu-demo.complicated.io",
+          "LMS_ROOT_URL": "http://edu-demo.complicated.io",
+          "PAID_COURSE_REGISTRATION_CURRENCY": [
+            "aud",
+            "$"
+          ],
+          "PLATFORM_NAME": "edu-demo.complicated.io by Sydney Scientific Pty Ltd",
+          "REGISTRATION_EXTRA_FIELDS": {
+            "city": "hidden",
+            "confirm_email": "hidden",
+            "country": "required",
+            "gender": "optional",
+            "goals": "optional",
+            "honor_code": "required",
+            "level_of_education": "optional",
+            "mailing_address": "hidden",
+            "terms_of_service": "hidden",
+            "year_of_birth": "required"
+          },
+          "SITE_NAME": "edu-demo.complicated.io",
+          "STATIC_ROOT_BASE": "/edx/var/edxapp/staticfiles",
+          "STATIC_URL_BASE": "/static/",
+          "STUDIO_NAME": "Studio",
+          "STUDIO_SHORT_NAME": "Studio",
+          "SUPPORT_SITE_LINK": "",
+          "SYSLOG_SERVER": "",
+          "TIME_ZONE": "Australia/Sydney",
+          "WIKI_ENABLED": true,
+          "homepage_overlay_html": "<h1>Take a free edu-demo.complicated.io course today &#57430;</h1>"
+        },
+        "cms.env": {
+          "ACTIVATION_EMAIL_SUPPORT_LINK": "http://edu-demo.complicated.io",
+          "CMS_BASE": "studio-demo.complicated.io",
+          "EMAIL_USE_TLS": false,
+          "FEATURES": {
+            "AUTH_USE_OPENID_PROVIDER": true,
+            "AUTOMATIC_AUTH_FOR_TESTING": false,
+            "CUSTOM_COURSES_EDX": false,
+            "ENABLE_COMBINED_LOGIN_REGISTRATION": true,
+            "ENABLE_CORS_HEADERS": false,
+            "ENABLE_COUNTRY_ACCESS": false,
+            "ENABLE_CREDIT_API": false,
+            "ENABLE_CREDIT_ELIGIBILITY": false,
+            "ENABLE_CROSS_DOMAIN_CSRF_COOKIE": false,
+            "ENABLE_CSMH_EXTENDED": true,
+            "ENABLE_DISCUSSION_HOME_PANEL": true,
+            "ENABLE_DISCUSSION_SERVICE": true,
+            "ENABLE_EDXNOTES": false,
+            "ENABLE_GRADE_DOWNLOADS": true,
+            "ENABLE_INSTRUCTOR_ANALYTICS": false,
+            "ENABLE_MKTG_SITE": false,
+            "ENABLE_MOBILE_REST_API": false,
+            "ENABLE_OAUTH2_PROVIDER": false,
+            "ENABLE_ONLOAD_BEACON": false,
+            "ENABLE_READING_FROM_MULTIPLE_HISTORY_TABLES": true,
+            "ENABLE_SPECIAL_EXAMS": false,
+            "ENABLE_SYSADMIN_DASHBOARD": false,
+            "ENABLE_THIRD_PARTY_AUTH": true,
+            "ENABLE_VIDEO_BEACON": false,
+            "ENABLE_VIDEO_UPLOAD_PIPELINE": false,
+            "PREVIEW_LMS_BASE": "preview.localhost",
+            "SHOW_FOOTER_LANGUAGE_SELECTOR": false,
+            "SHOW_HEADER_LANGUAGE_SELECTOR": false
+          },
+          "FOOTER_ORGANIZATION_IMAGE": "images/logo.png",
+          "LMS_BASE": "edu-demo.complicated.io",
+          "LMS_ROOT_URL": "http://edu-demo.complicated.io",
+          "PLATFORM_NAME": "edu-demo.complicated.io by offscale.io",
+          "REGISTRATION_EXTRA_FIELDS": {
+            "city": "hidden",
+            "confirm_email": "hidden",
+            "country": "hidden",
+            "gender": "hidden",
+            "goals": "hidden",
+            "honor_code": "required",
+            "level_of_education": "hidden",
+            "mailing_address": "hidden",
+            "terms_of_service": "hidden",
+            "year_of_birth": "hidden"
+          },
+          "SITE_NAME": "studio-demo.complicated.io",
+          "STUDIO_NAME": "Studio",
+          "STUDIO_SHORT_NAME": "Studio",
+          "TIME_ZONE": "Australia/Sydney",
+          "WIKI_ENABLED": true
+        }
+      },
+      "_run_cmds": {
+        "op": "in",
+        "val": [
+          "update_conf3"
+        ]
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-certbot",
+      "cluster_name": "certbot0",
+      "args": [],
+      "kwargs": {
+        "domains": [
+          "edu.complicated.io"
+        ],
+        "email": "EMAIL_ADDRESS_HERE"
+      },
+      "type": "fabric"
+    },
+    {
       "/unclustered/any-cluster-ubuntu1604-3-OpenEdX4": [
         {
           "module": "offregister-openedx",
-          "cluster_name": "openedx-ginkgo.master.1",
+          "cluster_name": "openedx-ironwood.master.1",
           "kwargs": {
             "run_paver": true,
-            "ALL_EMAILS_TO": "samuel@offscale.io",
+            "ALL_EMAILS_TO": "EMAIL_ADDRESS_HERE",
             "lms.env": {
               "ACTIVATION_EMAIL_SUPPORT_LINK": "https://edu.complicated.io",
               "CMS_BASE": "studio.complicated.io",
@@ -300,10 +320,10 @@
     },
     {
       "module": "offregister-app-push",
-      "cluster_name": "openedx-ginkgo.master.1",
+      "cluster_name": "openedx-ironwood.master.1",
       "kwargs": {
         "nginx_secure": "certbot",
-        "https_cert_email": "samuel@offscale.io"
+        "https_cert_email": "EMAIL_ADDRESS_HERE"
       },
       "type": "fabric",
       "run_cmds": {
@@ -366,7 +386,7 @@
     "any-cluster-ubuntu1604-3-OpenEdX2",
     {
       "module": "offregister-openedx",
-      "cluster_name": "openedx-ginkgo.master.1",
+      "cluster_name": "openedx-ironwood.master.1",
       "args": [],
       "kwargs": {
         "treat_local_different": true,
@@ -433,9 +453,9 @@
           "EMAIL_HOST": "smtp.gmail.com",
           "EMAIL_PORT": 587,
           "EMAIL_USE_TLS": true,
-          "EMAIL_HOST_USER": "samuel@offscale.io",
+          "EMAIL_HOST_USER": "EMAIL_ADDRESS_HERE",
           "EMAIL_HOST_PASSWORD": "no_password_hjereeee",
-          "DEFAULT_FROM_EMAIL": "samuel@offscale.io",
+          "DEFAULT_FROM_EMAIL": "EMAIL_ADDRESS_HERE",
           "USE_CUSTOM_THEME": false,
           "THEME_NAME": "edx-stanford-theme"
         },
@@ -497,11 +517,11 @@
           "EMAIL_USE_TLS": true,
           "EMAIL_HOST_USER": "samuelmarks@gmail.com",
           "EMAIL_HOST_PASSWORD": "no_password_hjereeee",
-          "DEFAULT_FROM_EMAIL": "samuel@offscale.io",
+          "DEFAULT_FROM_EMAIL": "EMAIL_ADDRESS_HERE",
           "USE_CUSTOM_THEME": false,
           "THEME_NAME": "edx-stanford-theme"
         },
-        "ALL_EMAILS_TO": "samuel@offscale.io",
+        "ALL_EMAILS_TO": "EMAIL_ADDRESS_HERE",
         "_openedx_honor_html": "<p>By taking this course you are agreeing to be polite and respectful in all discourse.</p><p>This course it OPT-OUT, and here is the detailed participation information statement: Details <a href=\"https://edu.complicated.io/asset-v1:UniversityOfSydney+OPHTH101+2017_T2+type@asset+block@PIS-Phase_2___D-eye.3.pdf\">PIS-Phase 2 + D-eye.3</a>.</p>",
         "_openedx_banner_html": "<h1>Welcome to edu.complicated.io</h1><h2>Enrol in <a href=\"https://edu.complicated.io/courses/course-v1:UniversityOfSydney+OPHTH101+2017_T2/about\">eFocus</a> today</h2>"
       },
