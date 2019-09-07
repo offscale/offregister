@@ -5,8 +5,8 @@ from sys import modules
 from types import FunctionType
 
 from etcd import Client
-from pip import get_installed_distributions
-from pip.commands import install
+from pip._internal.commands import InstallCommand
+from pip._internal.utils.misc import get_installed_distributions
 
 from offregister import get_logger
 
@@ -78,7 +78,7 @@ def get_pip_packages():
 
 
 def pip_install(package, options_attr=None):
-    install_cmd = install.InstallCommand()
+    install_cmd = InstallCommand()
     options, args = install_cmd.parse_args([package])
     if options_attr:
         for opt_name, opt_val in options_attr.iteritems():
