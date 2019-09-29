@@ -6,24 +6,19 @@
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/unclustered/ai0-gpu0": [
-      {
-        "module": "offregister-bootstrap",
-        "type": "fabric"
-      },
-      {
-        "module": "offregister-redis",
-        "type": "fabric"
-      },
+    "/unclustered/gpu0": [
       {
         "module": "offregister-tensorflow",
         "cluster_name": "tensorflow.southeast.0",
         "args": [],
         "kwargs": {
           "from": "source",
-          "virtual_env": "/opt/venvs/tflow3.6",
+          "virtual_env": "/opt/venvs/tflow3.6.8",
           "force_rebuild": true,
-          "python3": true
+          "GPU": true,
+          "python3": true,
+          "tensorflow_branch": "master",
+          "extra_build_args": "--verbose_failures --copt='--expt-relaxed-constexpr'"
         },
         "type": "fabric",
         "__run_cmds": {
@@ -34,18 +29,31 @@
         }
       },
       {
-      "module": "offregister-git",
-      "kwargs": {
-        "GIT_DIR": "/mnt-lg/ml-glaucoma",
-        "GIT_REPO": "https://github.com/SamuelMarks/ml-glaucoma",
-        "skip_reset": false,
-        "use_sudo": true
-      },
-      "type": "fabric"
-    }
+        "module": "offregister-git",
+        "kwargs": {
+          "GIT_DIR": "/mnt-lg/ml-glaucoma",
+          "GIT_REPO": "https://github.com/SamuelMarks/ml-glaucoma",
+          "skip_reset": false,
+          "use_sudo": true
+        },
+        "type": "fabric"
+      }
     ]
   },
   "_comments": [
+    {
+      "module": "offregister-bootstrap",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-redis",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-docker",
+      "type": "fabric"
+    },
+    "--------",
     {
       "module": "offregister-users",
       "type": "fabric",

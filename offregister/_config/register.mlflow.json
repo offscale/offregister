@@ -1,0 +1,94 @@
+{
+  "name": "mlflow",
+  "description": "Offregister strategy for mlflow",
+  "version": "0.0.1",
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "register": {
+    "/unclustered/gpu0": [
+      {
+        "module": "offregister-airflow",
+        "args": [],
+        "kwargs": {
+          "virtual_env": "/opt/venvs/airflow",
+          "skip_virtualenv": true,
+          "SERVER_NAME": "airflow.FQDN"
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-certbot",
+        "cluster_name": "certbot0",
+        "args": [],
+        "kwargs": {
+          "domains": [
+            "airflow.FQDN"
+          ],
+          "email": "EMAIL_ADDRESS_HERE"
+        },
+        "type": "fabric"
+      }
+    ]
+  },
+  "_comments": [
+    {
+      "module": "offregister-certbot",
+      "cluster_name": "certbot0",
+      "args": [],
+      "kwargs": {
+        "domains": [
+          "airflow.FQDN"
+        ],
+        "email": "EMAIL_ADDRESS_HERE"
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-python",
+      "args": [],
+      "kwargs": {
+        "virtual_env": "/opt/venvs/airflow",
+        "python3": true,
+        "pip_version": "19.2.3",
+        "use_sudo": true,
+        "remote_user": "ubuntu",
+        "PACKAGES": [
+          "apache-airflow[postgres,redis]"
+        ]
+      },
+      "run_cmds": {
+        "op": "in",
+        "val": [
+          "install_venv0"
+        ]
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-circus",
+      "kwargs": {
+        "APP_NAME": "airflow",
+        "APP_PORT": 8045,
+        "WSGI_FILE": "myproject:app"
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-git",
+      "kwargs": {
+        "GIT_DIR": "/var/www/static/stockrankr-rest-api",
+        "GIT_REPO": "https://github.com/stockrankr/stockrankr-rest-api",
+        "GIT_BRANCH": "ben-company-details",
+        "skip_reset": false,
+        "use_sudo": true
+      },
+      "type": "fabric"
+    }
+  ],
+  "purpose": [
+    "mlflow"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}

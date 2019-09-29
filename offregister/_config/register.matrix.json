@@ -14,8 +14,8 @@
       {
         "module": "offregister-matrix",
         "kwargs": {
-          "MATRIX_SERVER_NAME": "matrix.offscale.io",
-          "SERVER_NAME": "comms.offscale.io",
+          "MATRIX_SERVER_NAME": "matrix.FQDN",
+          "SERVER_NAME": "comms.FQDN",
           "clean_riot": false
         },
         "type": "fabric",
@@ -32,8 +32,8 @@
         "args": [],
         "kwargs": {
           "domains": [
-            "comms.offscale.io",
-            "matrix.offscale.io"
+            "comms.FQDN",
+            "matrix.FQDN"
           ],
           "email": "EMAIL_ADDRESS_HERE",
           "redirect_block": true

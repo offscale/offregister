@@ -111,7 +111,7 @@
         "python3": false,
         "requirements": true,
         "package_directory": "/var/www/glaucoma/glaucoma-analytics-rest-api",
-        "pip_version": "19.1.1",
+        "pip_version": "19.2.3",
         "use_sudo": true,
         "circus_name": "glaucoma_analytics_rest_api",
         "circus_cmd": "python",
@@ -192,7 +192,7 @@
         "app_name": "glaucoma-risk-calculator",
         "DESCRIPTION": "Glaucoma risk calculator frontend and backend",
         "DNS_NAMES": [
-          "calculator.offscale.io"
+          "calculator.FQDN"
         ],
         "PROXY_ROUTE": "/api",
         "PROXY_PASS": "http://localhost:5465",

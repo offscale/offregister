@@ -72,11 +72,11 @@
         "GIT_REPO": "https://github.com/SamuelMarks/hotel-kiosk-dist",
         "use_sudo": true,
         "node_sudo": false,
-        "app_name": "tz-minerals.offscale.io",
+        "app_name": "tz-minerals.FQDN",
         "NGINX_PORT": 80,
         "DESCRIPTION": "certbot frontend",
         "DNS_NAMES": [
-          "tz-minerals.offscale.io"
+          "tz-minerals.FQDN"
         ],
         "WWWROOT": "/var/www/static/certbot/dist",
         "WWWPATH": "/",
@@ -90,7 +90,7 @@
       "args": [],
       "kwargs": {
         "domains": [
-          "tz-minerals.offscale.io"
+          "tz-minerals.FQDN"
         ],
         "email": "EMAIL_ADDRESS_HERE"
       },
@@ -104,7 +104,7 @@
         "python3": true,
         "requirements": true,
         "package_directory": "/home/ubuntu/repos/incubator-superset",
-        "pip_version": "19.1.1",
+        "pip_version": "19.2.3",
         "use_sudo": false,
         "circus_name": "supserset",
         "circus_cmd": "gunicorn",

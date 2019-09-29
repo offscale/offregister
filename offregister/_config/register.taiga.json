@@ -6,15 +6,15 @@
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/unclustered/OpenEdX4": [
+    "/unclustered/200-srv": [
       {
         "module": "offregister-taiga",
         "kwargs": {
           "LISTEN_PORT": 443,
-          "SERVER_NAME": "projects.offscale.io",
+          "SERVER_NAME": "projects.FQDN",
           "TAIGA_ROOT": "/var/www/taiga",
           "__GITHUB": {
-            "client_id": "REPLACE_ME",
+            "client_id": "aac995ca8929af43f0f1",
             "client_secret": {
               "$ref": "env:GITHUB_CLIENT_SECRET"
             }
@@ -32,6 +32,18 @@
   },
   "_comments": [
     {
+      "module": "offregister-certbot",
+      "cluster_name": "certbot0",
+      "args": [],
+      "kwargs": {
+        "domains": [
+          "projects.FQDN"
+        ],
+        "email": "EMAIL_ADDRESS_HERE"
+      },
+      "type": "fabric"
+    },
+    {
       "module": "offregister-bootstrap",
       "type": "fabric"
     },
@@ -39,7 +51,7 @@
       "module": "offregister-taiga",
       "kwargs": {
         "LISTEN_PORT": 443,
-        "SERVER_NAME": "ec2-REPLACE_ME",
+        "SERVER_NAME": "projects.FQDN",
         "TAIGA_ROOT": "/var/www/taiga"
       },
       "type": "fabric"
@@ -74,7 +86,7 @@
         "NGINX_PORT": 80,
         "DESCRIPTION": "certbot frontend",
         "DNS_NAMES": [
-          "ec2-REPLACE_ME.us-east-2.compute.amazonaws.com"
+          "projects.FQDN"
         ],
         "WWWROOT": "/var/www/static/certbot/dist",
         "WWWPATH": "/",
@@ -86,7 +98,7 @@
       "module": "offregister-taiga",
       "kwargs": {
         "LISTEN_PORT": 443,
-        "SERVER_NAME": "projects.fantom.foundation",
+        "SERVER_NAME": "projects.FQDN",
         "TAIGA_ROOT": "/var/www/taiga"
       },
       "type": "fabric"

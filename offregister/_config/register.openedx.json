@@ -132,7 +132,7 @@
           "FOOTER_ORGANIZATION_IMAGE": "images/logo.png",
           "LMS_BASE": "edu-demo.complicated.io",
           "LMS_ROOT_URL": "http://edu-demo.complicated.io",
-          "PLATFORM_NAME": "edu-demo.complicated.io by offscale.io",
+          "PLATFORM_NAME": "edu-demo.complicated.io by FQDN",
           "REGISTRATION_EXTRA_FIELDS": {
             "city": "hidden",
             "confirm_email": "hidden",
@@ -288,7 +288,7 @@
               "FOOTER_ORGANIZATION_IMAGE": "images/logo.png",
               "LMS_BASE": "edu.complicated.io",
               "LMS_ROOT_URL": "https://edu.complicated.io",
-              "PLATFORM_NAME": "edu.complicated.io by offscale.io",
+              "PLATFORM_NAME": "edu.complicated.io by FQDN",
               "REGISTRATION_EXTRA_FIELDS": {
                 "city": "hidden",
                 "confirm_email": "hidden",

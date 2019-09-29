@@ -17,7 +17,7 @@
       {
         "module": "offregister-odoo",
         "kwargs": {
-          "DNS_NAME": "blueprint.offscale.io"
+          "DNS_NAME": "blueprint.FQDN"
         },
         "type": "fabric"
       },
@@ -27,7 +27,7 @@
         "args": [],
         "kwargs": {
           "domains": [
-            "blueprint.offscale.io"
+            "blueprint.FQDN"
           ],
           "email": "EMAIL_ADDRESS_HERE"
         },

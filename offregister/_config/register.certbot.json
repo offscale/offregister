@@ -6,13 +6,13 @@
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/unclustered/200-srv": [
+    "/unclustered/gpu1": [
       {
         "module": "offregister-jupyter",
         "cluster_name": "jupyter2",
         "args": [],
         "kwargs": {
-          "domain": "notebook.complicated.io",
+          "domain": "gpu1.notebook.FQDN",
           "virtual_env": "/opt/venvs/tflow3.6"
         },
         "type": "fabric"
@@ -43,7 +43,7 @@
         "NGINX_PORT": 80,
         "DESCRIPTION": "openapi-designer-rfc",
         "DNS_NAMES": [
-          "openapi-designer.offscale.io"
+          "openapi-designer.FQDN"
         ],
         "WWWROOT": "/var/www/static/openapi-designer-rfc",
         "WWWPATH": "/",

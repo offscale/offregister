@@ -42,7 +42,7 @@
           "NGINX_PORT": 80,
           "DESCRIPTION": "fantom frontend",
           "DNS_NAMES": [
-            "fantom.offscale.io"
+            "fantom.FQDN"
           ],
           "WWWROOT": "/var/www/static/fantom/dist",
           "WWWPATH": "/",

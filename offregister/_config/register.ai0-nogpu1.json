@@ -6,13 +6,12 @@
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/unclustered/gpu0": [
+    "/unclustered/gpu1": [
       {
         "module": "offregister-inline",
         "kwargs": {
           "run": [
-            "echo hello",
-            "sleep 20s"
+            "/opt/venvs/tflow3.6.8/bin/pip install tensorflow-gpu"
           ]
         },
         "type": "fabric"
@@ -22,7 +21,7 @@
         "kwargs": {
           "GIT_DIR": "/var/repos/ml-glaucoma",
           "GIT_REPO": "https://github.com/SamuelMarks/ml-glaucoma",
-          "GIT_BRANCH": "cnn",
+          "GIT_BRANCH": "master",
           "GIT_RESET_TO_FIRST": false,
           "skip_reset": false,
           "use_sudo": true
@@ -33,24 +32,10 @@
         "module": "offregister-python",
         "args": [],
         "kwargs": {
-          "virtual_env": "/opt/venvs/tflow3.6",
+          "virtual_env": "/opt/venvs/tflow3.6.8",
           "python3": true,
           "requirements": true,
-          "package_directory": "/var/repos/ml-glaucoma",
-          "pip_version": "9.0.3"
-        },
-        "type": "fabric"
-      },
-      {
-        "module": "offregister-service",
-        "args": [],
-        "kwargs": {
-          "conf_name": "ml_glaucoma_max20_batch32_dc0_300epochs",
-          "Environments": "Environment=VIRTUALENV=/opt/venvs/tflow3.6/bin\nEnvironment=PYTHONPATH=/opt/venvs/tflow3.6/bin",
-          "WorkingDirectory": "/tmp",
-          "User": "root",
-          "Group": "root",
-          "ExecStart": "/opt/venvs/tflow3.6/bin/python -m ml_glaucoma cnn -d /mnt/datasets/downloaded -m 400x400balanced_dataset.ml_glaucoma_max20_batch32_dc0_300epochs.weights.hdf5 -s /mnt/datasets/produced/ml_glaucoma_max20_batch32_dc0_300epochs.prepoc.hdf5 --tensorboard-log-dir /mnt/tensorboard/ml_glaucoma_max20_batch32_dc0_300epochs --metrics precision_recall --bmes123-pardir /mnt --split-dir /mnt/partitioned -p 400 -e 300 --class-mode categorical --loss categorical_crossentropy --optimizer Adam --batch-size 32 --max-imgs 20 --architecture dc0"
+          "package_directory": "/var/repos/ml-glaucoma"
         },
         "type": "fabric"
       },
@@ -70,6 +55,19 @@
     ]
   },
   "_comments": [
+    {
+      "module": "offregister-service",
+      "args": [],
+      "kwargs": {
+        "conf_name": "ml_glaucoma_max20_batch32_dc0_300epochs",
+        "Environments": "Environment=VIRTUALENV=/opt/venvs/tflow3.6/bin\nEnvironment=PYTHONPATH=/opt/venvs/tflow3.6/bin",
+        "WorkingDirectory": "/tmp",
+        "User": "root",
+        "Group": "root",
+        "ExecStart": "/opt/venvs/tflow3.6/bin/python -m ml_glaucoma cnn -d /mnt/datasets/downloaded -m 400x400balanced_dataset.ml_glaucoma_max20_batch32_dc0_300epochs.weights.hdf5 -s /mnt/datasets/produced/ml_glaucoma_max20_batch32_dc0_300epochs.prepoc.hdf5 --tensorboard-log-dir /mnt/tensorboard/ml_glaucoma_max20_batch32_dc0_300epochs --metrics precision_recall --bmes123-pardir /mnt --split-dir /mnt/partitioned -p 400 -e 300 --class-mode categorical --loss categorical_crossentropy --optimizer Adam --batch-size 32 --max-imgs 20 --architecture dc0"
+      },
+      "type": "fabric"
+    },
     {
       "module": "offregister-inline",
       "kwargs": {
