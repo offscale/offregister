@@ -5,7 +5,8 @@ from sys import modules
 from types import FunctionType
 
 from etcd import Client
-from pip._internal.commands import InstallCommand
+from pip._internal.commands.install import InstallCommand
+
 from pip._internal.utils.misc import get_installed_distributions
 
 from offregister import get_logger
