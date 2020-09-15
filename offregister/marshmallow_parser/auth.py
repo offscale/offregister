@@ -82,7 +82,9 @@ class AuthConfigSchema(ConfMetaSchema):
             :return: Namedtuple of (`errors`, `data`); with `data` containing parsed UDT object
             :rtype: ``AuthConfigSchema.IUnmarshalResult``
             """
-            return super(self, AuthConfigSchema).load(data=data, many=many, partial=partial)
+            return super(self, AuthConfigSchema).load(
+                data=data, many=many, partial=partial
+            )
 
 
 class AuthConfig(ConfMeta):

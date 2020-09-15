@@ -14,7 +14,7 @@ def ubuntu_install_deis(*args, **kwargs):
 
 def core_install_deis(*args, **kwargs):
     core_install_godep()
-    '''
+    """
     if run('which deisctl', warn_only=True).succeeded:
         return  # TODO: Add prompt from fabric.contrib to see if they want to overwrite
     run('curl -sSL http://deis.io/deisctl/install.sh | sudo sh -s 1.8.0')
@@ -27,7 +27,7 @@ def core_install_deis(*args, **kwargs):
     run('ssh-add ~/.ssh/deis')
     run('deisctl config platform set sshPrivateKey=~/.ssh/deis')
     # run('make discovery-url')
-    '''
+    """
 
 
 def ubuntu_serve_deis(domain):
@@ -35,9 +35,9 @@ def ubuntu_serve_deis(domain):
 
 
 def core_serve_deis(private_ipv4, public_ipv4, domain, node_name, *args, **kwargs):
-    '''
+    """
     run('eval `ssh-agent -s`')
     append('/etc/environment', 'DEISCTL_TUNNEL={DEISCTL_TUNNEL}'.format(DEISCTL_TUNNEL=domain), use_sudo=True)
     run('deisctl config platform set domain={domain}'.format(domain=domain))
     run('deisctl install platform')
-    '''
+    """

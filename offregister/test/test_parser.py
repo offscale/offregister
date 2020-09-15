@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from json import load
 from os import path
 from unittest import TestCase, main as unittest_main
@@ -16,12 +14,22 @@ class TestParser(TestCase):
     maxDiff = 3000
 
     def setUp(self):
-        with open(path.join(path.dirname(resource_filename('offregister', '__main__.py')),
-                            '_config', 'auth.sample.json')) as f:
+        with open(
+            path.join(
+                path.dirname(resource_filename("offregister", "__main__.py")),
+                "_config",
+                "auth.sample.json",
+            )
+        ) as f:
             self.auth_sample = load(f)
 
-        with open(path.join(path.dirname(resource_filename('offregister', '__main__.py')),
-                            '_config', 'register.new.sample.json')) as f:
+        with open(
+            path.join(
+                path.dirname(resource_filename("offregister", "__main__.py")),
+                "_config",
+                "register.new.sample.json",
+            )
+        ) as f:
             self.register_new_sample = load(f)
 
     def test_auth_parse(self):
@@ -30,7 +38,7 @@ class TestParser(TestCase):
         schema.load(self.auth_sample).data.name
 
         result = schema.dump(self.auth_sample)
-        print '\nresult =', result.data['name']
+        print(("\nresult =", result.data["name"]))
         self.assertDictEqual(result.data, self.auth_sample)
 
     def test_register_parse(self):
@@ -39,5 +47,5 @@ class TestParser(TestCase):
         self.assertDictEqual(result.data, self.register_new_sample)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest_main()

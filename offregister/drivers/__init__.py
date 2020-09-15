@@ -6,13 +6,13 @@ from offutils import is_sequence
 
 from offregister.process_node import Env
 
-PreparedClusterObj = namedtuple('PreparedClusterObj', ('cluster_path', 'cluster_type', 'cluster_args', 'cluster_kwargs',
-                                                 'res', 'tag'))
+PreparedClusterObj = namedtuple(
+    "PreparedClusterObj",
+    ("cluster_path", "cluster_type", "cluster_args", "cluster_kwargs", "res", "tag"),
+)
 
 
-class OffregisterBaseDriver(object):
-    __metaclass__ = ABCMeta
-
+class OffregisterBaseDriver(object, metaclass=ABCMeta):
     def __init__(self, env, node, node_name, dns_name):
         """
         OffregisterBaseDriver: base driver for implementing support for configuration managers
@@ -52,7 +52,9 @@ class OffregisterBaseDriver(object):
         """
 
     @abstractmethod
-    def run_tasks(self, cluster_path, cluster_type, cluster_args, cluster_kwargs, res, tag):
+    def run_tasks(
+        self, cluster_path, cluster_type, cluster_args, cluster_kwargs, res, tag
+    ):
         """
 
         :keyword cluster_path: cluster_path
@@ -91,7 +93,11 @@ class OffregisterBaseDriver(object):
             res[self.dns_name][cluster_path][step] = exec_output
         else:
             if not is_sequence(res[self.dns_name][cluster_path][step]):
-                res[self.dns_name][cluster_path][step] = [res[self.dns_name][cluster_path][step]]
+                res[self.dns_name][cluster_path][step] = [
+                    res[self.dns_name][cluster_path][step]
+                ]
             if not isinstance(res[self.dns_name][cluster_path][step], list):
-                res[self.dns_name][cluster_path][step] = list(res[self.dns_name][cluster_path][step])
+                res[self.dns_name][cluster_path][step] = list(
+                    res[self.dns_name][cluster_path][step]
+                )
             res[self.dns_name][cluster_path][step].append(exec_output)

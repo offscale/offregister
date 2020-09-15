@@ -20,8 +20,7 @@ class Register(ConfMetaSchema):
     exec_filter = Nested(ExecFilter())
     stateful = Bool()
 
-    dependencies = Nested('Register', many=True,
-                          exclude=('dependencies',))
+    dependencies = Nested("Register", many=True, exclude=("dependencies",))
 
 
 class RegisterConfig(ConfMetaSchema):
@@ -29,5 +28,4 @@ class RegisterConfig(ConfMetaSchema):
     stateful = Bool()
     register = Nested(Register, many=True)
 
-    dependencies = Nested('RegisterConfig', many=True,
-                          exclude=('dependencies',))
+    dependencies = Nested("RegisterConfig", many=True, exclude=("dependencies",))

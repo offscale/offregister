@@ -10,7 +10,7 @@ def ubuntu_install_vulcand(*args, **kwargs):
 
 
 def core_install_vulcand(*args, **kwargs):
-    clone_or_update(team='coreos', repo='unit-examples')
+    clone_or_update(team="coreos", repo="unit-examples")
 
 
 def ubuntu_serve_vulcand(*args, **kwargs):
@@ -22,9 +22,9 @@ def core_serve_vulcand(*args, **kwargs):
 
 
 def _serve_vulcand(**kwargs):
-    command = 'vulcandctl'
+    command = "vulcandctl"
     if cmd_avail(command):
-        raise EnvironmentError('Install {command} first'.format(command=command))
+        raise EnvironmentError("Install {command} first".format(command=command))
 
-    run('eval `ssh-agent -s`')
-    run('vulcandctl install platform')
+    run("eval `ssh-agent -s`")
+    run("vulcandctl install platform")

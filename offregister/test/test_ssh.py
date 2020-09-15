@@ -10,7 +10,7 @@ class TestSSH(TestCase):
     def setUpClass(cls):
         cls.nodes = list_nodes()
         if not len(cls.nodes):
-            raise AssertionError('No nodes found to process')
+            raise AssertionError("No nodes found to process")
 
     def test_(self):
         for node_name in self.nodes:
@@ -18,5 +18,5 @@ class TestSSH(TestCase):
             pp(obj_to_d(node))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest_main()
