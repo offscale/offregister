@@ -9,17 +9,13 @@ if __name__ == "__main__":
     package_name = "offregister"
 
     with open(path.join(package_name, "__init__.py")) as f:
-        __author__, __version__ = list(
-            map(
-                lambda buf: next([e.value.s for e in parse(buf).body]),
-                list(
-                    filter(
-                        lambda line: line.startswith("__version__")
-                        or line.startswith("__author__"),
-                        f,
-                    )
-                ),
-            )
+        __author__, __version__ = map(
+            lambda buf: next(map(lambda e: e.value.s, parse(buf).body)),
+            filter(
+                lambda line: line.startswith("__version__")
+                or line.startswith("__author__"),
+                f,
+            ),
         )
 
     to_funcs = lambda *paths: (
