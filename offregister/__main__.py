@@ -1,22 +1,31 @@
 #!/usr/bin/env python
 
-import contextlib
 import json
 import pprint
-from collections import OrderedDict
+import textwrap
+from pprint import pprint
 
 from os import path
 from argparse import ArgumentParser
 from subprocess import CalledProcessError
+from sys import stdout, version
 
 from pkg_resources import resource_filename
 from itertools import filterfalse
 
 from offutils import pp
-from offutils_strategy_register import list_nodes
+from offutils_strategy_register import list_nodes, fetch_node
 
 from .__init__ import root_logger, __version__
 from .process_node import ProcessNode
+
+if version[0] == "3":
+    from io import StringIO
+else:
+    try:
+        from cStringIO import StringIO
+    except ImportError:
+        from StringIO import StringIO
 
 
 def _build_parser():
@@ -86,22 +95,33 @@ def process_within(register_within, config, method, method_args):
         process_nodes(cluster_location, config, method, method_args)
 
 
-@contextlib.contextmanager
-def pprint_OrderedDict():
-    pp_orig = pprint._sorted
-    od_orig = OrderedDict.__repr__
+# From https://stackoverflow.com/a/4303996
+def pprint_OrderedDict(object, **kwrds):
     try:
-        pprint._sorted = lambda x: x
-        OrderedDict.__repr__ = dict.__repr__
-        yield
-    finally:
-        pprint._sorted = pp_orig
-        OrderedDict.__repr__ = od_orig
+        width = kwrds["width"]
+    except KeyError:  # unlimited, use stock function
+        pprint(object, **kwrds)
+        return
+    buffer = StringIO()
+    stream = kwrds.get("stream", stdout)
+    kwrds.update({"stream": buffer})
+    pprint(object, **kwrds)
+    words = buffer.getvalue().split()
+    buffer.close()
+
+    print(textwrap.fill(" ".join(words), width=width), file=stream)
 
 
 def process_nodes(cluster_location, config, method, method_args):
     clustering_results = []
-    for node_res in list_nodes(cluster_location, marshall=json):
+    nodes = list_nodes(cluster_location, marshall=json)
+    if len(nodes) == 0:
+        try:
+            nodes = (fetch_node(cluster_location),)  # try exact match
+        except StopIteration:
+            raise AssertionError("No node found at {!r}".format(cluster_location))
+    assert len(nodes), "No nodes found at {!r}".format(cluster_location)
+    for node_res in nodes:
         try:
             process_node_obj = ProcessNode(config, node_res, clustering_results)
             getattr(process_node_obj, method)(cluster_location, *method_args)
@@ -109,8 +129,7 @@ def process_nodes(cluster_location, config, method, method_args):
         except CalledProcessError as e:
             root_logger.exception(e)
 
-    with pprint_OrderedDict():
-        pp(clustering_results)
+    pprint_OrderedDict(clustering_results)
 
 
 if __name__ == "__main__":

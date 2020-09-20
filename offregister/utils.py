@@ -4,7 +4,7 @@ from collections import namedtuple
 from sys import modules
 from types import FunctionType
 
-from etcd import Client
+import etcd3
 from pip._internal.commands.install import InstallCommand
 
 from pip._internal.utils.misc import get_installed_distributions
@@ -17,23 +17,28 @@ logger = get_logger(modules[__name__].__name__)
 def cluster_key(node_name, *clusters, **client_kwargs):
     key_name = "/unclustered/{node_name}".format(node_name=node_name)
 
-    client = Client(**client_kwargs)
-    client.get_lock(key_name, ttl=60)
-    value = client.get(key_name).value
+    client = etcd3.client(**client_kwargs)
+    with client.lock(key_name, ttl=60):
+        value = client.get(key_name).value
 
-    for cluster in clusters:
-        client.set(
-            "/{cluster}/{node_name}".format(cluster=cluster, node_name=node_name), value
-        )
+        for cluster in clusters:
+            client.set(
+                "/{cluster}/{node_name}".format(cluster=cluster, node_name=node_name),
+                value,
+            )
 
-    return client.delete(key_name)
+        return client.delete(key_name)
 
 
 def import_submodules(package, recursive=True):
     """Import all submodules of a module, recursively, including subpackages
 
     :param package: package (name or actual module)
-    :type package: str | module
+    :type package: ```Union[str, module]```
+
+    :param recursive: Whether to import subpackages also
+    :type recursive: ```bool```
+
     :rtype: dict[str, types.ModuleType]
     """
     if isinstance(package, str):
@@ -57,7 +62,7 @@ def create_symbol_module_d(
 
     :param module_name_module_d
     :type module_name_module_d: dict[str, types.ModuleType]
-    :rtype: dict[str, types.FunctionType|types.ClassType|types.TupleType]
+    :rtype: dict[str, types.FunctionType|types.ClassType|types.type(tuple)]
     """
     inv_res = {}
     for mod in list(module_name_module_d.values()):

@@ -5,7 +5,7 @@
   "kv_server": {
     "url": "http://localhost:2379",
     "type": "etcd",
-    "version": "2"
+    "version": "3"
   },
   "default_pick": "first",
   "register": [

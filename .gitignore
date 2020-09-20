@@ -102,3 +102,6 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# Secure
+offregister/_config/auth.json

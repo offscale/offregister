@@ -6,7 +6,7 @@
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/unclustered/OpenEdX2": [
+    "/unclustered/openedx0": [
       {
         "module": "offregister-bootstrap",
         "type": "fabric"
@@ -366,11 +366,11 @@
           "/edx/backup/backup.tar.xz"
         ],
         "LOCAL_PATH": {
-          "$ref": "env:TMPDIR"
+          "_$ref": "env:TMPDIR"
         },
         "LOCAL_PATH.append": [
           {
-            "$ref": "env:DNS_NAME"
+            "_$ref": "env:DNS_NAME"
           },
           "backups"
         ],

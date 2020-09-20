@@ -82,7 +82,7 @@ class OffFabric(OffregisterBaseDriver):
                 self,
                 "fab",
                 getattr(
-                    __import__(cluster_type, globals(), locals(), [guessed_os], -1),
+                    __import__(cluster_type, globals(), locals(), [guessed_os]),
                     guessed_os,
                 ),
             )

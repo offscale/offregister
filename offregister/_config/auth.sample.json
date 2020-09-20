@@ -2,86 +2,90 @@
   "name": "cred sample",
   "description": "Default register strategy",
   "version": "0.0.1",
-  "auth": [
+  "options": [
     {
-      "provider": {
-        "name": "EC2",
-        "region": "ap-southeast-2"
-      },
-      "cred": {
-        "key": "${env.AWS_KEY_ID}",
-        "secret": "${env.AWS_ACCESS_KEY}"
-      },
-      "ssh": {
-        "public_key_path": "${env.PUBLIC_KEY_PATH}",
-        "private_key_path": "${env.PRIVATE_KEY_PATH}",
-        "key_name": "${env.PUBLIC_KEY_NAME}"
-      },
-      "security_groups": [
-        "all"
-      ],
-      "key_name": "${env.PUBLIC_KEY_NAME}"
-    },
-    {
-      "provider": {
-        "name": "SOFTLAYER",
-        "region": "syd01"
-      },
-      "cred": {
-        "key": "${env.SL_USER}",
-        "secret": "${env.SL_KEY}"
-      },
-      "ssh": {
-        "public_key_path": "${env.PUBLIC_KEY_PATH}",
-        "private_key_path": "${env.PRIVATE_KEY_PATH}",
-        "key_name": "${env.PUBLIC_KEY_NAME}"
-      }
-    },
-    {
-      "cred": {
-        "subscription_id": "${env.AZURE_SUBSCRIPTION}",
-        "key_file": "${env.AZURE_KEY_FILE}"
-      },
-      "ssh": {
-        "public_key_path": "${env.PUBLIC_KEY_PATH}",
-        "private_key_path": "${env.PRIVATE_KEY_PATH}",
-        "key_name": "${env.PUBLIC_KEY_NAME}",
-        "node_password": "${env.AZURE_NODE_PASSWORD}"
-      },
-      "create_with": {
-        "ex_cloud_service_name": "${env.AZURE_CLOUD_NAME}"
-      },
-      "provider": {
-        "name": "AZURE",
-        "region": "Australia East"
-      }
-    },
-    {
-      "provider": {
-        "name": "DIGITAL_OCEAN",
-        "region": "sgp1"
-      },
-      "cred": {
-        "key": "${env.DIGITAL_OCEAN_KEY}"
-      },
-      "ssh": {
-        "public_key_path": "${env.PUBLIC_KEY_PATH}",
-        "private_key_path": "${env.PRIVATE_KEY_PATH}",
-        "key_name": "${env.PUBLIC_KEY_NAME}"
-      }
-    },
-    {
-      "provider": {
-        "name": "VAGRANT",
-        "ex_vagrantfile": "/mnt/large_linux/vagrant/edx-fullstack/Vagrantfile",
-        "key": "/mnt/large_linux/vagrant/edx-fullstack/Vagrantfile"
-      }
+      "auth": [
+        {
+          "provider": {
+            "name": "EC2",
+            "region": "ap-southeast-2"
+          },
+          "cred": {
+            "key": "${env.AWS_KEY_ID}",
+            "secret": "${env.AWS_ACCESS_KEY}"
+          },
+          "ssh": {
+            "public_key_path": "${env.PUBLIC_KEY_PATH}",
+            "private_key_path": "${env.PRIVATE_KEY_PATH}",
+            "key_name": "${env.PUBLIC_KEY_NAME}"
+          },
+          "security_groups": [
+            "all"
+          ],
+          "key_name": "${env.PUBLIC_KEY_NAME}"
+        },
+        {
+          "provider": {
+            "name": "SOFTLAYER",
+            "region": "syd01"
+          },
+          "cred": {
+            "key": "${env.SL_USER}",
+            "secret": "${env.SL_KEY}"
+          },
+          "ssh": {
+            "public_key_path": "${env.PUBLIC_KEY_PATH}",
+            "private_key_path": "${env.PRIVATE_KEY_PATH}",
+            "key_name": "${env.PUBLIC_KEY_NAME}"
+          }
+        },
+        {
+          "cred": {
+            "subscription_id": "${env.AZURE_SUBSCRIPTION}",
+            "key_file": "${env.AZURE_KEY_FILE}"
+          },
+          "ssh": {
+            "public_key_path": "${env.PUBLIC_KEY_PATH}",
+            "private_key_path": "${env.PRIVATE_KEY_PATH}",
+            "key_name": "${env.PUBLIC_KEY_NAME}",
+            "node_password": "${env.AZURE_NODE_PASSWORD}"
+          },
+          "create_with": {
+            "ex_cloud_service_name": "${env.AZURE_CLOUD_NAME}"
+          },
+          "provider": {
+            "name": "AZURE",
+            "region": "Australia East"
+          }
+        },
+        {
+          "provider": {
+            "name": "DIGITAL_OCEAN",
+            "region": "sgp1"
+          },
+          "cred": {
+            "key": "${env.DIGITAL_OCEAN_KEY}"
+          },
+          "ssh": {
+            "public_key_path": "${env.PUBLIC_KEY_PATH}",
+            "private_key_path": "${env.PRIVATE_KEY_PATH}",
+            "key_name": "${env.PUBLIC_KEY_NAME}"
+          }
+        },
+        {
+          "provider": {
+            "name": "VAGRANT",
+            "ex_vagrantfile": "/mnt/large_linux/vagrant/edx-fullstack/Vagrantfile",
+            "key": "/mnt/large_linux/vagrant/edx-fullstack/Vagrantfile"
+          }
+        }
+      ]
     }
   ],
   "kv_server": {
     "url": "http://localhost:2379",
     "type": "etcd",
-    "version": "2"
+    "version": "3"
   },
   "default_pick": "first"
 }

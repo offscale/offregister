@@ -1,14 +1,14 @@
 import json
 from collections import namedtuple
+from ipaddress import ip_address
 
 from os import name as os_name, environ
 from sys import modules
-from types import NoneType
 
 import jsonref
-from etcd import Client
+import etcd3
+import requests
 from libcloud import security
-from libcloud.common.vagrant import isIpPrivate
 from libcloud.compute.base import Node
 from libcloud.compute.providers import get_driver, DRIVERS
 from libcloud.compute.types import Provider
@@ -51,6 +51,8 @@ class ProcessNode(object):
         nodes = None
         if not node:
             nodes = list_nodes(marshall=json)
+            if not len(nodes):
+                raise etcd3.exceptions.Etcd3Exception("No nodes found matching query")
             node = (
                 next(n for n in nodes if "global::" not in n.key)
                 if len(nodes) > 1
@@ -60,65 +62,56 @@ class ProcessNode(object):
         with open(process_filename) as f:
             self.process_dict = jsonref.load(f)
 
-        driver_cls = (
-            node.value["driver"]
-            if "_" not in node.value["driver"]
-            else node.value["driver"][: node.value["driver"].find("_")]
-            + node.value["driver"][node.value["driver"].rfind("_") + 1 :]
-        )
-
-        self.driver_name = next(
-            driver_name
-            for driver_name, driver_tuple in list(DRIVERS.items())
-            if driver_tuple[1].lower()
-            in (driver_cls.lower(), "{}NodeDriver".format(driver_cls).lower())
+        driver_cls = node.value.driver
+        self.driver_name = driver_cls.__name__[: -len("NodeDriver")]
+        driver_to_find = (
+            self.driver_name.upper()
+            if hasattr(Provider, self.driver_name.upper())
+            else next(
+                prov_name
+                for prov_name in dir(Provider)
+                if getattr(Provider, prov_name) == self.driver_name
+            )
         )
 
         self.config_provider = next(
             provider
             for provider in self.process_dict["provider"]["options"]
-            if provider["provider"]["name"]
-            == (
-                self.driver_name.upper()
-                if hasattr(Provider, self.driver_name.upper())
-                else next(
-                    [
-                        prov_name
-                        for prov_name in dir(Provider)
-                        if getattr(Provider, prov_name) == self.driver_name
-                    ]
-                )
-            )
+            if provider["provider"]["name"] == driver_to_find
         )
         self.redis_client_kwargs = redis_client_kwargs
 
         self.driver_name = self.driver_name.lower()
 
-        driver = (
-            lambda driver: driver(
-                **update_d(
-                    self.config_provider["provider"],
-                    **self.config_provider.get("auth", {})
-                )
+        try:
+            driver = driver_cls(
+                **self.config_provider.get("auth", {"cred": {}})["cred"]
             )
-        )(get_driver(self.driver_name))
+        except requests.exceptions.ConnectionError:
+            logger.warn(
+                "Connection failed, continuing without connecting to cloud provider's API"
+            )
 
         self.node_name = node.key[node.key.find("/", 1) + 1 :].encode("utf8")
         if nodes:
             pass
         elif self.driver_name in ("azure",):  # ('azure', 'azure_arm'):
             if (
-                "create_with" not in self.config_provider
-                or "ex_cloud_service_name" not in self.config_provider["create_with"]
+                "create_with" not in self.config_provider["auth"]
+                or "ex_cloud_service_name"
+                not in self.config_provider["auth"]["create_with"]
             ):
                 raise KeyError(
                     "`ex_cloud_service_name` must be defined. "
                     "See: http://libcloud.readthedocs.org/en/latest/compute/drivers/azure.html"
                     "#libcloud.compute.drivers.azure.AzureNodeDriver.create_node"
                 )
-            nodes = (
-                driver.list_nodes()
-            )  # (self.config_provider['create_with']['ex_cloud_service_name'])
+            if "driver" in locals():
+                nodes = (
+                    driver.list_nodes()
+                )  # (self.config_provider['create_with']['ex_cloud_service_name'])
+            else:
+                nodes = tuple()
         elif self.driver_name == "azure_arm":
             from libcloud.compute.drivers.azure_arm import AzureNodeDriver
 
@@ -149,20 +142,20 @@ class ProcessNode(object):
         else:
             self.node = ensure_node(
                 next(
-                    [
-                        _node
-                        for _node in nodes
-                        if _node.value["uuid"] == node.value["uuid"]
-                    ],
+                    (_node for _node in nodes if _node.value.uuid == node.value.uuid),
                     None,
                 ),
                 skip_assert=True,
             )
             if not self.node:
-                raise EnvironmentError(
-                    "node not found. Maybe the cloud provider is still provisioning?"
+                logger.warning(
+                    "node not found, maybe the cloud provider is still provisioning? "
+                    "K/V version will be used in the meantime."
                 )
-            assert isinstance(self.node, Node)
+                self.node = node.value
+            assert isinstance(self.node, Node), "Expected Node got {!r}".format(
+                type(self.node)
+            )
 
         if self.node.extra is not None:
             if "ssh_config" in self.node.extra:
@@ -271,16 +264,15 @@ class ProcessNode(object):
             ProcessNode.get_directory_or_key(self.process_dict, within)
         )
 
-        if isIpPrivate(self.node.public_ips[0]):
+        if ip_address(self.node.public_ips[0]).is_private:
             self.dns_name = self.node.public_ips[0]  # LOL
         elif (
             not self.dns_name
             and "skydns2" not in self.process_dict["register"][dir_or_key]
             and "consul" not in self.process_dict["register"][dir_or_key]
         ):
-            self.dns_name = self.node.public_ips[
-                0
-            ]  # '{public_ip}.xip.io'.format(public_ip=self.node.public_ips[0])
+            # self.dns_name = '{public_ip}.xip.io'.format(public_ip=self.node.public_ips[0])
+            self.dns_name = self.node.public_ips[0]
             # raise Exception('No DNS name and no way of acquiring one')
         self.env.hosts = [self.dns_name]
 
@@ -298,18 +290,20 @@ class ProcessNode(object):
     def get_directory_or_key(process_dict, within):
         directory = next((directory for directory in process_dict["register"]), None)
         if (
-            type(directory) is NoneType
+            directory is None
             or directory != within
             and len(directory) >= len(within) + 3
             or directory[-1] != "*"
         ):
 
-            v = Client().read(directory).value  # Maybe pass this along?
+            v = next(etcd3.client().get_prefix(directory), (None,))[
+                0
+            ]  # Maybe pass this along?
             if v is not None:
                 return DirectoryFile(directory=None, file=directory)
 
             # + 3 is for /, /* and *
-            raise Exception("No clusters found to join this node to")
+            # raise Exception("No clusters found to join this node to")
 
         return DirectoryFile(directory=directory, file=None)
 
