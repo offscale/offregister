@@ -1,9 +1,9 @@
+from __future__ import print_function
+
 from json import load
 from os import path
 from unittest import TestCase, main as unittest_main
 
-from marshmallow import pprint
-from offutils import pp
 from pkg_resources import resource_filename
 
 from offregister.marshmallow_parser.auth import AuthConfigSchema
@@ -38,7 +38,7 @@ class TestParser(TestCase):
         schema.load(self.auth_sample).data.name
 
         result = schema.dump(self.auth_sample)
-        print(("\nresult =", result.data["name"]))
+        print("\nresult =", result.data["name"])
         self.assertDictEqual(result.data, self.auth_sample)
 
     def test_register_parse(self):

@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from fabric.api import run, local
 
 from offregister_fab_utils.fs import cmd_avail
@@ -20,7 +22,7 @@ def core_install_flynn(*args, **kwargs):
 
 
 def ubuntu_serve_flynn(*args, **kwargs):
-    print(("kwargs =", kwargs))
+    print("kwargs =", kwargs)
     run("sudo flynn-host init --init-discovery=3")
     run("pgrep flynn || sudo start flynn-host")
     """

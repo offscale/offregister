@@ -1,8 +1,11 @@
+from __future__ import print_function
+
 import json
 from collections import namedtuple
 from ipaddress import ip_address
 from os import name as os_name, environ
 from sys import modules, version
+
 if version[0] == "2":
     from itertools import imap as map
 
