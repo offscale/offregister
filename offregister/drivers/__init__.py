@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple, OrderedDict
+from six import with_metaclass
 
 from libcloud.compute.base import Node
 from offutils import is_sequence
@@ -12,7 +13,7 @@ PreparedClusterObj = namedtuple(
 )
 
 
-class OffregisterBaseDriver(object, metaclass=ABCMeta):
+class OffregisterBaseDriver(with_metaclass(ABCMeta, object)):
     def __init__(self, env, node, node_name, dns_name):
         """
         OffregisterBaseDriver: base driver for implementing support for configuration managers
