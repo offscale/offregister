@@ -1,7 +1,9 @@
-from collections import OrderedDict
-
-from collections import namedtuple
+from collections import OrderedDict, namedtuple
 from time import time
+from sys import version
+
+if version[0] == "2":
+    from itertools import imap as map
 
 from ansible.parsing.dataloader import DataLoader
 from ansible.vars import VariableManager

@@ -11,9 +11,7 @@ from subprocess import CalledProcessError
 from sys import stdout, version
 
 from pkg_resources import resource_filename
-from itertools import filterfalse
 
-from offutils import pp
 from offutils_strategy_register import list_nodes, fetch_node
 
 from .__init__ import root_logger, __version__
@@ -21,11 +19,13 @@ from .process_node import ProcessNode
 
 if version[0] == "3":
     from io import StringIO
+    from itertools import filterfalse
 else:
     try:
         from cStringIO import StringIO
     except ImportError:
         from StringIO import StringIO
+    from itertools import ifilterfalse as filterfalse
 
 
 def _build_parser():
