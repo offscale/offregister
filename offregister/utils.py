@@ -1,12 +1,13 @@
 import importlib
 import pkgutil
+import runpy
+import sys
 from collections import namedtuple
+from os import getcwd, chdir, path
 from sys import modules
 from types import FunctionType
 
 import etcd3
-from pip._internal.commands.install import InstallCommand
-
 from pip._internal.utils.misc import get_installed_distributions
 
 from offregister import get_logger
@@ -90,12 +91,31 @@ def get_pip_packages():
 
 
 def pip_install(package, options_attr=None):
-    install_cmd = InstallCommand()
-    options, args = install_cmd.parse_args([package])
-    if options_attr:
-        for opt_name, opt_val in list(options_attr.items()):
-            setattr(options, opt_name, opt_val)
-    return install_cmd.run(options, args)
+    prev_wd = getcwd()
+    prev_sys_argv = sys.argv
+
+    pip_output = None
+    try:
+        sys.argv = ["pip", "install", "."]
+        if options_attr is not None and "src_dir" in options_attr:
+            src_dir = options_attr["src_dir"]
+            if path.basename(src_dir) != package:
+                src_dir = path.join(src_dir, package)
+            chdir(src_dir)
+        else:
+            sys.argv[-1] = package
+
+        pip_output = runpy.run_module("pip", run_name="__main__")
+
+    except SystemExit as e:
+        if e.code != 0:
+            raise
+
+        return pip_output
+
+    finally:
+        chdir(prev_wd)
+        sys.argv = prev_sys_argv
 
 
 def guess_os_username(node, hint=None):

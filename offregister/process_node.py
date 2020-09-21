@@ -1,18 +1,16 @@
 import json
 from collections import namedtuple
 from ipaddress import ip_address
-
 from os import name as os_name, environ
 from sys import modules
 
-import jsonref
 import etcd3
+import jsonref
 import requests
 from libcloud import security
 from libcloud.compute.base import Node
-from libcloud.compute.providers import get_driver, DRIVERS
 from libcloud.compute.types import Provider
-from offutils import pp, update_d, obj_to_d
+from offutils import pp, obj_to_d
 from offutils_strategy_register import (
     list_nodes,
     node_to_dict,
@@ -22,8 +20,8 @@ from offutils_strategy_register import (
 )
 from pkg_resources import resource_filename
 
-from .__init__ import get_logger
 from offregister.common.env import Env
+from .__init__ import get_logger
 from .utils import guess_os_username, guess_os
 
 # AWS Certificates are acting up (on Windows), remove this in production:
@@ -92,14 +90,12 @@ class ProcessNode(object):
                 "Connection failed, continuing without connecting to cloud provider's API"
             )
 
-        self.node_name = node.key[node.key.find("/", 1) + 1 :].encode("utf8")
+        self.node_name = node.key[node.key.find("/", 1) + 1 :]
         if nodes:
             pass
         elif self.driver_name in ("azure",):  # ('azure', 'azure_arm'):
-            if (
-                "create_with" not in self.config_provider["auth"]
-                or "ex_cloud_service_name"
-                not in self.config_provider["auth"]["create_with"]
+            if "ex_cloud_service_name" not in self.config_provider["auth"].get(
+                "create_with", {}
             ):
                 raise KeyError(
                     "`ex_cloud_service_name` must be defined. "
@@ -170,7 +166,7 @@ class ProcessNode(object):
                     )
                 self.env.ssh_config = self.node.extra["ssh_config"]
             # if 'password' in self.node.extra:
-            pp({"node.extra": self.node.extra})
+            # pp({"node.extra": self.node.extra})
 
         # pp(node_to_dict(self.node))
         self.dns_name = self.node.extra.get("dns_name")

@@ -2,7 +2,6 @@ import json
 import logging
 from collections import OrderedDict
 from functools import partial
-
 from operator import add
 from os import environ, path, listdir
 from sys import modules
@@ -16,7 +15,6 @@ from offutils import (
     filter_strnums,
     binary_search,
     raise_f,
-    pp,
 )
 from offutils_strategy_register import save_node_info
 
@@ -294,7 +292,8 @@ class OffFabric(OffregisterBaseDriver):
             else:
                 # `folder` is one above `offregister` directory
                 folder = environ.get(
-                    "PKG_DIR", path.dirname(path.dirname(path.dirname(__file__)))
+                    "PKG_DIR",
+                    path.dirname(path.dirname(path.dirname(path.dirname(__file__)))),
                 )
 
                 ls_folder = listdir(folder)
