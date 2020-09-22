@@ -1,11 +1,35 @@
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple, OrderedDict
-from six import with_metaclass
+from sys import version_info
+from types import resolve_bases
 
-from libcloud.compute.base import Node
 from offutils import is_sequence
 
-from offregister.process_node import Env
+
+# From `six` 1.15.0
+def with_metaclass(meta, *bases):
+    """Create a base class with a metaclass."""
+    # This requires a bit of explanation: the basic idea is to make a dummy
+    # metaclass for one level of class instantiation that replaces itself with
+    # the actual metaclass.
+    class metaclass(type):
+        def __new__(cls, name, this_bases, d):
+            if version_info[:2] >= (3, 7):
+                # This version introduced PEP 560 that requires a bit
+                # of extra care (we mimic what is done by __build_class__).
+                resolved_bases = resolve_bases(bases)
+                if resolved_bases is not bases:
+                    d["__orig_bases__"] = bases
+            else:
+                resolved_bases = bases
+            return meta(name, resolved_bases, d)
+
+        @classmethod
+        def __prepare__(cls, name, this_bases):
+            return meta.__prepare__(name, bases)
+
+    return type.__new__(metaclass, "temporary_class", (), {})
+
 
 PreparedClusterObj = namedtuple(
     "PreparedClusterObj",

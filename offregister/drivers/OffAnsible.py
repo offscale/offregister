@@ -2,6 +2,8 @@ from collections import OrderedDict, namedtuple
 from time import time
 from sys import version
 
+from offutils.util import iteritems
+
 if version[0] == "2":
     from itertools import imap as map
 
@@ -148,7 +150,7 @@ class OffAnsible(OffregisterBaseDriver):
                     "ansible_ssh_extra_args": "-o "
                     + " -o ".join(
                         '{k}="{v}"'.format(k=k, v=v)
-                        for k, v in list(self.env.ssh_config.items())
+                        for k, v in iteritems(self.env.ssh_config)
                         if k not in frozenset(("Port", "User", "Host"))
                     ),
                     "ansible_host_key_checking": host_key_checking,

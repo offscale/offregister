@@ -6,6 +6,8 @@ from ipaddress import ip_address
 from os import name as os_name, environ
 from sys import modules, version
 
+from offutils.util import iteritems
+
 if version[0] == "2":
     from itertools import imap as map
 
@@ -232,7 +234,7 @@ class ProcessNode(object):
                 "Port": "port",
                 "User": "user",
             }
-            for ssh_name, fab_name in list(ssh_config_to_fab.items()):
+            for ssh_name, fab_name in iteritems(ssh_config_to_fab):
                 if ssh_name in self.node.extra["ssh_config"]:
                     setattr(self.env, fab_name, self.node.extra["ssh_config"][ssh_name])
 

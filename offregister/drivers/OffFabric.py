@@ -22,6 +22,8 @@ from offregister import root_logger
 from offregister.drivers import OffregisterBaseDriver, PreparedClusterObj
 from offregister.utils import guess_os, get_pip_packages, pip_install
 
+from offutils.util import iteritems
+
 logging.getLogger("paramiko").setLevel(logging.WARNING)
 logging.getLogger("offregister.utils").setLevel(logging.ERROR)
 
@@ -185,7 +187,7 @@ class OffFabric(OffregisterBaseDriver):
                 del res[self.dns_name]["offregister_fab_utils"]
 
     def merge_steps(self, merge, res):
-        for (mod, step_name), out in list(merge.items()):
+        for (mod, step_name), out in iteritems(merge):
             mod = mod.partition(".")[0]
             if mod not in res[self.dns_name]:
                 res[self.dns_name][mod] = {}

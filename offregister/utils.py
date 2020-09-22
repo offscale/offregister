@@ -11,6 +11,7 @@ import etcd3
 from pip._internal.utils.misc import get_installed_distributions
 
 from offregister import get_logger
+from offutils.util import itervalues
 
 logger = get_logger(modules[__name__].__name__)
 
@@ -66,7 +67,7 @@ def create_symbol_module_d(
     :rtype: dict[str, types.FunctionType|types.ClassType|types.type(tuple)]
     """
     inv_res = {}
-    for mod in list(module_name_module_d.values()):
+    for mod in itervalues(module_name_module_d):
         for sym in dir(mod):
             if type(condition) is not FunctionType or condition(sym):
                 if include and sym in include:
