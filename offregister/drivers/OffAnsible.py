@@ -103,7 +103,7 @@ class OffAnsible(OffregisterBaseDriver):
             cluster_kwargs.update(play_source=cluster["source"])
         cluster_type = cluster["module"].replace("-", "_")
         cluster_path = "/".join(
-            [_f for _f in (cluster_type, cluster_kwargs["cluster_name"]) if _f]
+            _f for _f in (cluster_type, cluster_kwargs["cluster_name"]) if _f
         )
         cluster_kwargs.update(cluster_path=cluster_path)
         if "cache" not in cluster_kwargs:
