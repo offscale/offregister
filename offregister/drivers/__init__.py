@@ -1,7 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple, OrderedDict
 from sys import version_info
-from types import resolve_bases
 
 from offutils import is_sequence
 
@@ -15,6 +14,8 @@ def with_metaclass(meta, *bases):
     class metaclass(type):
         def __new__(cls, name, this_bases, d):
             if version_info[:2] >= (3, 7):
+                from types import resolve_bases
+
                 # This version introduced PEP 560 that requires a bit
                 # of extra care (we mimic what is done by __build_class__).
                 resolved_bases = resolve_bases(bases)
