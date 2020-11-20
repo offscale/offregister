@@ -1,0 +1,187 @@
+{
+  "name": "HealthPlatform",
+  "description": "Offregister strategy for deploying healthplatform",
+  "version": "0.0.1",
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "register": {
+    "/unclustered/openedx0": [
+      {
+        "module": "offregister-nginx-static",
+        "kwargs": {
+          "nginx-conf-dirname": "/etc/nginx/sites-enabled",
+          "nginx-conf-filename": "healthplatform.io",
+          "SERVER_NAME": "healthplatform.io",
+          "WWWROOT": "/var/www/static/healthplatform-web-frontend/dist/healthplatform-web-frontend",
+          "API_HOST": "localhost",
+          "API_PORT": 3000
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-certbot",
+        "cluster_name": "certbot0",
+        "args": [],
+        "kwargs": {
+          "domains": [
+            "healthplatform.io"
+          ],
+          "email": {
+            "$ref": "env:CERTBOT_EMAIL"
+          }
+        },
+        "type": "fabric"
+      }
+    ]
+  },
+  "_comments": [
+    {
+      "module": "offregister-bootstrap",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-app-push",
+      "kwargs": {
+        "GIT_DIR": "/var/www/static/healthplatform-nodejs-rest-api",
+        "GIT_REPO": "https://github.com/offscale/healthplatform-nodejs-rest-api",
+        "RDBMS_URI": [
+          "postgres://",
+          {
+            "$ref": "env:DB_USER"
+          },
+          ":",
+          {
+            "$ref": "env:DB_PASS"
+          },
+          "@",
+          "localhost",
+          "/",
+          {
+            "$ref": "env:DB_NAME"
+          }
+        ],
+        "DAEMON_ENV": {
+          "DEFAULT_ADMIN_EMAIL": {
+            "$ref": "env:DEFAULT_ADMIN_EMAIL"
+          },
+          "DEFAULT_ADMIN_PASSWORD": {
+            "$ref": "env:DEFAULT_ADMIN_PASSWORD"
+          }
+        },
+        "service_name": "healthplatform-nodejs-rest-api",
+        "skip_reset": false,
+        "destory_cache": true,
+        "use_sudo": true,
+        "node_sudo": false,
+        "node_version": "lts",
+        "node_main": "main.js",
+        "npm_global_packages": [
+          "npm",
+          "typings",
+          "mocha",
+          "typescript",
+          "bunyan"
+        ],
+        "post_npm_step": "tsc",
+        "nginx": false,
+        "app_name": "healthplatform",
+        "DESCRIPTION": "healthplatform frontend and backend",
+        "DNS_NAMES": [
+          "healthplatform.io"
+        ],
+        "PROXY_ROUTE": "/api",
+        "PROXY_PASS": "http://localhost:5465",
+        "REST_API_PORT": 5465,
+        "NGINX_PORT": 80,
+        "WWWROOT": "/var/www/static/healthplatform-web-frontend/dist/healthplatform-web-frontend",
+        "WWWPATH": "/",
+        "nginx_secure": "certbot",
+        "https_cert_email": {
+          "$ref": "env:CERTBOT_EMAIL"
+        }
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-git",
+      "kwargs": {
+        "GIT_DIR": "/var/www/static/healthplatform-web-frontend",
+        "GIT_REPO": "https://github.com/offscale/healthplatform-web-frontend",
+        "GIT_BRANCH": "master",
+        "GIT_RESET_TO_FIRST": false,
+        "skip_reset": false,
+        "use_sudo": true
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-inline",
+      "kwargs": {
+        "sudo": [
+          "chown -R ubuntu:ubuntu /var/www/static/healthplatform-web-frontend"
+        ]
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-inline",
+      "kwargs": {
+        "run": [
+          "[ -f typings.json ] && typings i || true",
+          "npm i",
+          "npm run-script build"
+        ],
+        "CWD": "/var/www/static/healthplatform-web-frontend",
+        "ENV": {
+          "PATH": "$HOME/n/bin:$PATH"
+        }
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-redis",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-postgres",
+      "kwargs": {
+        "create": [
+          {
+            "user": {
+              "$ref": "env:DB_USER"
+            },
+            "password": {
+              "$ref": "env:DB_PASS"
+            },
+            "dbname": {
+              "$ref": "env:DB_NAME"
+            }
+          }
+        ],
+        "users": [
+          {
+            "name": {
+              "$ref": "env:DB_USER"
+            },
+            "password": {
+              "$ref": "env:DB_PASS"
+            }
+          }
+        ],
+        "dbs": [
+          {
+            "$ref": "env:DB_NAME"
+          }
+        ],
+        "cluster": false
+      },
+      "type": "fabric"
+    }
+  ],
+  "purpose": [
+    "any-cluster"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}
