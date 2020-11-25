@@ -8,27 +8,49 @@
   "register": {
     "/unclustered/openedx0": [
       {
-        "module": "offregister-nginx-static",
+        "module": "offregister-circusd",
         "kwargs": {
-          "nginx-conf-dirname": "/etc/nginx/sites-enabled",
-          "nginx-conf-filename": "healthplatform.io",
-          "SERVER_NAME": "healthplatform.io",
-          "WWWROOT": "/var/www/static/healthplatform-web-frontend/dist/healthplatform-web-frontend",
-          "API_HOST": "localhost",
-          "API_PORT": 3000
-        },
-        "type": "fabric"
-      },
-      {
-        "module": "offregister-certbot",
-        "cluster_name": "certbot0",
-        "args": [],
-        "kwargs": {
-          "domains": [
-            "healthplatform.io"
+          "BACKEND_ROOT": "/var/www/static/healthplatform-stats-rest-api",
+          "BACKEND_PORT": 5555,
+          "BACKEND_LOGS_ROOT": "/var/log/healthplatform-stats-rest-api",
+          "BACKEND_VIRTUAL_ENV": "/opt/venvs/healthplatform-venv",
+          "CIRCUS_VIRTUALENV": "/opt/venvs/circus",
+          "GIT_TEAM": "offscale",
+          "GIT_REPO": "healthplatform-stats-rest-api",
+          "SERVICE_USER": "ubuntu",
+          "RDBMS_URI": [
+            "postgres://",
+            {
+              "$ref": "env:DB_USER"
+            },
+            ":",
+            {
+              "$ref": "env:DB_PASS"
+            },
+            "@",
+            "localhost",
+            "/",
+            {
+              "$ref": "env:DB_NAME"
+            }
           ],
-          "email": {
-            "$ref": "env:CERTBOT_EMAIL"
+          "BACKEND_ENV_VARS": {
+            "RDBMS_URI": [
+              "postgres://",
+              {
+                "$ref": "env:DB_USER"
+              },
+              ":",
+              {
+                "$ref": "env:DB_PASS"
+              },
+              "@",
+              "localhost",
+              "/",
+              {
+                "$ref": "env:DB_NAME"
+              }
+            ]
           }
         },
         "type": "fabric"
@@ -175,6 +197,32 @@
           }
         ],
         "cluster": false
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-nginx-static",
+      "kwargs": {
+        "nginx-conf-dirname": "/etc/nginx/sites-enabled",
+        "nginx-conf-filename": "healthplatform.io",
+        "SERVER_NAME": "healthplatform.io",
+        "WWWROOT": "/var/www/static/healthplatform-web-frontend/dist/healthplatform-web-frontend",
+        "API_HOST": "localhost",
+        "API_PORT": 3000
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-certbot",
+      "cluster_name": "certbot0",
+      "args": [],
+      "kwargs": {
+        "domains": [
+          "healthplatform.io"
+        ],
+        "email": {
+          "$ref": "env:CERTBOT_EMAIL"
+        }
       },
       "type": "fabric"
     }
