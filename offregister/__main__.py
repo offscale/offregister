@@ -1,25 +1,27 @@
 #!/usr/bin/env python
 
+"""
+CLI entrypoint
+"""
+
 from __future__ import print_function
 
 import json
 import pprint
 import textwrap
-from pprint import pprint
-
-from os import path
 from argparse import ArgumentParser
+from os import path
+from pprint import pprint
 from subprocess import CalledProcessError
-from sys import stdout, version
+from sys import stdout, version_info
 
+from offutils_strategy_register import fetch_node, list_nodes
 from pkg_resources import resource_filename
 
-from offutils_strategy_register import list_nodes, fetch_node
-
-from .__init__ import root_logger, __version__
+from .__init__ import __version__, root_logger
 from .process_node import ProcessNode
 
-if version[0] == "3":
+if version_info[0] == 3:
     from io import StringIO
     from itertools import filterfalse
 else:
@@ -31,6 +33,12 @@ else:
 
 
 def _build_parser():
+    """
+    Parser constructing function
+
+    :return: instanceof ArgumentParser
+    :rtype: ```ArgumentParser```
+    """
     parser = ArgumentParser(
         prog="python -m offregister",
         description="Register node to cluster(s). Node is found by manual specification, or popped from a queue.",
@@ -87,6 +95,21 @@ def _build_parser():
 
 
 def process_within(register_within, config, method, method_args):
+    """
+    Helper function to process a collection of tasks from a dictionary
+
+    :param register_within: List of clusters to register the node's operation to
+    :type register_within: ```Iterable[str]```
+
+    :param config: dictionary for config
+    :type config: ```dict```
+
+    :param method: Which method to run
+    :type method: ```str```
+
+    :param method_args: Arguments to provide to the function by the `method` name
+    :type method_args: ```Tuple[str]```
+    """
     if not len(register_within):
         raise Exception("No clusters found to join this node to")
 
@@ -99,6 +122,15 @@ def process_within(register_within, config, method, method_args):
 
 # From https://stackoverflow.com/a/4303996
 def pprint_OrderedDict(object, **kwrds):
+    """
+    Pretty print an OrderedDict
+
+    :param object: Input container
+    :type object: ```OrderedDict```
+
+    :param kwrds: Keyword arguments
+    :type kwrds: ```dict```
+    """
     try:
         width = kwrds["width"]
     except KeyError:  # unlimited, use stock function
@@ -115,6 +147,21 @@ def pprint_OrderedDict(object, **kwrds):
 
 
 def process_nodes(cluster_location, config, method, method_args):
+    """
+    Helper function that runs methods against cluster location with given config
+
+    :param cluster_location: Cluster to register the node's operation to
+    :type cluster_location: ```str```
+
+    :param config: dictionary for config
+    :type config: ```dict```
+
+    :param method: Which method to run
+    :type method: ```str```
+
+    :param method_args: Arguments to provide to the function by the `method` name
+    :type method_args: ```Tuple[str]```
+    """
     clustering_results = []
     nodes = list_nodes(cluster_location, marshall=json)
     if len(nodes) == 0:
