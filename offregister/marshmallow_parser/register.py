@@ -1,5 +1,5 @@
+from marshmallow.fields import Bool, Dict, Int, List, Nested, Str
 from marshmallow.schema import Schema
-from marshmallow.fields import Str, Bool, Int, Dict, List, Nested
 
 from offregister.marshmallow_parser import ConfMetaSchema
 

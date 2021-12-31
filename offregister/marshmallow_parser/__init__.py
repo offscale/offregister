@@ -9,7 +9,7 @@ class KvServerSchema(Schema):
     version = Str()
 
     class IUnmarshalResult:
-        """ Interface; used exclusively for typing """
+        """Interface; used exclusively for typing"""
 
         @property
         def data(self):
@@ -55,7 +55,7 @@ class ConfMetaSchema(Schema):
     kv_server = Nested(KvServerSchema)
 
     class IUnmarshalResult:
-        """ Interface; used exclusively for typing """
+        """Interface; used exclusively for typing"""
 
         @property
         def data(self):

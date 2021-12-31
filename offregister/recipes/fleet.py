@@ -1,12 +1,12 @@
 from os import path
-from pkg_resources import resource_filename
 
-from fabric.api import run, sudo, local
-from fabric.contrib.files import append, upload_template
-
-from offregister_fab_utils.fs import cmd_avail
-from offregister_etcd.ubuntu import install as install_etcd, serve as serve_etcd
+from fabric.api import local, run, sudo
+from fabric.contrib.files import upload_template
 from offregister_etcd.coreos import serve as coreos_serve_etcd
+from offregister_etcd.ubuntu import install as install_etcd
+from offregister_etcd.ubuntu import serve as serve_etcd
+from offregister_fab_utils.fs import cmd_avail
+from pkg_resources import resource_filename
 
 
 def ubuntu_install_coreos(*args, **kwargs):

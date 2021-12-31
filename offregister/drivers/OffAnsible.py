@@ -1,20 +1,19 @@
 from collections import OrderedDict, namedtuple
-from time import time
 from sys import version
+from time import time
 
 from offutils.util import iteritems
 
 if version[0] == "2":
     from itertools import imap as map
 
-from ansible.parsing.dataloader import DataLoader
-from ansible.vars import VariableManager
-from ansible.inventory import Inventory
-from ansible.playbook.play import Play
 from ansible.executor.task_queue_manager import TaskQueueManager
+from ansible.inventory import Inventory
+from ansible.parsing.dataloader import DataLoader
+from ansible.playbook.play import Play
 from ansible.plugins.callback.default import CallbackModule as CallbackModule_default
-
-from offutils import update_d, it_consumes, is_sequence
+from ansible.vars import VariableManager
+from offutils import it_consumes, update_d
 
 from offregister import get_logger
 from offregister.drivers import OffregisterBaseDriver, PreparedClusterObj

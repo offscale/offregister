@@ -1,6 +1,5 @@
 from fabric.api import run, sudo
 from fabric.contrib.files import append
-
 from offregister_fab_utils.apt import apt_depends
 
 

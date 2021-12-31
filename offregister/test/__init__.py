@@ -1,6 +1,5 @@
-from unittest import TestCase, main as unittest_main
-
-from offregister.fabfile import hostname
+from unittest import TestCase
+from unittest import main as unittest_main
 
 
 class TestSSH(TestCase):

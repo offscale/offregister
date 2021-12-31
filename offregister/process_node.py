@@ -3,7 +3,8 @@ from __future__ import print_function
 import json
 from collections import namedtuple
 from ipaddress import ip_address
-from os import name as os_name, environ
+from os import environ
+from os import name as os_name
 from sys import modules, version
 
 from offutils.util import iteritems
@@ -17,19 +18,20 @@ import requests
 from libcloud import security
 from libcloud.compute.base import Node
 from libcloud.compute.types import Provider
-from offutils import pp, obj_to_d
+from offutils import obj_to_d, pp
 from offutils_strategy_register import (
+    KeyVal,
+    dict_to_node,
     list_nodes,
     node_to_dict,
     save_node_info,
-    KeyVal,
-    dict_to_node,
 )
 from pkg_resources import resource_filename
 
 from offregister.common.env import Env
+
 from .__init__ import get_logger
-from .utils import guess_os_username, guess_os
+from .utils import guess_os, guess_os_username
 
 # AWS Certificates are acting up (on Windows), remove this in production:
 if os_name == "nt" or environ.get("disable_ssl"):

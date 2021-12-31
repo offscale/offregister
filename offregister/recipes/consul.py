@@ -1,4 +1,4 @@
-from fabric.api import run, cd
+from fabric.api import run
 
 
 def ubuntu_install_consul(*args, **kwargs):

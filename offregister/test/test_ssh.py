@@ -1,8 +1,8 @@
-from unittest import TestCase, main as unittest_main
+from unittest import TestCase
+from unittest import main as unittest_main
 
-from offregister.fabfile import hostname
-from offutils_strategy_register import list_nodes, pickle
 from offutils import obj_to_d, pp
+from offutils_strategy_register import list_nodes
 
 
 class TestSSH(TestCase):

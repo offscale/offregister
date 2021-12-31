@@ -1,4 +1,5 @@
-from fabric.api import run, sudo, local, settings
+from fabric.api import local, run, settings, sudo
+
 from offregister.utils import App, sym2mod
 
 

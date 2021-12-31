@@ -2,9 +2,9 @@ from os import environ
 
 from fabric.api import run, sudo
 from fabric.contrib.files import put
+from offregister_fab_utils.apt import apt_depends
 
 from offregister.aux_recipes.dokku_plugin import install_plugin
-from offregister_fab_utils.apt import apt_depends
 
 
 def ubuntu_install_dokku(domain, *args, **kwargs):

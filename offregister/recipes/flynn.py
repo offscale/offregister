@@ -1,9 +1,8 @@
 from __future__ import print_function
 
-from fabric.api import run, local
-
-from offregister_fab_utils.fs import cmd_avail
+from fabric.api import local, run
 from offregister_fab_utils.apt import apt_depends
+from offregister_fab_utils.fs import cmd_avail
 
 
 def ubuntu_install_flynn(*args, **kwargs):

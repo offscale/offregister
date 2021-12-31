@@ -1,11 +1,8 @@
-from operator import itemgetter
-
-from marshmallow import pprint
-from marshmallow.decorators import pre_load, post_dump, pre_dump, post_load
+from marshmallow.decorators import post_load
+from marshmallow.fields import Dict, List, Nested, Str
 from marshmallow.schema import Schema
-from marshmallow.fields import Str, Dict, List, Nested, Int
 
-from offregister.marshmallow_parser import ConfMetaSchema, ConfMeta
+from offregister.marshmallow_parser import ConfMeta, ConfMetaSchema
 
 
 class ProviderSchema(Dict):
@@ -35,7 +32,7 @@ class AuthConfigSchema(ConfMetaSchema):
     auth = Nested(CredSchema, many=True)
 
     class IUnmarshalResult:
-        """ Interface; used exclusively for typing """
+        """Interface; used exclusively for typing"""
 
         @property
         def data(self):

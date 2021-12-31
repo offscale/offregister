@@ -2,7 +2,8 @@ from __future__ import print_function
 
 from json import load
 from os import path
-from unittest import TestCase, main as unittest_main
+from unittest import TestCase
+from unittest import main as unittest_main
 
 from pkg_resources import resource_filename
 

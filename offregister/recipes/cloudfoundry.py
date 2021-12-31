@@ -1,7 +1,7 @@
-from fabric.api import run, sudo, cd, local
-
+from fabric.api import cd, local, run, sudo
 from offregister_fab_utils.fs import cmd_avail
 from offregister_fab_utils.go import install as install_go
+
 from offregister.recipes.bosh import ubuntu_actually_install_bosh
 
 

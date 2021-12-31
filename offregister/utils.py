@@ -3,15 +3,15 @@ import pkgutil
 import runpy
 import sys
 from collections import namedtuple
-from os import getcwd, chdir, path
+from os import chdir, getcwd, path
 from sys import modules
 from types import FunctionType
 
 import etcd3
+from offutils.util import itervalues
 from pip._internal.utils.misc import get_installed_distributions
 
 from offregister import get_logger
-from offutils.util import itervalues
 
 logger = get_logger(modules[__name__].__name__)
 

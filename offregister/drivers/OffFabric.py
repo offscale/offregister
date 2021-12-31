@@ -3,26 +3,19 @@ import logging
 from collections import OrderedDict
 from functools import partial
 from operator import add
-from os import environ, path, listdir
+from os import environ, listdir, path
 from sys import modules
 from time import time
 
 from fabric.api import env
 from fabric.tasks import execute
-from offutils import (
-    update_d,
-    get_sorted_strnum,
-    filter_strnums,
-    binary_search,
-    raise_f,
-)
+from offutils import binary_search, filter_strnums, get_sorted_strnum, raise_f, update_d
+from offutils.util import iteritems
 from offutils_strategy_register import save_node_info
 
 from offregister import root_logger
 from offregister.drivers import OffregisterBaseDriver, PreparedClusterObj
-from offregister.utils import guess_os, get_pip_packages, pip_install
-
-from offutils.util import iteritems
+from offregister.utils import get_pip_packages, guess_os, pip_install
 
 logging.getLogger("paramiko").setLevel(logging.WARNING)
 logging.getLogger("offregister.utils").setLevel(logging.ERROR)

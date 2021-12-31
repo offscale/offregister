@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from collections import namedtuple, OrderedDict
+from collections import OrderedDict, namedtuple
 from sys import version_info
 
 from offutils import is_sequence

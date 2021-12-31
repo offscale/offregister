@@ -1,5 +1,4 @@
-from fabric.api import run, sudo, local
-
+from fabric.api import local, run, sudo
 from offregister_fab_utils.apt import apt_depends
 from offregister_fab_utils.fs import cmd_avail
 from offregister_fab_utils.go import install as install_go

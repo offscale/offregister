@@ -1,9 +1,3 @@
-from os import path
-
-from fabric.api import run, sudo, cd
-from fabric.contrib.files import append
-
-from offregister.common.fabric_utils import get_tempdir_fab
 from offregister.aux_recipes.go import core_install_godep
 
 
