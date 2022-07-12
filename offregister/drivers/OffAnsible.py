@@ -262,7 +262,7 @@ class ResultCallback(CallbackModule_default):
         This method could store the result in an instance attribute for retrieval later
 
         :keyword result: Task result
-        :type result: ``ansible.executor.task_result.TaskResult``
+        :type result: ```ansible.executor.task_result.TaskResult```
         """
         log = get_logger("ansible.results_callback")
 
@@ -275,10 +275,10 @@ class ResultCallback(CallbackModule_default):
         """
 
         :keyword result: Task result
-        :type result: ``ansible.executor.task_result.TaskResult``
+        :type result: ```ansible.executor.task_result.TaskResult```
 
         :keyword ignore_errors: whether or not to ignore errors
-        :type ignore_errors: bool
+        :type ignore_errors: ```bool```
         """
         assert result.is_failed()
 

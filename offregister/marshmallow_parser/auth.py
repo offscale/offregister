@@ -38,7 +38,7 @@ class AuthConfigSchema(ConfMetaSchema):
         def data(self):
             """
             :return: UDT object populated with parsed content
-            :rtype: ``AuthConfig``
+            :rtype: ```AuthConfig```
             """
             raise NotImplementedError()
 
@@ -52,13 +52,13 @@ class AuthConfigSchema(ConfMetaSchema):
         To UDT object
 
         :keyword in_data: Parsed content
-        :type in_data: ``str|[str]|[{}]|{}``
+        :type in_data: ```Union[str,dict,List[Union[str,dict]]]```
 
         :keyword many: Set to true when `pass_many=True`
-        :type many: ``bool``
+        :type many: ```bool```
 
         :return: UDT object populated with parsed content
-        :rtype: ``AuthConfig``
+        :rtype: ```AuthConfig```
         """
         return AuthConfig(**in_data)
 
@@ -66,20 +66,20 @@ class AuthConfigSchema(ConfMetaSchema):
             """Deserialize a data structure to an object defined by this Schema's fields and `make_object`.
 
             :keyword data: The data to deserialize.
-            :type data: ``{}``
+            :type data: ```dict```
 
             :keyword many: Whether to deserialize `data` as a collection. If `None`, the value for `self.many` is used.
-            :type many: ``bool``
+            :type many: ```bool```
 
             :keyword partial: Whether to ignore missing fields. If `None`,
                 the value for `self.partial` is used. If its value is an iterable,
                 only missing fields listed in that iterable will be ignored.
-            :type partial: ``bool|tuple``
+            :type partial: ```Union[bool,tuple]```
 
             :return: Namedtuple of (`errors`, `data`); with `data` containing parsed UDT object
-            :rtype: ``AuthConfigSchema.IUnmarshalResult``
+            :rtype: ```AuthConfigSchema.IUnmarshalResult```
             """
-            return super(self, AuthConfigSchema).load(
+            return super(AuthConfigSchema, self).load(
                 data=data, many=many, partial=partial
             )
 

@@ -44,16 +44,16 @@ class OffregisterBaseDriver(with_metaclass(ABCMeta, object)):
         OffregisterBaseDriver: base driver for implementing support for configuration managers
 
         :keyword env: Env
-        :type env: ``Env``
+        :type env: ```Env```
 
         :keyword node: Node
-        :type node: ``Node``
+        :type node: ```Node```
 
         :keyword node_name: name of node
-        :type node_name: ``str``
+        :type node_name: ```str```
 
         :keyword dns_name: DNS name associated with node
-        :type dns_name: ``str``
+        :type dns_name: ```str```
         """
         self.env_namedtuple = env
         self.node = node
@@ -64,17 +64,14 @@ class OffregisterBaseDriver(with_metaclass(ABCMeta, object)):
     def prepare_cluster_obj(self, cluster, res):
         """
 
-        :keyword cluster: a dictionary
-        :type cluster: ``{}``
-
-        cluster contains something like:
-            {"cluster_name": "odoo0", "args": [], "kwargs": {}, "module": "offregister-odoo", "type": "fabric"}
+        :keyword cluster: e.g., {"cluster_name": "odoo0", "args": [], "kwargs": {}, "module": "offregister-odoo", "type": "fabric"}
+        :type cluster: ```dict```
 
         :keyword res: a dictionary
-        :type res: ``{}``
+        :type res: ```dict```
 
         :return: PreparedClusterObj, i.e.: cluster_path, cluster_type, res, tag, args, kwargs
-        :rtype: ``PreparedClusterObj``
+        :rtype: ```PreparedClusterObj```
         """
 
     @abstractmethod
@@ -84,22 +81,22 @@ class OffregisterBaseDriver(with_metaclass(ABCMeta, object)):
         """
 
         :keyword cluster_path: cluster_path
-        :type cluster_path: ``str``
+        :type cluster_path: ```str```
 
         :keyword cluster_type: cluster_type
-        :type cluster_type: ``str`
+        :type cluster_type: ```str```
 
         :keyword res: res
-        :type res: ``{}``
+        :type res: ```dict```
 
         :keyword tag: tag
-        :type tag: ``str`
+        :type tag: ```str```
 
         :keyword cluster_args: args
-        :type cluster_args: ``[]``
+        :type cluster_args: ```List[any]```
 
         :keyword cluster_kwargs: kv
-        :type cluster_kwargs: ``{}``
+        :type cluster_kwargs: ```dict```
         """
 
     @staticmethod
@@ -107,7 +104,7 @@ class OffregisterBaseDriver(with_metaclass(ABCMeta, object)):
     def install_packages(cluster):
         """
         :keyword cluster: dictionary of the cluster object in the register key of the conf
-        :type cluster: ``{}``
+        :type cluster: ```dict```
 
         """
 

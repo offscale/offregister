@@ -7,6 +7,7 @@ from os import environ
 from os import name as os_name
 from sys import modules, version
 
+from libcloud.common.exceptions import BaseHTTPError
 from offutils.util import iteritems
 
 if version[0] == "2":
@@ -14,7 +15,6 @@ if version[0] == "2":
 
 import etcd3
 import jsonref
-import requests
 from libcloud import security
 from libcloud.compute.base import Node
 from libcloud.compute.types import Provider
@@ -92,9 +92,9 @@ class ProcessNode(object):
 
         try:
             driver = driver_cls(
-                **self.config_provider.get("auth", {"cred": {}})["cred"]
+                **(self.config_provider.get("auth") or {"cred": {}})["cred"]
             )
-        except requests.exceptions.ConnectionError:
+        except BaseHTTPError:
             logger.warn(
                 "Connection failed, continuing without connecting to cloud provider's API"
             )
@@ -269,16 +269,21 @@ class ProcessNode(object):
             ProcessNode.get_directory_or_key(self.process_dict, within)
         )
 
-        if ip_address(self.node.public_ips[0]).is_private:
-            self.dns_name = self.node.public_ips[0]  # LOL
-        elif (
-            not self.dns_name
-            and "skydns2" not in self.process_dict["register"][dir_or_key]
-            and "consul" not in self.process_dict["register"][dir_or_key]
-        ):
-            # self.dns_name = '{public_ip}.xip.io'.format(public_ip=self.node.public_ips[0])
+        try:
+            if ip_address(self.node.public_ips[0]).is_private:
+                self.dns_name = self.node.public_ips[0]  # LOL
+            elif (
+                not self.dns_name
+                and "skydns2" not in self.process_dict["register"][dir_or_key]
+                and "consul" not in self.process_dict["register"][dir_or_key]
+            ):
+                # self.dns_name = '{public_ip}.xip.io'.format(public_ip=self.node.public_ips[0])
+                self.dns_name = self.node.public_ips[0]
+                # raise Exception('No DNS name and no way of acquiring one')
+        except ValueError as e:
+            if not str(e).endswith("does not appear to be an IPv4 or IPv6 address"):
+                raise e
             self.dns_name = self.node.public_ips[0]
-            # raise Exception('No DNS name and no way of acquiring one')
         self.env.hosts = [self.dns_name]
 
         if "no_key_filename" in self.node.extra and self.node.extra["no_key_filename"]:

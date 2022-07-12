@@ -15,7 +15,7 @@ class KvServerSchema(Schema):
         def data(self):
             """
             :return: UDT object populated with parsed content
-            :rtype: ``KvServer``
+            :rtype: ```KvServer```
             """
             raise NotImplementedError()
 
@@ -29,13 +29,13 @@ class KvServerSchema(Schema):
         To UDT object
 
         :keyword in_data: Parsed content
-        :type in_data: ``str|[str]|[{}]|{}``
+        :type in_data: ```Union[str,dict,List[Union[str,dict]]]```
 
         :keyword many: Set to true when `pass_many=True`
-        :type many: ``bool``
+        :type many: ```bool```
 
         :return: Namedtuple of (`errors`, `data`); with `data` containing parsed UDT object
-        :rtype: ``ConfMetaSchema.IUnmarshalResult``
+        :rtype: ```ConfMetaSchema.IUnmarshalResult```
         """
         return KvServer(**in_data)
 
@@ -61,7 +61,7 @@ class ConfMetaSchema(Schema):
         def data(self):
             """
             :return: UDT object populated with parsed content
-            :rtype: ``ConfMeta``
+            :rtype: ```ConfMeta```
             """
             raise NotImplementedError()
 
@@ -75,13 +75,13 @@ class ConfMetaSchema(Schema):
         To UDT object
 
         :keyword in_data: Parsed content
-        :type in_data: ``str|[str]|[{}]|{}``
+        :type in_data: ```Union[str,dict,List[Union[str,dict]]]```
 
         :keyword many: Set to true when `pass_many=True`
-        :type many: ``bool``
+        :type many: ```bool```
 
         :return: Namedtuple of (`errors`, `data`); with `data` containing parsed UDT object
-        :rtype: ``ConfMetaSchema.IUnmarshalResult``
+        :rtype: ```ConfMetaSchema.IUnmarshalResult```
         """
         return ConfMeta(**in_data)
 

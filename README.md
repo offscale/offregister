@@ -12,15 +12,19 @@ Tool that uses JSON input to register node(s) to cluster(s). Nodes can be specif
 
 New entry in `register.sample.json`:
 
+```json
+{
     "register": {
         "/unclustered/*": [
-            "coreos"
+            "coreos",
             "deis"
         ]
     },
     "purpose": [
         "any-cluster"
-    ],
+    ]
+}
+```
 
 ## Usage
 

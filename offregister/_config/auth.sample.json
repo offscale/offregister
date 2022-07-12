@@ -42,6 +42,9 @@
         {
           "cred": {
             "subscription_id": "${env.AZURE_SUBSCRIPTION}",
+            "tenant_id": "${env.AZURE_TENANT_ID}",
+            "key": "${env.AZURE_KEY}",
+            "secret": "${env.AZURE_SECRET}",
             "key_file": "${env.AZURE_KEY_FILE}"
           },
           "ssh": {

@@ -8,8 +8,8 @@ from sys import modules
 from types import FunctionType
 
 import etcd3
+import pkg_resources
 from offutils.util import itervalues
-from pip._internal.utils.misc import get_installed_distributions
 
 from offregister import get_logger
 
@@ -41,7 +41,7 @@ def import_submodules(package, recursive=True):
     :param recursive: Whether to import subpackages also
     :type recursive: ```bool```
 
-    :rtype: dict[str, types.ModuleType]
+    :rtype: ```dict[str, types.ModuleType]```
     """
     if isinstance(package, str):
         package = importlib.import_module(package)
@@ -63,8 +63,9 @@ def create_symbol_module_d(
     """Create mapping of symbol to module
 
     :param module_name_module_d
-    :type module_name_module_d: dict[str, types.ModuleType]
-    :rtype: dict[str, types.FunctionType|types.ClassType|types.type(tuple)]
+    :type module_name_module_d: ```Dict[str, types.ModuleType]```
+
+    :rtype: ```Dict[str, Union[types.FunctionType,types.ClassType,types.type(tuple)]]```
     """
     inv_res = {}
     for mod in itervalues(module_name_module_d):
@@ -88,7 +89,7 @@ App.__new__.__defaults__ = None, None
 
 
 def get_pip_packages():
-    return [s.project_name for s in get_installed_distributions()]
+    return [d.key for d in pkg_resources.working_set]
 
 
 def pip_install(package, options_attr=None):

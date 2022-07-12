@@ -4,11 +4,17 @@ from collections import OrderedDict
 from functools import partial
 from operator import add
 from os import environ, listdir, path
-from sys import modules
+from sys import modules, stderr, stdout, version
 from time import time
+from typing import Optional
 
-from fabric.api import env
-from fabric.tasks import execute
+if version[0] == "2":
+    from cStringIO import StringIO
+else:
+    from io import StringIO
+
+# import fabric.executor
+import fabric.connection
 from offutils import binary_search, filter_strnums, get_sorted_strnum, raise_f, update_d
 from offutils.util import iteritems
 from offutils_strategy_register import save_node_info
@@ -21,12 +27,58 @@ logging.getLogger("paramiko").setLevel(logging.WARNING)
 logging.getLogger("offregister.utils").setLevel(logging.ERROR)
 
 
+class coloredstream:
+    def __init__(self, prefix, err=False):
+        self.prefix = prefix
+        self.buffer = None
+        self.err = err
+
+    def write(self, data):
+        if self.buffer is None or self.buffer.closed:
+            self.buffer = StringIO()
+        self.buffer.write(data)
+
+    def flush(self):
+        if self.buffer is None or self.buffer.closed:
+            return
+
+        print(self.buffer.getvalue())
+        self.buffer.close()
+
+
+class Connection(fabric.connection.Connection):
+    out_stream = StringIO()
+    err_stream = StringIO()
+
+    def run(self, command, **kwargs):
+        self.out_stream = StringIO()
+        self.err_stream = StringIO()
+        res = super(Connection, self).run(
+            command, **kwargs, out_stream=self.out_stream, err_stream=self.err_stream
+        )
+        stdout.write(self.out_stream.getvalue())
+        stderr.write(self.err_stream.getvalue())
+        return res
+
+    def sudo(self, command, **kwargs):
+        self.out_stream = StringIO()
+        self.err_stream = StringIO()
+        res = super(Connection, self).sudo(
+            command, **kwargs, out_stream=self.out_stream, err_stream=self.err_stream
+        )
+        stdout.write(self.out_stream.getvalue())
+        stderr.write(self.err_stream.getvalue())
+        return res
+
+
 class OffFabric(OffregisterBaseDriver):
     func_names = None
+    env = {}
+    executor = None  # type: Optional[fabric.executor.Executor]
 
     def __init__(self, env_obj, node, node_name, dns_name):
         super(OffFabric, self).__init__(env_obj, node, node_name, dns_name)
-        env.update(
+        self.env.update(
             {
                 k: getattr(env_obj, k)
                 for k in dir(env_obj)
@@ -80,7 +132,7 @@ class OffFabric(OffregisterBaseDriver):
                 ),
             )
         except AttributeError as e:
-            if e.message != "'module' object has no attribute '{os}'".format(
+            if str(e) != "'module' object has no attribute '{os}'".format(
                 os=guessed_os
             ):
                 raise
@@ -136,15 +188,47 @@ class OffFabric(OffregisterBaseDriver):
     def run_tasks(
         self, cluster_path, cluster_type, cluster_args, cluster_kwargs, res, tag
     ):
+        # TODO: Use `Collection`, WiP below
+        # collection = Collection()
+        # for idx, step in enumerate(self.func_names):
+        #     kw_args = {}
+        #     print("getattr(self.fab, step):", getattr(self.fab, step), ";")
+        #     collection.add_task(
+        #         Task(
+        #             name=step,
+        #             aliases=(str(idx),),
+        #             body=getattr(self.fab, step),
+        #             hosts=(self.dns_name,),
+        #             default=idx == 0
+        #         )
+        #     )
+        #     # body=lambda: getattr(self.fab, step)(*cluster_args, **kw_args)))
+        #
+        # # hosts.value = self.dns_name
+        # core_args = ParseResult(
+        #     [ParserContext(args=[Argument(name="hosts", default=self.dns_name
+        #                                   )])]
+        # )
+        #
+        # self.executor = Executor(collection=collection, core=core_args)
+        # # self.executor.normalize_hosts((self.dns_name,))
+        #
+        # self.executor.execute()
+
+        io = StringIO()
+        # config = Config(defaults={"out_stream": io})
+        connection = Connection(self.dns_name)  # , config=config)
+        connection.config.out_stream = io
         for idx, step in enumerate(self.func_names):
             kw_args = (
                 cluster_kwargs.copy()
             )  # Only allow mutations on cluster_kwargs.cache [between task runs]
             kw_args["cache"] = cluster_kwargs["cache"]  # ref
+
             t = time()
-            exec_output = execute(getattr(self.fab, step), *cluster_args, **kw_args)[
-                self.dns_name
-            ]
+
+            getattr(self.fab, step)(connection, *cluster_args, **kw_args)
+            exec_output = connection.out_stream.getvalue()
 
             if idx == 0:
                 if self.dns_name not in res:
