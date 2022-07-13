@@ -4,12 +4,15 @@ from collections import OrderedDict
 from functools import partial
 from operator import add
 from os import environ, listdir, path
-from sys import modules, stderr, stdout, version
+from sys import modules, stderr, version
 from time import time
 from typing import Optional
 
 if version[0] == "2":
-    from cStringIO import StringIO
+    try:
+        from cStringIO import StringIO
+    except ImportError:
+        from StringIO import StringIO
 else:
     from io import StringIO
 
@@ -56,8 +59,7 @@ class Connection(fabric.connection.Connection):
         res = super(Connection, self).run(
             command, **kwargs, out_stream=self.out_stream, err_stream=self.err_stream
         )
-        stdout.write(self.out_stream.getvalue())
-        stderr.write(self.err_stream.getvalue())
+        self._output_to_pty()
         return res
 
     def sudo(self, command, **kwargs):
@@ -66,9 +68,17 @@ class Connection(fabric.connection.Connection):
         res = super(Connection, self).sudo(
             command, **kwargs, out_stream=self.out_stream, err_stream=self.err_stream
         )
-        stdout.write(self.out_stream.getvalue())
-        stderr.write(self.err_stream.getvalue())
+        self._output_to_pty()
         return res
+
+    def _output_to_pty(self):
+        prefix = "[{}@{}]\t".format(self.user, self.host)
+        out = self.out_stream.getvalue()
+        if out:
+            print("\n".join(map(partial(add, prefix), out.splitlines())))
+        err = self.err_stream.getvalue()
+        if err:
+            print("\n".join(map(partial(add, prefix), err.splitlines())), file=stderr)
 
 
 class OffFabric(OffregisterBaseDriver):
@@ -217,6 +227,7 @@ class OffFabric(OffregisterBaseDriver):
 
         io = StringIO()
         # config = Config(defaults={"out_stream": io})
+
         connection = Connection(self.dns_name)  # , config=config)
         connection.config.out_stream = io
         for idx, step in enumerate(self.func_names):
@@ -228,7 +239,9 @@ class OffFabric(OffregisterBaseDriver):
             t = time()
 
             getattr(self.fab, step)(connection, *cluster_args, **kw_args)
-            exec_output = connection.out_stream.getvalue()
+            exec_output = (
+                connection.out_stream.getvalue() + connection.err_stream.getvalue()
+            )
 
             if idx == 0:
                 if self.dns_name not in res:
@@ -262,6 +275,8 @@ class OffFabric(OffregisterBaseDriver):
 
             if "offregister_fab_utils" in res[self.dns_name]:
                 del res[self.dns_name]["offregister_fab_utils"]
+
+        connection.close()
 
     def merge_steps(self, merge, res):
         for (mod, step_name), out in iteritems(merge):
