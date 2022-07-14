@@ -1,5 +1,6 @@
-from fabric.api import run
-
-
-def hostname():
-    run("hostname")
+def hostname(c):
+    """
+    :param c: Connection
+    :type c: ```fabric.connection.Connection```
+    """
+    c.run("hostname")

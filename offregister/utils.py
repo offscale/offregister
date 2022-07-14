@@ -2,7 +2,9 @@ import importlib
 import pkgutil
 import runpy
 import sys
+import types
 from collections import namedtuple
+from inspect import getmro, isclass
 from os import chdir, getcwd, path
 from sys import modules
 from types import FunctionType
@@ -150,6 +152,46 @@ def guess_os(node, hint=None):
     elif "core" in node_name:
         return "core"
     return hint or "{}".format(node.extra["user"]) if "user" in node.extra else "ubuntu"
+
+
+def get_member_names(obj, predicate=None):
+    """Return all members of an object sorted by name.
+    Optionally, only return members that satisfy a given predicate.
+
+    [refactored from 3.10's `inspect.getmembers`]"""
+    if isclass(obj):
+        mro = (obj,) + getmro(obj)
+    else:
+        mro = ()
+    results = []
+    processed = set()
+    names = dir(obj)
+    # :dd any DynamicClassAttributes to the list of names if object is a class;
+    # this may result in duplicate entries if, for example, a virtual
+    # attribute with the same name as a DynamicClassAttribute exists
+    try:
+        for base in obj.__bases__:
+            for k, v in base.__dict__.items():
+                if isinstance(v, types.DynamicClassAttribute):
+                    names.append(k)
+    except AttributeError:
+        pass
+    for key in names:
+        # First try to get the value via getattr.  Some descriptors don't
+        # like calling their __get__ (see bug #1785), so fall back to
+        # looking in the __dict__.
+        try:
+            value = getattr(obj, key)
+            # handle the duplicate key
+            if key in processed:
+                raise AttributeError
+        except AttributeError:
+            pass
+        if not predicate or predicate(key):
+            results.append(key)
+        processed.add(key)
+    results.sort()
+    return results
 
 
 # stolen from fabric.api!

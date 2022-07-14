@@ -30,25 +30,6 @@ logging.getLogger("paramiko").setLevel(logging.WARNING)
 logging.getLogger("offregister.utils").setLevel(logging.ERROR)
 
 
-class coloredstream:
-    def __init__(self, prefix, err=False):
-        self.prefix = prefix
-        self.buffer = None
-        self.err = err
-
-    def write(self, data):
-        if self.buffer is None or self.buffer.closed:
-            self.buffer = StringIO()
-        self.buffer.write(data)
-
-    def flush(self):
-        if self.buffer is None or self.buffer.closed:
-            return
-
-        print(self.buffer.getvalue())
-        self.buffer.close()
-
-
 class Connection(fabric.connection.Connection):
     out_stream = StringIO()
     err_stream = StringIO()
@@ -56,23 +37,21 @@ class Connection(fabric.connection.Connection):
     def run(self, command, **kwargs):
         self.out_stream = StringIO()
         self.err_stream = StringIO()
-        res = super(Connection, self).run(
-            command, **kwargs, out_stream=self.out_stream, err_stream=self.err_stream
-        )
+        kwargs.update({"out_stream": self.out_stream, "err_stream": self.err_stream})
+        res = super(Connection, self).run(command, **kwargs)
         self._output_to_pty()
         return res
 
     def sudo(self, command, **kwargs):
         self.out_stream = StringIO()
         self.err_stream = StringIO()
-        res = super(Connection, self).sudo(
-            command, **kwargs, out_stream=self.out_stream, err_stream=self.err_stream
-        )
+        kwargs.update({"out_stream": self.out_stream, "err_stream": self.err_stream})
+        res = super(Connection, self).sudo(command, **kwargs)
         self._output_to_pty()
         return res
 
     def _output_to_pty(self):
-        prefix = "[{}@{}]\t".format(self.user, self.host)
+        prefix = "[{user}@{host}]\t".format(user=self.user, host=self.host)
         out = self.out_stream.getvalue()
         if out:
             print("\n".join(map(partial(add, prefix), out.splitlines())))
@@ -85,6 +64,7 @@ class OffFabric(OffregisterBaseDriver):
     func_names = None
     env = {}
     executor = None  # type: Optional[fabric.executor.Executor]
+    os = None  # type: Optional[str]
 
     def __init__(self, env_obj, node, node_name, dns_name):
         super(OffFabric, self).__init__(env_obj, node, node_name, dns_name)
@@ -129,26 +109,21 @@ class OffFabric(OffregisterBaseDriver):
         if hasattr(self.node, "private_ips") and len(self.node.private_ips):
             cluster_kwargs.update(private_ipv4=self.node.private_ips[-1])
 
-        guessed_os = guess_os(node=self.node)
-
         # import `cluster_type`
+        self.os = guess_os(node=self.node)
         try:
-            setattr(
-                self,
-                "fab",
-                getattr(
-                    __import__(cluster_type, globals(), locals(), [guessed_os]),
-                    guessed_os,
-                ),
-            )
+            mod = __import__(cluster_type, globals(), locals(), [self.os])
+            # member_names = get_member_names(
+            #     mod, predicate=lambda s: not s.startswith("_")
+            # )
+            # pp({"get_member_names": member_names})
+            setattr(self, "fab", getattr(mod, self.os))
         except AttributeError as e:
-            if str(e) != "'module' object has no attribute '{os}'".format(
-                os=guessed_os
-            ):
+            if not str(e).endswith("has no attribute '{os}'".format(os=self.os)):
                 raise
             raise ImportError(
-                "Cannot `import {os} from {cluster_type}`".format(
-                    os=guessed_os, cluster_type=cluster_type
+                "from {cluster_type} import {os}".format(
+                    os=self.os, cluster_type=cluster_type
                 )
             )
         fab_dir = dir(self.fab)
@@ -230,23 +205,27 @@ class OffFabric(OffregisterBaseDriver):
 
         connection = Connection(self.dns_name)  # , config=config)
         connection.config.out_stream = io
+
+        cluster_kwargs["cache"]["os_version"] = self.os
+        kw_args = (
+            cluster_kwargs.copy()
+        )  # Only allow mutations on `cluster_kwargs.cache` [between task runs]
+        kw_args["cache"] = cluster_kwargs["cache"]  # ref
+
         for idx, step in enumerate(self.func_names):
-            kw_args = (
-                cluster_kwargs.copy()
-            )  # Only allow mutations on cluster_kwargs.cache [between task runs]
-            kw_args["cache"] = cluster_kwargs["cache"]  # ref
-
-            t = time()
-
-            getattr(self.fab, step)(connection, *cluster_args, **kw_args)
-            exec_output = (
+            started_at = time()
+            exec_output = getattr(self.fab, step)(connection, *cluster_args, **kw_args)
+            ended_at = time()
+            exec_stream_output = (
                 connection.out_stream.getvalue() + connection.err_stream.getvalue()
             )
 
             if idx == 0:
                 if self.dns_name not in res:
                     res[self.dns_name] = {
-                        cluster_path: OrderedDict({step: {t: exec_output}})
+                        cluster_path: OrderedDict(
+                            {step: {started_at: exec_stream_output}}
+                        )
                     }
                 if tag == "master":
                     save_node_info(
@@ -255,12 +234,16 @@ class OffFabric(OffregisterBaseDriver):
 
             if cluster_path not in res[self.dns_name]:
                 res[self.dns_name][cluster_path] = OrderedDict(
-                    {step: OrderedDict({t: exec_output})}
+                    {step: OrderedDict({started_at: exec_stream_output})}
                 )
             elif step not in res[self.dns_name][cluster_path]:
-                res[self.dns_name][cluster_path][step] = OrderedDict({t: exec_output})
+                res[self.dns_name][cluster_path][step] = OrderedDict(
+                    {started_at: exec_stream_output}
+                )
             else:
-                res[self.dns_name][cluster_path][step][t] = exec_output
+                res[self.dns_name][cluster_path][step][started_at] = exec_stream_output
+
+            res[self.dns_name][cluster_path][step][ended_at] = exec_output
 
             if (
                 res[self.dns_name][cluster_path][step]

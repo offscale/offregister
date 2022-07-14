@@ -1,10 +1,13 @@
-from fabric.api import run
 from offregister_fab_utils.apt import apt_depends
 
 
-def ubuntu_install_tsuru(*args, **kwargs):
-    apt_depends("curl")
-    run("curl -sL https://raw.githubusercontent.com/tsuru/now/master/run.bash | bash")
+def ubuntu_install_tsuru(c, *args, **kwargs):
+    """
+    :param c: Connection
+    :type c: ```fabric.connection.Connection```
+    """
+    apt_depends(c, "curl")
+    c.run("curl -sL https://raw.githubusercontent.com/tsuru/now/master/run.bash | bash")
 
 
 def core_install_tsuru(*args, **kwargs):

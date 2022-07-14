@@ -1,15 +1,18 @@
-from fabric.api import run, sudo
-from fabric.contrib.files import append
 from offregister_fab_utils.apt import apt_depends
+from patchwork.files import append
 
 
-def ubuntu_install_vb(extensions=False, distribution="trusty"):
-    apt_depends("curl")
+def ubuntu_install_vb(c, extensions=False, distribution="trusty"):
+    """
+    :param c: Connection
+    :type c: ```fabric.connection.Connection```
+    """
+    apt_depends(c, "curl")
     asc = "oracle_vbox.asc"
-    run(
+    c.run(
         "curl -O https://www.virtualbox.org/download/{asc}".format(asc=asc)
     )  # TODO: verify cert also
-    sudo("apt-key add {asc}".format(asc=asc))
+    c.sudo("apt-key add {asc}".format(asc=asc))
     append(
         "/etc/apt/sources.list",
         "deb http://download.virtualbox.org/virtualbox/debian {distribution} contrib".format(
@@ -17,7 +20,7 @@ def ubuntu_install_vb(extensions=False, distribution="trusty"):
         ),
         use_sudo=True,
     )
-    apt_depends("virtualbox-5.0" "dkms")
+    apt_depends(c, "virtualbox-5.0" "dkms")
 
     if extensions:
         raise NotImplementedError()
