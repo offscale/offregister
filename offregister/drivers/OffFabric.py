@@ -1,12 +1,17 @@
 import json
 import logging
+import re
 from collections import OrderedDict
 from functools import partial
 from operator import add
 from os import environ, listdir, path
+from shlex import quote as shlex_quote
 from sys import modules, stderr, version
 from time import time
 from typing import Optional
+
+from invoke import AuthFailure, FailingResponder, Failure, ResponseNotAccepted
+from six import raise_from
 
 if version[0] == "2":
     try:
@@ -49,6 +54,79 @@ class Connection(fabric.connection.Connection):
         res = super(Connection, self).sudo(command, **kwargs)
         self._output_to_pty()
         return res
+
+    # def cd(self, command):
+    #     res = super(Connection, self).cd(command, **kwargs)
+    #     with connection.cd("/var/log"):
+    #         prompt = connection.config.sudo.prompt
+    #         connection.run(
+    #             f"sudo -S -p '{prompt}' tail syslog",
+    #             watchers=[SudoPasswordResponder(connection)],
+    #         )
+
+    def _sudo(self, runner, command, **kwargs):
+        prompt = self.config.sudo.prompt
+        password = kwargs.pop("password", self.config.sudo.password)
+        user = kwargs.pop("user", self.config.sudo.user)
+        env = kwargs.get("env", {})
+        # TODO: allow subclassing for 'get the password' so users who REALLY
+        # want lazy runtime prompting can have it easily implemented.
+        # TODO: want to print a "cleaner" echo with just 'sudo <command>'; but
+        # hard to do as-is, obtaining config data from outside a Runner one
+        # holds is currently messy (could fix that), if instead we manually
+        # inspect the config ourselves that duplicates logic. NOTE: once we
+        # figure that out, there is an existing, would-fail-if-not-skipped test
+        # for this behavior in test/context.py.
+        # TODO: once that is done, though: how to handle "full debug" output
+        # exactly (display of actual, real full sudo command w/ -S and -p), in
+        # terms of API/config? Impl is easy, just go back to passing echo
+        # through to 'run'...
+        user_flags = ""
+        if user is not None:
+            user_flags = "-H -u {} ".format(user)
+        env_flags = ""
+        if env:
+            env_flags = "--preserve-env='{}' ".format(",".join(env.keys()))
+        command = self._prefix_commands(command)
+        cmd_str = "sudo -S -p '{prompt}' {env_flags}{user_flags}{command}".format(
+            prompt=prompt,
+            env_flags=env_flags,
+            user_flags=user_flags,
+            command="bash -c {}".format(shlex_quote(command)),
+        )
+        watcher = FailingResponder(
+            pattern=re.escape(prompt),
+            response="{}\n".format(password),
+            sentinel="Sorry, try again.\n",
+        )
+        # Ensure we merge any user-specified watchers with our own.
+        # NOTE: If there are config-driven watchers, we pull those up to the
+        # kwarg level; that lets us merge cleanly without needing complex
+        # config-driven "override vs merge" semantics.
+        # TODO: if/when those semantics are implemented, use them instead.
+        # NOTE: config value for watchers defaults to an empty list; and we
+        # want to clone it to avoid actually mutating the config.
+        watchers = kwargs.pop("watchers", list(self.config.run.watchers))
+        watchers.append(watcher)
+        try:
+            return runner.run(cmd_str, watchers=watchers, **kwargs)
+        except Failure as failure:
+            # Transmute failures driven by our FailingResponder, into auth
+            # failures - the command never even ran.
+            # TODO: wants to be a hook here for users that desire "override a
+            # bad config value for sudo.password" manual input
+            # NOTE: as noted in #294 comments, we MAY in future want to update
+            # this so run() is given ability to raise AuthFailure on its own.
+            # For now that has been judged unnecessary complexity.
+            if isinstance(failure.reason, ResponseNotAccepted):
+                # NOTE: not bothering with 'reason' here, it's pointless.
+                # NOTE: using raise_from(..., None) to suppress Python 3's
+                # "helpful" multi-exception output. It's confusing here.
+                error = AuthFailure(result=failure.result, prompt=prompt)
+                raise_from(error, None)
+            # Reraise for any other error so it bubbles up normally.
+            else:
+                raise
 
     def _output_to_pty(self):
         prefix = "[{user}@{host}]\t".format(user=self.user, host=self.host)

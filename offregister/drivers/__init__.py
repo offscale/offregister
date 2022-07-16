@@ -12,7 +12,7 @@ def with_metaclass(meta, *bases):
     # metaclass for one level of class instantiation that replaces itself with
     # the actual metaclass.
     class metaclass(type):
-        def __new__(cls, name, this_bases, d):
+        def __new__(mcs, name, this_bases, d):
             if version_info[:2] >= (3, 7):
                 from types import resolve_bases
 
