@@ -10,6 +10,7 @@ from sys import modules, stderr, version
 from time import time
 from typing import Optional
 
+from fabric2 import Remote
 from invoke import AuthFailure, FailingResponder, Failure, ResponseNotAccepted
 from six import raise_from
 
@@ -52,7 +53,7 @@ class Connection(fabric.connection.Connection):
         self.err_stream = StringIO()
         kwargs.update({"out_stream": self.out_stream, "err_stream": self.err_stream})
         res = super(Connection, self).sudo(command, **kwargs)
-        self._output_to_pty()
+        self._output_to_pty(**kwargs)
         return res
 
     # def cd(self, command):
@@ -128,7 +129,9 @@ class Connection(fabric.connection.Connection):
             else:
                 raise
 
-    def _output_to_pty(self):
+    def _output_to_pty(self, **kwargs):
+        if kwargs.get("hide") is True and kwargs.get("echo") is not True:
+            return
         prefix = "[{user}@{host}]\t".format(user=self.user, host=self.host)
         out = self.out_stream.getvalue()
         if out:
@@ -282,7 +285,11 @@ class OffFabric(OffregisterBaseDriver):
         # config = Config(defaults={"out_stream": io})
 
         connection = Connection(self.dns_name)  # , config=config)
+        connection.config.runners.remote = lambda context, inline_env: Remote(
+            context=connection, inline_env=True
+        )
         connection.config.out_stream = io
+        # connection.config.runners.remote.inline_env = True
 
         cluster_kwargs["cache"]["os_version"] = self.os
         kw_args = (
