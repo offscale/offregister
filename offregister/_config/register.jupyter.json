@@ -6,23 +6,47 @@
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/unclustered/ai0-nogpu0": [
+    "/unclustered/instance-1": [
+      {
+        "module": "offregister-bootstrap",
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-inline",
+        "kwargs": {
+          "sudo": [
+            "mkdir -p /var/repos",
+            "chown -R samuel:samuel /var/repos"
+          ]
+        },
+        "type": "fabric"
+      },
       {
         "module": "offregister-git",
         "kwargs": {
-          "GIT_DIR": "/home/ubuntu/notebooks/optic-nerve-cnn",
-          "GIT_REPO": "https://github.com/SamuelMarks/optic-nerve-cnn",
+          "GIT_DIR": "/var/repos/sm-jupyter-notebooks",
+          "GIT_REPO": "https://github.com/SamuelMarks/sm-jupyter-notebooks",
+          "GIT_ENV": {
+            "GIT_USER": {
+              "$ref": "env:GIT_USER"
+            },
+            "GIT_ACCESS_TOKEN": {
+              "$ref": "env:GIT_ACCESS_TOKEN"
+            }
+          },
           "skip_reset": true,
           "use_sudo": false
         },
         "type": "fabric"
       },
       {
-        "module": "offregister-jupyter",
-        "cluster_name": "jupyter1",
+        "module": "offregister-python",
         "args": [],
         "kwargs": {
-          "domain": "notebook.ai0.complicated.io"
+          "virtual_env": "/opt/venvs/tflow3.9",
+          "python3": true,
+          "requirements": true,
+          "package_directory": "/var/repos/sm-jupyter-notebooks"
         },
         "type": "fabric"
       },
@@ -42,13 +66,44 @@
   },
   "_comments": [
     {
+      "module": "offregister-git",
+      "kwargs": {
+        "GIT_DIR": "/var/repos/sm-jupyter-notebooks",
+        "GIT_REPO": "https://SamuelMarks@github.com/SamuelMarks/sm-jupyter-notebooks",
+        "skip_reset": true,
+        "use_sudo": false
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-jupyter",
+      "cluster_name": "jupyter1",
+      "args": [],
+      "kwargs": {
+        "domain": "notebook.ai0.complicated.io"
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-certbot",
+      "cluster_name": "jupyter1",
+      "args": [],
+      "kwargs": {
+        "domains": [
+          "notebook.ai0.complicated.io"
+        ],
+        "email": "EMAIL_ADDRESS_HERE"
+      },
+      "type": "fabric"
+    },
+    {
       "module": "offregister-python",
       "args": [],
       "kwargs": {
-        "virtual_env": "/opt/venvs/tflow3.6",
+        "virtual_env": "/opt/venvs/tflow3.9",
         "python3": true,
         "requirements": true,
-        "package_directory": "/var/repos/optic-nerve-cnn",
+        "package_directory": "/var/repos/sm-jupyter-notebooks",
         "pip_version": "9.0.3"
       },
       "type": "fabric"

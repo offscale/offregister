@@ -6,59 +6,8 @@
     "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
   },
   "register": {
-    "/unclustered/openedx0": [
+    "/unclustered/200-vm0": [
       {
-        "module": "offregister-circusd",
-        "kwargs": {
-          "BACKEND_ROOT": "/var/www/static/healthplatform-stats-rest-api",
-          "BACKEND_PORT": 5555,
-          "BACKEND_LOGS_ROOT": "/var/log/healthplatform-stats-rest-api",
-          "BACKEND_VIRTUAL_ENV": "/opt/venvs/healthplatform-venv",
-          "CIRCUS_VIRTUALENV": "/opt/venvs/circus",
-          "GIT_TEAM": "offscale",
-          "GIT_REPO": "healthplatform-stats-rest-api",
-          "SERVICE_USER": "ubuntu",
-          "RDBMS_URI": [
-            "postgres://",
-            {
-              "$ref": "env:DB_USER"
-            },
-            ":",
-            {
-              "$ref": "env:DB_PASS"
-            },
-            "@",
-            "localhost",
-            "/",
-            {
-              "$ref": "env:DB_NAME"
-            }
-          ],
-          "BACKEND_ENV_VARS": {
-            "RDBMS_URI": [
-              "postgres://",
-              {
-                "$ref": "env:DB_USER"
-              },
-              ":",
-              {
-                "$ref": "env:DB_PASS"
-              },
-              "@",
-              "localhost",
-              "/",
-              {
-                "$ref": "env:DB_NAME"
-              }
-            ]
-          }
-        },
-        "type": "fabric"
-      }
-    ]
-  },
-  "_comments": [
-    {
       "module": "offregister-bootstrap",
       "type": "fabric"
     },
@@ -225,7 +174,59 @@
         }
       },
       "type": "fabric"
-    }
+    },
+      {
+        "module": "offregister-circusd",
+        "kwargs": {
+          "BACKEND_ROOT": "/var/www/static/healthplatform-stats-rest-api",
+          "BACKEND_PORT": 5555,
+          "BACKEND_LOGS_ROOT": "/var/log/healthplatform-stats-rest-api",
+          "BACKEND_VIRTUAL_ENV": "/opt/venvs/healthplatform-venv",
+          "CIRCUS_VIRTUALENV": "/opt/venvs/circus",
+          "GIT_TEAM": "offscale",
+          "GIT_REPO": "healthplatform-stats-rest-api",
+          "SERVICE_USER": "ubuntu",
+          "RDBMS_URI": [
+            "postgres://",
+            {
+              "$ref": "env:DB_USER"
+            },
+            ":",
+            {
+              "$ref": "env:DB_PASS"
+            },
+            "@",
+            "localhost",
+            "/",
+            {
+              "$ref": "env:DB_NAME"
+            }
+          ],
+          "BACKEND_ENV_VARS": {
+            "RDBMS_URI": [
+              "postgres://",
+              {
+                "$ref": "env:DB_USER"
+              },
+              ":",
+              {
+                "$ref": "env:DB_PASS"
+              },
+              "@",
+              "localhost",
+              "/",
+              {
+                "$ref": "env:DB_NAME"
+              }
+            ]
+          }
+        },
+        "type": "fabric"
+      }
+    ]
+  },
+  "_comments": [
+
   ],
   "purpose": [
     "any-cluster"
