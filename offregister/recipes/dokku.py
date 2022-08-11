@@ -26,7 +26,7 @@ def ubuntu_install_dokku(c, domain, *args, **kwargs):
         'echo "deb https://packagecloud.io/dokku/dokku/ubuntu/ trusty main" > /etc/apt/sources.list.d/dokku.list'
     )
 
-    uname_r = c.run("uname -r").stdout
+    uname_r = c.run("uname -r").stdout.rstrip()
     apt_depends(
         c, "linux-image-extra-{uname_r}".format(uname_r=uname_r), "apt-transport-https"
     )

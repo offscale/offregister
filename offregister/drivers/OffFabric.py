@@ -24,6 +24,7 @@ else:
 
 # import fabric.executor
 import fabric.connection
+from offconf import parse
 from offutils import binary_search, filter_strnums, get_sorted_strnum, raise_f, update_d
 from offutils.util import iteritems
 from offutils_strategy_register import save_node_info
@@ -45,7 +46,7 @@ class Connection(fabric.connection.Connection):
         self.err_stream = StringIO()
         kwargs.update({"out_stream": self.out_stream, "err_stream": self.err_stream})
         res = super(Connection, self).run(command, **kwargs)
-        self._output_to_pty()
+        self._output_to_pty(**kwargs)
         return res
 
     def sudo(self, command, **kwargs):
@@ -292,9 +293,33 @@ class OffFabric(OffregisterBaseDriver):
         # connection.config.runners.remote.inline_env = True
 
         cluster_kwargs["cache"]["os_version"] = self.os
-        kw_args = (
-            cluster_kwargs.copy()
-        )  # Only allow mutations on `cluster_kwargs.cache` [between task runs]
+        # I could use the nginxctl solution of recursive inplace modifying `map` but for now 3 levels seems sufficient
+        if "NO_OFFCONF" in environ:
+            kw_args = cluster_kwargs.copy()
+        else:
+            kw_args = {
+                key: parse(val)
+                if isinstance(val, str)
+                else (
+                    {
+                        k: parse(v)
+                        if isinstance(v, str)
+                        else (
+                            {
+                                _k: (parse(_v) if isinstance(_v, str) else _v)
+                                for _k, _v in iteritems(v)
+                            }
+                            if isinstance(v, dict)
+                            else v
+                        )
+                        for k, v in iteritems(val)
+                    }
+                    if isinstance(val, dict)
+                    else val
+                )
+                for key, val in iteritems(cluster_kwargs.copy())
+            }
+        # Only allow mutations on `cluster_kwargs.cache` [between task runs]
         kw_args["cache"] = cluster_kwargs["cache"]  # ref
 
         for idx, step in enumerate(self.func_names):
