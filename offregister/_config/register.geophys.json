@@ -1,0 +1,125 @@
+{
+  "name": "Jupyter",
+  "description": "Offregister strategy for Jupyter Notebook",
+  "version": "0.0.2",
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "register": {
+    "/unclustered/cpu0": [
+      {
+        "module": "offregister-bootstrap",
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-inline",
+        "kwargs": {
+          "sudo": [
+            "mkdir -p /var/repos",
+            "chown -R samuel:samuel /var/repos"
+          ]
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-git",
+        "kwargs": {
+          "GIT_DIR": "/var/repos/sm-jupyter-notebooks",
+          "GIT_REPO": "https://github.com/SamuelMarks/sm-jupyter-notebooks",
+          "GIT_ENV": {
+            "GIT_USER": {
+              "$ref": "env:GIT_USER"
+            },
+            "GIT_ACCESS_TOKEN": {
+              "$ref": "env:GIT_ACCESS_TOKEN"
+            }
+          },
+          "skip_reset": true,
+          "use_sudo": false
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-python",
+        "args": [],
+        "kwargs": {
+          "virtual_env": "/opt/venvs/tflow3.9",
+          "python3": true,
+          "requirements": true,
+          "package_directory": "/var/repos/sm-jupyter-notebooks",
+          "dependencies": "jupyter notebook"
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-service",
+        "args": [],
+        "kwargs": {
+          "conf_name": "jupyter_notebook",
+          "Environments": [
+            "Environment=VIRTUALENV=/opt/venvs/tflow3.9/bin\n",
+            "Environment=PYTHONPATH=/opt/venvs/tflow3.9/bin"
+          ],
+          "WorkingDirectory": "/var/repos/sm-jupyter-notebooks",
+          "User": {
+            "$ref": "env:NON_ROOT_USER"
+          },
+          "Group": {
+            "$ref": "env:NON_ROOT_GROUP"
+          },
+          "ExecStart": [
+            "/opt/venvs/tflow3.9/bin/jupyter notebook",
+            "--no-browser",
+            "--NotebookApp.port=8000",
+            "--NotebookApp.notebook_dir=/var/repos/sm-jupyter-notebooks",
+            "--NotebookApp.local_hostnames",
+            {
+              "$ref": "env:SERVER_NAME"
+            },
+            "--NotebookApp.allow_origin",
+            {
+              "$ref": "env:SERVER_NAME"
+            },
+            "--NotebookApp.password_required=True",
+            "--NotebookApp.password",
+            {
+              "$ref": "env:JUPYTER_PASSWORD"
+            }
+          ]
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-nginx-static",
+        "kwargs": {
+          "nginx_conf": "websocket.conf",
+          "nginx-conf-dirname": "/etc/nginx/sites-enabled",
+          "nginx-conf-filename": "offscale.com.au",
+          "SERVER_NAME": "offscale.com.au",
+          "API_HOST": "127.0.0.1",
+          "API_PORT": 8000
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-certbot",
+        "cluster_name": "jupyter1",
+        "args": [],
+        "kwargs": {
+          "domains": [
+            "offscale.com.au"
+          ],
+          "email": "samuelmarks@gmail.com"
+        },
+        "type": "fabric"
+      }
+    ]
+  },
+  "_comments": [
+  ],
+  "purpose": [
+    "jupyter"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}
