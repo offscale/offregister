@@ -29,6 +29,7 @@ from offutils_strategy_register import (
 from pkg_resources import resource_filename
 
 from offregister.common.env import Env
+from offconf import jsonref_env_loader
 
 from .__init__ import get_logger
 from .utils import guess_os, guess_os_username
@@ -67,7 +68,7 @@ class ProcessNode(object):
             )
 
         with open(process_filename) as f:
-            self.process_dict = jsonref.load(f)
+            self.process_dict = jsonref.load(f, loader=jsonref_env_loader)
 
         driver_cls = node.value.driver
         self.driver_name = driver_cls.__name__[: -len("NodeDriver")]
