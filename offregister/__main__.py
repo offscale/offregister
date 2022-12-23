@@ -163,12 +163,15 @@ def process_nodes(cluster_location, config, method, method_args):
     :type method_args: ```Tuple[str]```
     """
     clustering_results = []
-    nodes = list_nodes(cluster_location, marshall=json)
-    if len(nodes) == 0:
-        try:
-            nodes = (fetch_node(cluster_location),)  # try exact match
-        except StopIteration:
-            raise AssertionError("No node found at {!r}".format(cluster_location))
+    if cluster_location.rpartition("/")[2] == "local":
+        nodes = ("local",)
+    else:
+        nodes = list_nodes(cluster_location, marshall=json)
+        if len(nodes) == 0:
+            try:
+                nodes = (fetch_node(cluster_location),)  # try exact match
+            except StopIteration:
+                raise AssertionError("No node found at {!r}".format(cluster_location))
     assert len(nodes), "No nodes found at {!r}".format(cluster_location)
     for node_res in nodes:
         try:

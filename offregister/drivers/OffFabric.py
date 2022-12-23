@@ -8,10 +8,18 @@ from os import environ, listdir, path
 from shlex import quote as shlex_quote
 from sys import modules, stderr, version
 from time import time
-from typing import Optional
 
 from fabric2 import Remote
-from invoke import AuthFailure, FailingResponder, Failure, ResponseNotAccepted
+from invoke import (
+    AuthFailure,
+    Config,
+    Context,
+    FailingResponder,
+    Failure,
+    Local,
+    ResponseNotAccepted,
+    StreamWatcher,
+)
 from six import raise_from
 
 if version[0] == "2":
@@ -35,6 +43,15 @@ from offregister.utils import get_pip_packages, guess_os, pip_install
 
 logging.getLogger("paramiko").setLevel(logging.WARNING)
 logging.getLogger("offregister.utils").setLevel(logging.ERROR)
+
+
+class OutputWatcher(StreamWatcher):
+    def __init__(self, prefix):
+        self.prefix = prefix
+
+    def submit(self, stream):
+        print("\n".join(map(partial(add, self.prefix), stream.splitlines())))
+        return []
 
 
 class Connection(fabric.connection.Connection):
@@ -147,6 +164,7 @@ class OffFabric(OffregisterBaseDriver):
     env = {}
     executor = None  # type: Optional[fabric.executor.Executor]
     os = None  # type: Optional[str]
+    local = False
 
     def __init__(self, env_obj, node, node_name, dns_name):
         super(OffFabric, self).__init__(env_obj, node, node_name, dns_name)
@@ -159,6 +177,7 @@ class OffFabric(OffregisterBaseDriver):
         )
 
     def prepare_cluster_obj(self, cluster, res):
+        print("prepare_cluster_obj")
         cluster_args = cluster["args"] if "args" in cluster else tuple()
         cluster_kwargs = update_d(
             {
@@ -285,12 +304,19 @@ class OffFabric(OffregisterBaseDriver):
         io = StringIO()
         # config = Config(defaults={"out_stream": io})
 
-        connection = Connection(self.dns_name)  # , config=config)
-        connection.config.runners.remote = lambda context, inline_env: Remote(
-            context=connection, inline_env=True
-        )
-        connection.config.out_stream = io
-        # connection.config.runners.remote.inline_env = True
+        print("self.local:", self.local, ";")
+        if self.local:
+            connection = Local(
+                Context(Config({"run": {"watchers": [OutputWatcher(prefix="[local]\t")]}}))
+            )
+            print("connection:", connection.run("echo testing local && echo testing foo"), ";")
+        else:
+            connection = Connection(self.dns_name)  # , config=config)
+            connection.config.runners.remote = lambda context, inline_env: Remote(
+                context=connection, inline_env=True
+            )
+            connection.config.out_stream = io
+            # connection.config.runners.remote.inline_env = True
 
         cluster_kwargs["cache"]["os_version"] = self.os
         # I could use the nginxctl solution of recursive inplace modifying `map` but for now 3 levels seems sufficient

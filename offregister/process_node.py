@@ -8,6 +8,7 @@ from os import name as os_name
 from sys import modules, version
 
 from libcloud.common.exceptions import BaseHTTPError
+from libcloud.compute.drivers.dummy import DummyNodeDriver
 from offutils.util import iteritems
 
 if version[0] == "2":
@@ -18,6 +19,7 @@ import jsonref
 from libcloud import security
 from libcloud.compute.base import Node
 from libcloud.compute.types import Provider
+from offconf import jsonref_env_loader
 from offutils import obj_to_d, pp
 from offutils_strategy_register import (
     KeyVal,
@@ -29,7 +31,6 @@ from offutils_strategy_register import (
 from pkg_resources import resource_filename
 
 from offregister.common.env import Env
-from offconf import jsonref_env_loader
 
 from .__init__ import get_logger
 from .utils import guess_os, guess_os_username
@@ -45,6 +46,7 @@ logger = get_logger(modules[__name__].__name__)
 
 class ProcessNode(object):
     node = None  # type: Node
+    local = False
 
     def __init__(
         self,
@@ -55,8 +57,21 @@ class ProcessNode(object):
     ):
         self.env = Env()
         self.previous_clustering_results = previous_clustering_results
+        self.redis_client_kwargs = redis_client_kwargs
 
         nodes = None
+
+        with open(process_filename) as f:
+            self.process_dict = jsonref.load(f, loader=jsonref_env_loader)
+
+        if isinstance(node, str) and node == "local":
+            self.node_name = "local"
+            self.local = True
+            self.dns_name = None
+            self.node = DummyNodeDriver(0)
+            self.node.public_ips = (self.dns_name,)
+            self.node.extra = iter(())
+            return
         if not node:
             nodes = list_nodes(marshall=json)
             if not len(nodes):
@@ -66,9 +81,6 @@ class ProcessNode(object):
                 if len(nodes) > 1
                 else nodes[0]
             )
-
-        with open(process_filename) as f:
-            self.process_dict = jsonref.load(f, loader=jsonref_env_loader)
 
         driver_cls = node.value.driver
         self.driver_name = driver_cls.__name__[: -len("NodeDriver")]
@@ -87,7 +99,6 @@ class ProcessNode(object):
             for provider in self.process_dict["provider"]["options"]
             if provider["provider"]["name"] == driver_to_find
         )
-        self.redis_client_kwargs = redis_client_kwargs
 
         self.driver_name = self.driver_name.lower()
 
@@ -319,10 +330,13 @@ class ProcessNode(object):
         return DirectoryFile(directory=directory, file=None)
 
     def set_clusters(self, within):
-        if not self.node:
+        if self.node_name == "local":
+            pass
+        elif not self.node:
             logger.warn("No node, skipping")
             return
-        self.setup_connection_meta(within)
+        else:
+            self.setup_connection_meta(within)
         dir_or_key = ProcessNode.get_directory_or_key(self.process_dict, within)
 
         res = {}
@@ -346,12 +360,14 @@ class ProcessNode(object):
         3. Serves `cluster_name`
         """
         if self.is_comment_cluster(cluster):
+            print("return")
             return
 
         if cluster["type"] == "fabric":
             from .drivers.OffFabric import OffFabric
 
             offregisterC = OffFabric
+            offregisterC.local = self.local
         elif cluster["type"] == "ansible":
             from .drivers.OffAnsible import OffAnsible
 
@@ -361,6 +377,7 @@ class ProcessNode(object):
 
         offregister = offregisterC(self.env, self.node, self.node_name, self.dns_name)
         add_cluster_ret = offregister.prepare_cluster_obj(cluster, res)
+        print("offregister.run_tasks")
         offregister.run_tasks(**add_cluster_ret._asdict())
         # offregister.run_tasks(cluster_path, cluster_type, res, tag, args, kwargs)
         save_node_info(
