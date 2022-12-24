@@ -1,4 +1,5 @@
 https://api.github.com/repos/offscale/offutils/zipball#egg=offutils
+https://api.github.com/repos/offscale/offconf/zipball#egg=offconf
 https://api.github.com/repos/offscale/offutils-strategy-register/zipball#egg=offutils-strategy-register
 https://api.github.com/repos/offscale/offregister-fab-utils/zipball#egg=offregister_fab_utils
 jsonref

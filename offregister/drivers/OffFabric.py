@@ -84,6 +84,7 @@ class Connection(fabric.connection.Connection):
     #         )
 
     def _sudo(self, runner, command, **kwargs):
+        # TODO: See if this works https://docs.pyinvoke.org/en/stable/api/watchers.html#invoke.watchers.Responder
         prompt = self.config.sudo.prompt
         password = kwargs.pop("password", self.config.sudo.password)
         user = kwargs.pop("user", self.config.sudo.user)
@@ -157,6 +158,47 @@ class Connection(fabric.connection.Connection):
         err = self.err_stream.getvalue()
         if err:
             print("\n".join(map(partial(add, prefix), err.splitlines())), file=stderr)
+
+
+class LocalWithSudo(Local):
+    def __init__(self, context):
+        super(LocalWithSudo, self).__init__(context)
+        # Bookkeeping var for pty use case
+        self.config = context.config
+
+    def sudo(self, command, **kwargs):
+        prompt = self.config.sudo.prompt
+        password = kwargs.pop("password", self.config.sudo.password)
+        user = kwargs.pop("user", self.config.sudo.user)
+        env = kwargs.get("env", {})
+        user_flags = ""
+        if user is not None:
+            user_flags = "-H -u {} ".format(user)
+        env_flags = ""
+        if env:
+            env_flags = "--preserve-env='{}' ".format(",".join(env.keys()))
+        # command = self._prefix_commands(command)
+        cmd_str = "sudo -S -p '{prompt}' {env_flags}{user_flags}{command}".format(
+            prompt=prompt,
+            env_flags=env_flags,
+            user_flags=user_flags,
+            command="bash -c {}".format(shlex_quote(command)),
+        )
+        watcher = FailingResponder(
+            pattern=re.escape(prompt),
+            response="{}\n".format(password),
+            sentinel="Sorry, try again.\n",
+        )
+        watchers = kwargs.pop("watchers", list(self.config.run.watchers))
+        watchers.append(watcher)
+        try:
+            return self.run(cmd_str, watchers=watchers, **kwargs)
+        except Failure as failure:
+            if isinstance(failure.reason, ResponseNotAccepted):
+                error = AuthFailure(result=failure.result, prompt=prompt)
+                raise_from(error, None)
+            else:
+                raise
 
 
 class OffFabric(OffregisterBaseDriver):
@@ -306,10 +348,19 @@ class OffFabric(OffregisterBaseDriver):
 
         print("self.local:", self.local, ";")
         if self.local:
-            connection = Local(
-                Context(Config({"run": {"watchers": [OutputWatcher(prefix="[local]\t")]}}))
+            connection = LocalWithSudo(
+                Context(
+                    Config(
+                        {
+                            "run": {"watchers": [OutputWatcher(prefix="[local]\t")]},
+                            "sudo": {"password": environ["SUDO_PASSWORD"]},
+                        }
+                    )
+                )
             )
-            print("connection:", connection.run("echo testing local && echo testing foo"), ";")
+            r = connection.run("lsb_release -rcs", hide=True)
+            os_version, os_codename = r.stdout[:-1].splitlines()
+            self.os = float(os_version)
         else:
             connection = Connection(self.dns_name)  # , config=config)
             connection.config.runners.remote = lambda context, inline_env: Remote(
@@ -352,9 +403,13 @@ class OffFabric(OffregisterBaseDriver):
             started_at = time()
             exec_output = getattr(self.fab, step)(connection, *cluster_args, **kw_args)
             ended_at = time()
-            exec_stream_output = (
-                connection.out_stream.getvalue() + connection.err_stream.getvalue()
-            )
+
+            if self.local:
+                exec_stream_output = "".join(connection.stdout + connection.stderr)
+            else:
+                exec_stream_output = (
+                    connection.out_stream.getvalue() + connection.err_stream.getvalue()
+                )
 
             if idx == 0:
                 if self.dns_name not in res:
@@ -395,7 +450,8 @@ class OffFabric(OffregisterBaseDriver):
             if "offregister_fab_utils" in res[self.dns_name]:
                 del res[self.dns_name]["offregister_fab_utils"]
 
-        connection.close()
+        if not self.local:
+            connection.close()
 
     def merge_steps(self, merge, res):
         for (mod, step_name), out in iteritems(merge):

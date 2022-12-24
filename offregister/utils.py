@@ -11,7 +11,7 @@ from types import FunctionType
 
 import etcd3
 import pkg_resources
-from offutils.util import itervalues
+from offutils.util import iteritems, itervalues
 
 from offregister import get_logger
 
@@ -171,7 +171,7 @@ def get_member_names(obj, predicate=None):
     # attribute with the same name as a DynamicClassAttribute exists
     try:
         for base in obj.__bases__:
-            for k, v in base.__dict__.items():
+            for k, v in iteritems(base.__dict__):
                 if isinstance(v, types.DynamicClassAttribute):
                     names.append(k)
     except AttributeError:

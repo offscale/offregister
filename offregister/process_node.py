@@ -69,8 +69,9 @@ class ProcessNode(object):
             self.local = True
             self.dns_name = None
             self.node = DummyNodeDriver(0)
+            self.node.driver = self.node
             self.node.public_ips = (self.dns_name,)
-            self.node.extra = iter(())
+            self.node.extra = {}
             return
         if not node:
             nodes = list_nodes(marshall=json)
