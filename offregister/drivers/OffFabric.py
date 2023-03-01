@@ -152,12 +152,16 @@ class Connection(fabric.connection.Connection):
         if kwargs.get("hide") is True and kwargs.get("echo") is not True:
             return
         prefix = "[{user}@{host}]\t".format(user=self.user, host=self.host)
-        out = self.out_stream.getvalue()
-        if out:
-            print("\n".join(map(partial(add, prefix), out.splitlines())))
-        err = self.err_stream.getvalue()
-        if err:
-            print("\n".join(map(partial(add, prefix), err.splitlines())), file=stderr)
+        if "stdout" not in kwargs.get("hide", iter(())):
+            out = self.out_stream.getvalue()
+            if out:
+                print("\n".join(map(partial(add, prefix), out.splitlines())))
+        if "stderr" not in kwargs.get("hide", iter(())):
+            err = self.err_stream.getvalue()
+            if err:
+                print(
+                    "\n".join(map(partial(add, prefix), err.splitlines())), file=stderr
+                )
 
 
 class LocalWithSudo(Local):
@@ -219,7 +223,6 @@ class OffFabric(OffregisterBaseDriver):
         )
 
     def prepare_cluster_obj(self, cluster, res):
-        print("prepare_cluster_obj")
         cluster_args = cluster["args"] if "args" in cluster else tuple()
         cluster_kwargs = update_d(
             {
@@ -346,7 +349,6 @@ class OffFabric(OffregisterBaseDriver):
         io = StringIO()
         # config = Config(defaults={"out_stream": io})
 
-        print("self.local:", self.local, ";")
         if self.local:
             connection = LocalWithSudo(
                 Context(

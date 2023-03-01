@@ -378,7 +378,6 @@ class ProcessNode(object):
 
         offregister = offregisterC(self.env, self.node, self.node_name, self.dns_name)
         add_cluster_ret = offregister.prepare_cluster_obj(cluster, res)
-        print("offregister.run_tasks")
         offregister.run_tasks(**add_cluster_ret._asdict())
         # offregister.run_tasks(cluster_path, cluster_type, res, tag, args, kwargs)
         save_node_info(

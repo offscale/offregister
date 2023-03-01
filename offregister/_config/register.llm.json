@@ -1,0 +1,26 @@
+{
+  "name": "llm",
+  "description": "Offregister strategy for Large Language Models",
+  "version": "0.0.1",
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "register": {
+    "/unclustered/rocky": [
+      {
+        "module": "offregister-bootstrap",
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-llms",
+        "type": "fabric"
+      }
+    ]
+  },
+  "_comments": [],
+  "purpose": [
+    "llm"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}

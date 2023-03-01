@@ -1,0 +1,225 @@
+{
+  "name": "Postgres",
+  "description": "Offregister strategy for Postgres",
+  "version": "0.0.1",
+  "provider": {
+    "$ref": "env:OFFAUTH_JSON|offutils.str_from_file | json.loads"
+  },
+  "register": {
+    "/unclustered/postgres0": [
+      {
+        "module": "offregister-bootstrap",
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-postgres",
+        "kwargs": {
+          "create": [
+            {
+              "user": {
+                "$ref": "env:DB_USER"
+              },
+              "password": {
+                "$ref": "env:DB_PASS"
+              },
+              "dbname": {
+                "$ref": "env:DB_NAME"
+              }
+            }
+          ],
+          "users": [
+            {
+              "name": {
+                "$ref": "env:DB_USER"
+              },
+              "password": {
+                "$ref": "env:DB_PASS"
+              }
+            }
+          ],
+          "dbs": [
+            {
+              "$ref": "env:DB_NAME"
+            }
+          ],
+          "cluster": false
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-python",
+        "args": [],
+        "kwargs": {
+          "virtual_env": "/opt/venvs/venv0",
+          "python3": true,
+          "requirements": true,
+          "package_directory": "/tmp",
+          "dependencies": [
+            "https://api.github.com/repos/offscale/cdd-python/zipball#egg=python_cdd",
+            "python_cdd_gae",
+            "-r https://raw.githubusercontent.com/offscale/cdd-python-gae/master/requirements.txt",
+            "psycopg2",
+            "pandas"
+          ]
+        },
+        "type": "fabric"
+      },
+      {
+        "module": "offregister-service",
+        "args": [],
+        "kwargs": {
+          "conf_name": "parquet_to_table",
+          "Environments": [
+            "VIRTUALENV=/opt/venvs/venv0/bin",
+            "PYTHONPATH=/opt/venvs/venv0/bin",
+            {
+              "RDBMS_URI": [
+                "postgres://",
+                {
+                  "$ref": "env:DB_USER"
+                },
+                ":",
+                {
+                  "$ref": "env:DB_PASS"
+                },
+                "@",
+                "localhost",
+                "/",
+                {
+                  "$ref": "env:DB_NAME"
+                }
+              ]
+            },
+            "PARQUET_FILE=parquet_file"
+          ],
+          "WorkingDirectory": "/opt/venvs/venv0",
+          "User": {
+            "$ref": "env:NON_ROOT_USER"
+          },
+          "Group": {
+            "$ref": "env:NON_ROOT_GROUP"
+          },
+          "ExecStart": [
+            "/opt/venvs/venv0/bin/python",
+            "-m cdd_gae parquet2table -i \"$PARQUET_FILE\""
+          ]
+        },
+        "type": "fabric"
+      }
+    ]
+  },
+  "_comments": [
+    {
+      "module": "offregister-bootstrap",
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-postgres",
+      "kwargs": {
+        "create": [
+          {
+            "user": {
+              "$ref": "env:DB_USER"
+            },
+            "password": {
+              "$ref": "env:DB_PASS"
+            },
+            "dbname": {
+              "$ref": "env:DB_NAME"
+            }
+          }
+        ],
+        "users": [
+          {
+            "name": {
+              "$ref": "env:DB_USER"
+            },
+            "password": {
+              "$ref": "env:DB_PASS"
+            }
+          }
+        ],
+        "dbs": [
+          {
+            "$ref": "env:DB_NAME"
+          }
+        ],
+        "cluster": false
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-python",
+      "args": [],
+      "kwargs": {
+        "virtual_env": "/opt/venvs/play-venv",
+        "python3": true,
+        "pip_version": "-U pip",
+        "use_sudo": true,
+        "remote_user": {
+          "$ref": "env:NON_ROOT_USER"
+        },
+        "PACKAGES": [
+          "sqlalchemy",
+          "google-cloud-ndb",
+          "https://api.github.com/repos/playable-video/vidiense_backend/zipball#egg=vidiense_backend",
+          "https://api.github.com/repos/playable-video/ndb2sqlalchemy/zipball#egg=ndb2sqlalchemy"
+        ]
+      },
+      "run_cmds": {
+        "op": "in",
+        "val": [
+          "install_venv0"
+        ]
+      },
+      "type": "fabric"
+    },
+    {
+      "module": "offregister-service",
+      "args": [],
+      "kwargs": {
+        "conf_name": "conv_EmailServiceProvider",
+        "Environments": [
+          "VIRTUALENV=/opt/venvs/play-venv/bin",
+          "PYTHONPATH=/opt/venvs/play-venv/bin",
+          {
+            "RDBMS_URI": [
+              "postgres://",
+              {
+                "$ref": "env:DB_USER"
+              },
+              ":",
+              {
+                "$ref": "env:DB_PASS"
+              },
+              "@",
+              "localhost",
+              "/",
+              {
+                "$ref": "env:DB_NAME"
+              }
+            ]
+          }
+        ],
+        "WorkingDirectory": "/opt/venvs/play-venv",
+        "User": {
+          "$ref": "env:NON_ROOT_USER"
+        },
+        "Group": {
+          "$ref": "env:NON_ROOT_GROUP"
+        },
+        "ExecStart": [
+          "/opt/venvs/play-venv/bin/python",
+          "-m \"ndb2sqlalchemy.EmailServiceProvider\""
+        ]
+      },
+      "type": "fabric"
+    },
+    "printf 'postgresql://%s:%s@%s/%s\\n' \"$DB_USER\" \"$DB_PASS\" 'localhost' \"$DB_NAME\""
+  ],
+  "purpose": [
+    "postgres"
+  ],
+  "etcd_server": "http://localhost:2379",
+  "default_pick": "first"
+}
