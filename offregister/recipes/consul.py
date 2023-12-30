@@ -1,4 +1,4 @@
-def ubuntu_install_consul(*args, **kwargs):
+def ubuntu_install_consul(c, *args, **kwargs):
     raise NotImplementedError()
 
 

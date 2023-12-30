@@ -2,7 +2,7 @@
 from offregister_fab_utils.go import install as install_go
 
 
-def ubuntu_install_deis(*args, **kwargs):
+def ubuntu_install_deis(c, *args, **kwargs):
     raise NotImplementedError("Deis not implemented on Ubuntu")
     # Unsupported at the moment, deis is CoreOS only. Porting would be another project :P
 

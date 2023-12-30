@@ -318,7 +318,6 @@ class ProcessNode(object):
             and len(directory) >= len(within) + 3
             or directory[-1] != "*"
         ):
-
             v = next(etcd3.client().get_prefix(directory), (None,))[
                 0
             ]  # Maybe pass this along?

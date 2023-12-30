@@ -5,7 +5,7 @@ from os import path
 import yaml
 
 __author__ = "Samuel Marks"
-__version__ = "0.5.0"
+__version__ = "0.5.1"
 
 
 def get_logger(name=None):

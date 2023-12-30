@@ -46,7 +46,7 @@ def ubuntu_actually_install_bosh(c, master, *args, **kwargs):
     )"""
 
 
-def core_install_bosh(*args, **kwargs):
+def core_install_bosh(c, *args, **kwargs):
     raise NotImplementedError()
 
 
@@ -58,7 +58,7 @@ def ubuntu_serve_bosh(c, domain, master, *args, **kwargs):
     _serve_bosh(c, domain, master)
 
 
-def core_serve_bosh(*args, **kwargs):
+def core_serve_bosh(c, *args, **kwargs):
     raise NotImplementedError()
 
 

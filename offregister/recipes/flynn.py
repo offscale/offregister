@@ -20,7 +20,7 @@ def ubuntu_install_flynn(c, *args, **kwargs):
     c.run("sudo bash < <(curl -fsSL https://dl.flynn.io/install-flynn)")
 
 
-def core_install_flynn(*args, **kwargs):
+def core_install_flynn(c, *args, **kwargs):
     raise NotImplementedError("Flynn not [yet?] implemented on CoreOS")
 
 

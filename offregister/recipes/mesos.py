@@ -26,13 +26,13 @@ def ubuntu_install_mesos(c, version="0.27.0", apt_update=True, *args, **kwargs):
     c.run("tar -zxf mesos-{version}.tar.gz".format(version=version))
 
 
-def core_install_mesos(*args, **kwargs):
+def core_install_mesos(c, *args, **kwargs):
     raise NotImplementedError()
 
 
-def ubuntu_serve_mesos(*args, **kwargs):
+def ubuntu_serve_mesos(c, *args, **kwargs):
     raise NotImplementedError()
 
 
-def core_serve_mesos(*args, **kwargs):
+def core_serve_mesos(c, *args, **kwargs):
     raise NotImplementedError()

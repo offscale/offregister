@@ -10,13 +10,13 @@ def ubuntu_install_tsuru(c, *args, **kwargs):
     c.run("curl -sL https://raw.githubusercontent.com/tsuru/now/master/run.bash | bash")
 
 
-def core_install_tsuru(*args, **kwargs):
+def core_install_tsuru(c, *args, **kwargs):
     return
 
 
-def ubuntu_serve_tsuru(*args, **kwargs):
+def ubuntu_serve_tsuru(c, *args, **kwargs):
     pass
 
 
-def core_serve_tsuru(*args, **kwargs):
+def core_serve_tsuru(c, *args, **kwargs):
     pass

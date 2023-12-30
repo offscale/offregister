@@ -80,11 +80,11 @@ def core_install_dokku(c, *args, **kwargs):
     raise NotImplementedError()
 
 
-def ubuntu_serve_dokku(*args, **kwargs):
+def ubuntu_serve_dokku(c, *args, **kwargs):
     raise NotImplementedError()
 
 
-def core_serve_dokku(*args, **kwargs):
+def core_serve_dokku(c, *args, **kwargs):
     raise NotImplementedError()
 
 

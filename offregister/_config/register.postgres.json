@@ -109,6 +109,8 @@
     ]
   },
   "_comments": [
+    "gcloud storage cp -R 'gs://playable-datastore-backup/2023-01-25_0/*' data",
+    "find parquet_to_postgres -type f -exec sed -i 's/binary/JSON/g ; s/double/Float/g ; s/int64/Integer/g' {} \\;",
     {
       "module": "offregister-bootstrap",
       "type": "fabric"

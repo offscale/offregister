@@ -49,7 +49,7 @@ def tpl():
     export BOSH_VPC_SECONDARY_AZ=us-east-1b"""
 
 
-def core_install_cloudfoundry(*args, **kwargs):
+def core_install_cloudfoundry(c, *args, **kwargs):
     raise NotImplementedError()
 
 
@@ -61,7 +61,7 @@ def ubuntu_serve_cloudfoundry(c, domain, master, *args, **kwargs):
     _serve_cloudfoundry(c, domain, master)
 
 
-def core_serve_cloudfoundry(*args, **kwargs):
+def core_serve_cloudfoundry(c, *args, **kwargs):
     raise NotImplementedError()
 
 
