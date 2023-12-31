@@ -6,7 +6,7 @@ import yaml
 
 __author__ = "Samuel Marks"
 __version__ = "0.5.1"
-
+__description__ = "Configuration driven deployments with Fabric"
 
 def get_logger(name=None):
     """
