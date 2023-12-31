@@ -5,12 +5,13 @@ setup.py implementation, interesting because it parsed the first __init__.py and
     extracts the `__author__` and `__version__`
 """
 
+import sys
 from ast import Assign, Name, parse
 from functools import partial
 from operator import attrgetter
 from os import listdir, path
 from os.path import extsep
-import sys
+
 from setuptools import find_packages, setup
 
 if sys.version_info[:2] >= (3, 12):
@@ -80,10 +81,11 @@ if sys.version_info[:2] >= (3, 12):
                 "I don't know where Python installs its library "
                 "on platform '%s'" % os.name
             )
+
     from ast import Del as Str
 else:
-    from distutils.sysconfig import get_python_lib
     from ast import Str
+    from distutils.sysconfig import get_python_lib
 
 if sys.version_info[0] == 2:
     from itertools import ifilter as filter
@@ -145,7 +147,8 @@ def main():
                     lambda node: isinstance(node, Assign)
                     and any(
                         filter(
-                            lambda name: isinstance(name, Name) and name.id
+                            lambda name: isinstance(name, Name)
+                            and name.id
                             in frozenset(
                                 ("__author__", "__version__", "__description__")
                             ),
@@ -165,8 +168,12 @@ def main():
     setup(
         name=package_name_verbatim,
         author=__author__,
+        author_email="807580+SamuelMarks@users.noreply.github.com",
         version=__version__,
         description=__description__,
+        url="https://github.com/offscale/{}".format(package_name_verbatim),
+        long_description=long_description,
+        long_description_content_type="text/markdown",
         classifiers=[
             "Development Status :: 7 - Inactive",
             "Intended Audience :: Developers",
@@ -188,7 +195,7 @@ def main():
             "Programming Language :: Python :: 3.11",
             "Programming Language :: Python :: 3.12",
         ],
-        test_suite=package_name + ".tests",
+        test_suite="{}{}tests".format(package_name, path.extsep),
         packages=find_packages(),
         package_dir={package_name: package_name},
         install_requires=["pyyaml", "apache-libcloud", "etcd3"],
