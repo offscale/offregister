@@ -2,7 +2,7 @@ offregister
 ===========
 [![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech)
 ![Python version range](https://img.shields.io/badge/python-2.7%20|%203.5%20|%203.6%20|%203.7%20|%203.8%20|%203.9%20|%203.10%20|%203.11%20|%203.12-blue.svg)
-[![License](https://img.shields.io/badge/license-Apache--2.0%20OR%20MIT%20OR%20CC0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License](https://img.shields.io/badge/license-Apache--2.0%20OR%20MIT%20OR%20CC0--1.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort)
 
@@ -10,6 +10,14 @@ Tool that uses JSON input to register node(s) to cluster(s). Nodes can be specif
 
 New since July 2022: now uses [offconf](https://github.com/offscale/offconf) to support `${env.bar}`, function calls, and arrow functions within JSON strings.
 This opens up security risks, as the environment is exposed, disable by setting `NO_OFFCONF` env var.
+
+## Install dependencies
+
+    pip install -r requirements.txt
+
+## Install package
+
+    pip install .
 
 ## Approach
 
