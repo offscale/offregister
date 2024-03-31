@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from offregister_fab_utils.apt import apt_depends
 from offregister_fab_utils.fs import cmd_avail
 from offregister_fab_utils.git import clone_or_update

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 def hostname(c):
     """
     :param c: Connection

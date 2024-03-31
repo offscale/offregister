@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 class Env:
     use_ssh_config = None  # type: bool
     ssh_config = {}

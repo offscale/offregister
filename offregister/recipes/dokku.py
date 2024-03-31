@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from os import environ
 
 from offregister_fab_utils.apt import apt_depends

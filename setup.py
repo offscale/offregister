@@ -129,7 +129,7 @@ def main():
         license_files=["LICENSE-APACHE", "LICENSE-MIT", "LICENSE-CC0"],
         test_suite="{}{}tests".format(package_name, path.extsep),
         packages=find_packages(),
-        install_requires=["pyyaml", "apache-libcloud", "etcd3"],
+        install_requires=["pyyaml", "apache-libcloud", "grpcio == 1.29.0 ; python_version<'3.5'", "etcd3"],
         package_data={
             package_name: list(
                 chain.from_iterable(

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from offregister.utils import App, sym2mod
 
 

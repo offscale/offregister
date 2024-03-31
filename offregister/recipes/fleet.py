@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from os import path
 
 from offregister_etcd.coreos import serve as coreos_serve_etcd

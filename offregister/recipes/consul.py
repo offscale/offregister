@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 def ubuntu_install_consul(c, *args, **kwargs):
     raise NotImplementedError()
 

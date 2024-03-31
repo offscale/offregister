@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict, namedtuple
 from sys import version_info

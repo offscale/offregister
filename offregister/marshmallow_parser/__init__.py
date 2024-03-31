@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from marshmallow.decorators import post_load
 from marshmallow.fields import Nested, Str
 from marshmallow.schema import Schema

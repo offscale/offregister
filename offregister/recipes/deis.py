@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # from offregister.aux_recipes.go import core_install_godep
 from offregister_fab_utils.go import install as install_go
 

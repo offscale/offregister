@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from collections import OrderedDict, namedtuple
 from sys import version
 from time import time

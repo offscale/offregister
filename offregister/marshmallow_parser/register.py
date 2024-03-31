@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from marshmallow.fields import Bool, Dict, Int, List, Nested, Str
 from marshmallow.schema import Schema
 
