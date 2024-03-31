@@ -8,8 +8,8 @@ setup.py implementation, interesting because it parsed the first __init__.py and
 import sys
 from ast import Assign, Name, parse
 from functools import partial
-from itertools import chain
 from operator import attrgetter
+from itertools import chain
 from os import listdir, path
 from os.path import extsep
 
@@ -130,7 +130,19 @@ def main():
         test_suite="{}{}tests".format(package_name, path.extsep),
         packages=find_packages(),
         install_requires=["pyyaml", "apache-libcloud", "etcd3"],
-        package_data={package_name: listdir(_data_join()) + listdir(_config_join()) + listdir(templates_join())},
+        package_data={
+            package_name: list(
+                chain.from_iterable(
+                    map(
+                        lambda folder_join: map(
+                            folder_join,
+                            listdir(folder_join()),
+                        ),
+                        (_data_join, _config_join, templates_join),
+                    )
+                )
+            )
+        },
         include_package_data=True,
     )
 
