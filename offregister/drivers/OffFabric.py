@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+
+from __future__ import print_function
+
 import json
 import logging
 import re
@@ -6,11 +9,10 @@ from collections import OrderedDict
 from functools import partial
 from operator import add
 from os import environ, listdir, path
-from shlex import quote as shlex_quote
-from sys import modules, stderr, version
+from sys import modules, stderr, version_info
 from time import time
 
-from fabric2 import Remote
+from fabric import Remote
 from invoke import (
     AuthFailure,
     Config,
@@ -23,13 +25,27 @@ from invoke import (
 )
 from six import raise_from
 
-if version[0] == "2":
-    try:
-        from cStringIO import StringIO
-    except ImportError:
-        from StringIO import StringIO
+if version_info[0] == 2:
+    # `quote` taken from https://github.com/python/cpython/blob/3.12/Lib/shlex.py
+    import re
+
+    ASCII = 256
+    _find_unsafe = re.compile(r'[^\w@%+=:,./-]', ASCII).search
+
+    def shlex_quote(s):
+        """Return a shell-escaped version of the string *s*."""
+        if not s:
+            return "''"
+        if _find_unsafe(s) is None:
+            return s
+
+        # use single quotes, and put single quotes into double quotes
+        # the string $'b is then quoted as '$'"'"'b'
+        return "'" + s.replace("'", "'\"'\"'") + "'"
+    from StringIO import StringIO
 else:
     from io import StringIO
+    from shlex import quote as shlex_quote
 
 # import fabric.executor
 import fabric.connection

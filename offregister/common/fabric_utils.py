@@ -17,10 +17,10 @@ def cmd_avail(c, command, run_command=None, **kwargs):
     :param c: Connection
     :type c: ```fabric.connection.Connection```
     """
+    kwargs["warn"] = False
     installed = (run_command or c.run)(
         "command -v {command} >/dev/null".format(command=command),
-        **kwargs,
-        warn=False,
+        **kwargs
     )
     return installed.exited == 0
 
