@@ -6,7 +6,7 @@ from os import path
 import yaml
 
 __author__ = "Samuel Marks"
-__version__ = "0.5.1"
+__version__ = "0.5.2"
 __description__ = "Configuration driven deployments with Fabric"
 
 

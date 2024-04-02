@@ -42,6 +42,8 @@ if version_info[0] == 2:
         # use single quotes, and put single quotes into double quotes
         # the string $'b is then quoted as '$'"'"'b'
         return "'" + s.replace("'", "'\"'\"'") + "'"
+
+
     from StringIO import StringIO
 else:
     from io import StringIO
@@ -382,6 +384,16 @@ class OffFabric(OffregisterBaseDriver):
             self.os = float(os_version)
         else:
             connection = Connection(self.dns_name)  # , config=config)
+            if self.node.extra:
+                if self.node.extra.get("ssh_config"):
+                    if self.node.extra["ssh_config"].get("Port"):
+                        connection.port = int(self.node.extra["ssh_config"]["Port"])
+                    if self.node.extra["ssh_config"].get("IdentityFile"):
+                        connection.connect_kwargs["key_filename"] = connection.key_filename = \
+                        self.node.extra["ssh_config"]["IdentityFile"]
+                if self.node.extra.get("user"):
+                    connection.user = self.node.extra["user"]
+
             connection.config.runners.remote = lambda context, inline_env: Remote(
                 context=connection, inline_env=True
             )
@@ -539,8 +551,8 @@ class OffFabric(OffregisterBaseDriver):
         called = 0
         deprecated = (
             lambda: add(called, 1)
-            and called == 0
-            and root_logger.warn(
+                    and called == 0
+                    and root_logger.warn(
                 "Depreciation: use function names ending in numerals instead"
             )
         )
